@@ -1,0 +1,39 @@
+# secret files
+.env*
+*secrets*
+*.key
+*.pem
+*.crt
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+.DS_Store
+
+# log file
+*.log
+
+# Build artifacts
+dist/
+build/
+*.o
+*.obj
+*.exe
+*.out
+*.so
+*.dll
+*.lib
+*.a
+
+# python
+__pycache__/
+venv
+
+# IDE
+.vscode
+*.swp
+
+# Node
+node_modules
+
