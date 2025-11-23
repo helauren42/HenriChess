@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS users {
+	id SERIAL PRIMARY KEY;
+	username TEXT NOT NULL,
+	email TEXT NOT NULL,
+	password BYTEA unique NOT NULL,
+	sessionToken TEXT UNIQUE NOT NULL,
+	deviceToken TEXT UNIQUE NOT NULL,
+	creation DATE DEFAULT CURRENT_DATE NOT NULL
+}
