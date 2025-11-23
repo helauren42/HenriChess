@@ -1,0 +1,10 @@
+fastapi
+fastapi-wraps
+psycopg[binary]
+redis[hiredis]
+uvicorn
+pydantic
+websockets
+dotenv
+bcrypt
+requests

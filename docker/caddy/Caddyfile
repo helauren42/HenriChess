@@ -6,9 +6,6 @@
 		}
 	}
 }
-:80 {
-	redir "https://localhost:8290"
-}
 :443 {
 	tls /etc/caddy/cert.pem /etc/caddy/key.pem
 	route /api/* {
