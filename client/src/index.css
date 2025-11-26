@@ -1,68 +1,136 @@
+@import "tailwindcss";
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+	/* colors */
+	--bg-color: rgb(200, 140, 110);
+	--bg-color-light: rgb(230, 190, 170);
+	--nav-color: rgb(150, 105, 90);
+	--border-color: rgb(90, 60, 50);
+	--text-color-dark: rgb(90, 50, 40);
+	--text-color-light: rgb(210, 175, 170);
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+	color: var(--text-color-dark);
+	background-color: var(--bg-color);
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	/* other variables */
+	--auth-shadow: 0 0 10px 8px rgba(90, 50, 40, 0.6);
+
+
+	font-family: "Lexend", system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
+	font-synthesis: none;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+@font-face {
+	font-family: "Lexend";
+	src: url("/fonts/Lexend/Lexend-VariableFont_wght.ttf") format("truetype-variations");
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+
+html,
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	padding: 0;
+	margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: 600;
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+	font-size: 3.2rem;
+	font-weight: 700;
+}
+
+h2 {
+	font-size: 2.5rem;
+	font-weight: 700;
+}
+
+h3 {
+	font-size: 1.9rem;
+}
+
+h4 {
+	font-size: 1.6rem;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+	position: relative;
+	font-size: 1.2rem;
+	font-weight: 600;
+	border-radius: 0.5rem;
+	border: 1px solid transparent;
+	padding: 0.6rem 1.2rem;
+	font-family: inherit;
+	cursor: pointer;
+	transition: border-color 0.25s;
+	z-index: 1;
+	background-color: rgb(50, 20, 5);
+	color: var(--text-color-light);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button>* {
+	z-index: 2;
+}
+
+button::before {
+	position: absolute;
+	z-index: -1;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: inherit;
+	content: "";
+	pointer-events: none;
+}
+
+button:hover {
+	filter: brightness(0.8);
+}
+
+button:active {
+	filter: brightness(0.6);
+	box-shadow: inset 0 0 3px rgba(250, 200, 150, 0.9);
+}
+
+ul {
+	list-style: none;
+}
+
+li {
+	cursor: pointer;
+}
+
+input {
+	border-radius: 0.4rem;
+	background-color: var(--bg-color-light);
+	padding: 0.5rem;
+	box-shadow: inset 0 0 1px 1px rgba(150, 105, 90, 0.5);
+}
+
+input:focus {
+	outline: 2px solid var(--text-color-dark);
+	box-shadow: none;
+}
+
+#base-border {
+	border-radius: 0.5rem;
+	border: 1px solid var(--text-color-dark);
 }
