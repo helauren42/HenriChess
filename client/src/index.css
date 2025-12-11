@@ -1,33 +1,33 @@
 @import "tailwindcss";
 
 :root {
-	/* colors */
-	--bg-color: rgb(200, 140, 110);
-	--bg-color-light: rgb(230, 190, 170);
-	--nav-color: rgb(150, 105, 90);
-	--border-color: rgb(90, 60, 50);
-	--text-color-dark: rgb(90, 50, 40);
-	--text-color-light: rgb(210, 175, 170);
+  /* colors */
+  --bg-color: rgb(200, 140, 110);
+  --bg-color-light: rgb(230, 190, 170);
+  --nav-color: rgb(150, 105, 90);
+  --border-color: rgb(90, 60, 50);
+  --text-color-dark: rgb(90, 50, 40);
+  --text-color-light: rgb(210, 175, 170);
 
-	color: var(--text-color-dark);
-	background-color: var(--bg-color);
+  color: var(--text-color-dark);
+  background-color: var(--bg-color);
 
-	/* other variables */
-	--auth-shadow: 0 0 10px 8px rgba(90, 50, 40, 0.6);
+  /* other variables */
+  --auth-shadow: 0 0 10px 8px rgba(90, 50, 40, 0.6);
 
 
-	font-family: "Lexend", system-ui, Avenir, Helvetica, Arial, sans-serif;
-	line-height: 1.5;
-	font-weight: 400;
-	font-synthesis: none;
+  font-family: "Lexend", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
 }
 
 @font-face {
-	font-family: "Lexend";
-	src: url("/fonts/Lexend/Lexend-VariableFont_wght.ttf") format("truetype-variations");
-	font-weight: 100 900;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Lexend";
+  src: url("/fonts/Lexend/Lexend-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
 
@@ -39,8 +39,8 @@ h3,
 h4,
 h5,
 h6 {
-	padding: 0;
-	margin: 0;
+  padding: 0;
+  margin: 0;
 }
 
 h1,
@@ -49,88 +49,88 @@ h3,
 h4,
 h5,
 h6 {
-	font-weight: 600;
+  font-weight: 600;
 }
 
 h1 {
-	font-size: 3.2rem;
-	font-weight: 700;
+  font-size: 3.2rem;
+  font-weight: 700;
 }
 
 h2 {
-	font-size: 2.5rem;
-	font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 700;
 }
 
 h3 {
-	font-size: 1.9rem;
+  font-size: 1.9rem;
 }
 
 h4 {
-	font-size: 1.6rem;
+  font-size: 1.6rem;
 }
 
 button {
-	position: relative;
-	font-size: 1.2rem;
-	font-weight: 600;
-	border-radius: 0.5rem;
-	border: 1px solid transparent;
-	padding: 0.6rem 1.2rem;
-	font-family: inherit;
-	cursor: pointer;
-	transition: border-color 0.25s;
-	z-index: 1;
-	background-color: rgb(50, 20, 5);
-	color: var(--text-color-light);
+  position: relative;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  padding: 0.6rem 1.2rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  z-index: 1;
+  background-color: rgb(50, 20, 5);
+  color: var(--text-color-light);
 }
 
 button>* {
-	z-index: 2;
+  z-index: 2;
 }
 
 button::before {
-	position: absolute;
-	z-index: -1;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	border-radius: inherit;
-	content: "";
-	pointer-events: none;
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
 }
 
 button:hover {
-	filter: brightness(0.8);
+  filter: brightness(0.8);
 }
 
 button:active {
-	filter: brightness(0.6);
-	box-shadow: inset 0 0 3px rgba(250, 200, 150, 0.9);
+  filter: brightness(0.6);
+  box-shadow: inset 0 0 3px rgba(250, 200, 150, 0.9);
 }
 
 ul {
-	list-style: none;
+  list-style: none;
 }
 
 li {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 input {
-	border-radius: 0.4rem;
-	background-color: var(--bg-color-light);
-	padding: 0.5rem;
-	box-shadow: inset 0 0 1px 1px rgba(150, 105, 90, 0.5);
+  border-radius: 0.4rem;
+  background-color: var(--bg-color-light);
+  padding: 0.5rem;
+  box-shadow: inset 0 0 1px 1px rgba(150, 105, 90, 0.5);
 }
 
 input:focus {
-	outline: 2px solid var(--text-color-dark);
-	box-shadow: none;
+  outline: 2px solid var(--text-color-dark);
+  box-shadow: none;
 }
 
 #base-border {
-	border-radius: 0.5rem;
-	border: 1px solid var(--text-color-dark);
+  border-radius: 0.5rem;
+  border: 1px solid var(--text-color-dark);
 }
