@@ -1,36 +1,7 @@
-import asyncio
-from fastapi import HTTPException
-import psycopg
-from abc import ABC
+from databases.postgresUser import PostgresUser
 
-from utils.const import Env
-from utils.errors import MyErrors
-from utils.logger import mylog
-
-class APostgres(ABC):
+class Postgres(PostgresUser):
     def __init__(self) -> None:
-        asyncio.run(self.connectCursor())
+        super().__init__()
 
-    async def commit(self) -> None:
-        await self.conn.commit()
-
-    async def connectCursor(self) -> None:
-        self.conn = await psycopg.AsyncConnection.connect(
-            dbname=Env.DB_NAME,
-            user=Env.DB_USER,
-            password=Env.DB_PWD,
-            port=Env.DB_PORT,
-            host=Env.DB_HOST,
-        )
-        self.cursor = self.conn.cursor()
-
-    async def executeQueryValues(self, query: str, values: tuple):
-            if self.cursor.closed:
-                mylog.info(f"connection to mysql was closed attempted reconnection and query execution")
-            try:
-                await self.connectCursor()
-            except Exception as e:
-                mylog.critical("Cursor failed to connect to postgres")
-                await MyErrors.postgres(e)
-            await self.cursor.execute(query.encode(), values)
-
+postgres = Postgres()

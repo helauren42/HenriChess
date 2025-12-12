@@ -16,8 +16,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     restart: unless-stopped
   db:
     image: postgres:16-alpine3.22
@@ -47,11 +45,6 @@ services:
       - ./.data/redis_data:/data
     networks:
       - chess-net
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
     restart: unless-stopped
   vite:
     image: node:24.9-bookworm
@@ -77,8 +70,6 @@ services:
       - "${CADDY_EXT}:443"
     depends_on:
       db:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     restart: unless-stopped
 

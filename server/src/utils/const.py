@@ -2,9 +2,9 @@ import sys
 import dotenv
 import os
 
-from .logger import mylog
+from utils.logger import mylog
 
-if dotenv.load_dotenv():
+if dotenv.load_dotenv() is False:
     mylog.critical("failed load env file")
     sys.exit(1)
 

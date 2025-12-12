@@ -54,7 +54,7 @@ export const SignupPage = () => {
   return (
     <>
       <AuthTitle title="Signup" />
-      <FormWrapper onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleSubmit(e)} submitText="Signup" >
+      <FormWrapper onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleSubmit(e)} submitText="Signup">
         <InputField title="Username" type="text" value={values.username} setter={(val) => setValues({ ...values, username: val })} />
         <InputField title="Email" type="text" value={values.email} setter={(val) => setValues({ ...values, email: val })} />
         <InputField title="Password" type="password" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
