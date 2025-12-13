@@ -1,9 +1,16 @@
 CREATE TABLE IF NOT EXISTS users (
 	id SERIAL PRIMARY KEY,
-	username TEXT NOT NULL,
+	username TEXT UNIQUE NOT NULL,
 	email TEXT UNIQUE NOT NULL,
-	password BYTEA unique NOT NULL,
-	sessionToken BYTEA UNIQUE NOT NULL,
-	deviceToken TEXT UNIQUE NOT NULL,
+	password BYTEA NOT NULL,
 	creation DATE DEFAULT CURRENT_DATE NOT NULL
-)
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id SERIAL PRIMARY KEY,
+  userId INTEGER REFERENCES users(id),
+	sessionToken BYTEA UNIQUE NOT NULL,
+	deviceToken TEXT UNIQUE NOT NULL
+);
+
+CREATE INDEX idx_sessions_deviceToken ON sessions(deviceToken);

@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react"
 import { Link, Outlet } from "react-router-dom"
-import { writeFetch } from "../utils/requests"
+import { writeFetch, type writeResp } from "../utils/requests"
+import { ToastInputError, ToastServerError } from "../utils/toastify"
 
 const AuthTitle = ({ title }: { title: string }) => {
   return (
@@ -47,14 +48,28 @@ export const SignupPage = () => {
     email: "",
     password: ""
   })
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [loading, setLoading] = useState<boolean>(false)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    writeFetch("/auth/signup", "POST", values)
+    if (loading)
+      return
+    setLoading(true)
+    const resp: writeResp | null = await writeFetch("/auth/signup", "POST", values)
+    if (!resp)
+      return setLoading(false)
+    if (!resp.ok) {
+      switch (resp.status) {
+        case 409:
+          ToastInputError(resp.message)
+          break
+      }
+    }
+    setLoading(false)
   }
   return (
     <>
       <AuthTitle title="Signup" />
-      <FormWrapper onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleSubmit(e)} submitText="Signup">
+      <FormWrapper onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleSubmit(e)} submitText={loading ? "loading" : "Signup"}>
         <InputField title="Username" type="text" value={values.username} setter={(val) => setValues({ ...values, username: val })} />
         <InputField title="Email" type="text" value={values.email} setter={(val) => setValues({ ...values, email: val })} />
         <InputField title="Password" type="password" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
@@ -69,9 +84,26 @@ export const LoginPage = () => {
     username: "",
     password: ""
   })
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [loading, setLoading] = useState<boolean>(false)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-
+    if (loading)
+      return
+    setLoading(true)
+    const resp: writeResp | null = await writeFetch("/auth/login", "POST", values)
+    if (!resp)
+      return setLoading(false)
+    if (!resp.ok) {
+      switch (resp.status) {
+        case 409:
+          ToastInputError(resp.message)
+          break
+        case 500:
+          ToastServerError(resp.message)
+          break
+      }
+    }
+    setLoading(false)
   }
   return (
     <>

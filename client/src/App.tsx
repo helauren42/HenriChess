@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import { ToastContainer } from "react-toastify"
 import './App.css'
 import { HomePage } from './Pages/HomePage'
 import { AuthPage, LoginPage, SignupPage } from './Pages/AuthPage'
@@ -6,6 +7,7 @@ import { AuthPage, LoginPage, SignupPage } from './Pages/AuthPage'
 function App() {
   return (
     <>
+      <ToastContainer />
       <Routes>
         <Route path='/' element={<HomePage />} />
         <Route path='/auth/' element={<AuthPage />}>

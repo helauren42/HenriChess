@@ -8,6 +8,15 @@ from databases.postgres import postgres
 
 authRouter = APIRouter(prefix="/auth")
 
+
+@authRouter.patch("/login")
+async def patchLogin():
+    pass
+
+@authRouter.post("/login")
+async def postLogin():
+    pass
+
 @authRouter.post("/signup")
 async def signup(data: SignupModel, clireq: Request):
     sessionToken = str(uuid.uuid4())

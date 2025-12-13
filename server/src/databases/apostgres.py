@@ -13,8 +13,8 @@ class APostgres(ABC):
     async def commit(self) -> None:
         await self.conn.commit()
 
-    async def fallback(self) -> None:
-        await self.conn.commit()
+    async def rollback(self) -> None:
+        await self.conn.rollback()
 
     async def connectCursor(self) -> None:
         self.conn = await psycopg.AsyncConnection.connect(

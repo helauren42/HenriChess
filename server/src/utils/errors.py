@@ -16,5 +16,10 @@ class HttpErrors():
 
     @staticmethod
     async def badRequest(e: Exception, message: str = "Bad request"):
-        mylog.error(f"{message}: {e}")
+        mylog.info(f"{message}: {e}")
         raise HTTPException(400, message)
+
+    @staticmethod
+    async def uniquenessViolation(e: Exception, message: str = "Uniqueness Violation"):
+        mylog.info(f"{message}: {e}")
+        raise HTTPException(409, message)
