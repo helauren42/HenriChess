@@ -1,9 +1,12 @@
 from fastapi import HTTPException
+from psycopg import postgres
 from psycopg.errors import UniqueViolation
 from api.models.auth import LoginSchema
 from databases.apostgres import APostgres
 from databases.models.sessions import PgUserSession
+from databases.models.users import BasicUserModel
 from utils.errors import HttpErrors
+from utils.logger import mylog
 import bcrypt
 
 class APostgresUser(APostgres):
@@ -21,7 +24,7 @@ class APostgresUser(APostgres):
         return True
 
     async def updateSession(self, sessionToken: str, deviceToken: str, userId: int):
-        await self.executeQueryValues("update sessions set userId=%s sessionToken=%s where deviceToken=%s", (userId, bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken))
+        await self.executeQueryValues("update sessions set userId=%s, sessionToken=%s where deviceToken=%s", (userId, bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken))
 
     async def createSession(self, sessionToken: str, deviceToken: str, userId: int):
         await self.executeQueryValues("insert into sessions (userId, sessionToken, deviceToken) values(%s, %s, %s)", (userId, bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken, ))
@@ -58,6 +61,7 @@ class PostgresUser(APostgresUser):
             await self.updateSession(sessionToken, deviceToken, userId)
         else:
             await self.createSession(sessionToken, deviceToken, userId)
+        await self.commit()
 
 
     async def createUser(self, username: str, email: str, password: str, sessionToken: str, deviceToken: str):
@@ -82,5 +86,22 @@ class PostgresUser(APostgresUser):
                     await HttpErrors.uniquenessViolation(e, "Unexpected Unique Violation")
         except Exception as e:
             await HttpErrors.postgres(e, "Failed to create user")
+
+    async def basicUserData(self, userId: int)-> BasicUserModel:
+        keys = [
+            "username",
+            "email",
+            "creation"
+        ]
+        await self.executeQueryValues(f"select {', '.join(keys)} from users where id=%s", (userId, ))
+        row = await self.cursor.fetchone()
+        if row is None:
+            mylog.error(f"Somehow could not get basicUserData() {row}")
+            raise HTTPException(500, "Server error")
+        obj = {}
+        for i in range(len(row)):
+            obj[keys[i]] = row[i]
+        data: BasicUserModel = BasicUserModel(**obj)
+        return data
 
     # async def userClientData(userId: int)-> UserModel:

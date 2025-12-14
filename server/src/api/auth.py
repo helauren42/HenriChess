@@ -6,6 +6,7 @@ from fastapi.responses import Response
 import uuid
 
 from api.models.auth import LoginSchema, SignupSchema
+from databases.models.users import BasicUserModel
 from databases.postgres import postgres
 from utils.api import mini401, miniResp, resp204, setCookie, setSessionCookie
 
@@ -30,6 +31,7 @@ async def getDeviceToken(clireq: Request):
     resp.delete_cookie("sessionToken")
     return resp
 
+# TODO make getLogin extend deviceToken expiry age below a threshold of 3 months
 @authRouter.get("/login")
 async def autoLogin(clireq: Request):
     sessionToken = clireq.cookies.get("sessionToken")
@@ -38,11 +40,10 @@ async def autoLogin(clireq: Request):
         return mini401()
     # TODO log potential hacker if not in db
     userId = await postgres.sessionsUserId(sessionToken, deviceToken)
-    print("userId: ", userId)
-    if userId:
-        return resp204()
-    return mini401()
-# TODO make getLogin extend deviceToken expiry age below a threshold of 3 months
+    if not userId:
+        return mini401()
+    userData: BasicUserModel = await postgres.basicUserData(userId)
+    return miniResp(200, "login success", userData.myjson())
 
 @authRouter.post("/login")
 @hasDeviceToken
@@ -52,7 +53,7 @@ async def Login(clireq: Request, data: LoginSchema):
         return mini401("Invalid credentials")
     sessionToken = str(uuid.uuid4())
     deviceToken = cast(str, clireq.cookies.get("deviceToken"))
-    await postgres.storeSession(sessionToken, deviceToken)
+    await postgres.storeSession(sessionToken, deviceToken, userId)
     resp = resp204()
     setSessionCookie(resp, sessionToken)
     return resp
