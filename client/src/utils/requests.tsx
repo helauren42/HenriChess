@@ -8,7 +8,7 @@ export interface MyResp {
   data: object | null
 }
 
-export const readFetch = async (path: string): Promise<MyResp | null> => {
+export const readFetch = async (path: string): Promise<MyResp> => {
   try {
     const resp = await fetch(SERVER_URL + path, {
       method: "GET",
@@ -34,7 +34,12 @@ export const readFetch = async (path: string): Promise<MyResp | null> => {
   catch (e) {
     console.error("request error ", path, ": ", e)
     ToastNetworkError()
-    return null
+    return {
+      status: 0,
+      ok: false,
+      message: "",
+      data: {}
+    }
   }
 }
 

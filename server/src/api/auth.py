@@ -2,7 +2,7 @@ from functools import wraps
 from typing import cast
 from fastapi import APIRouter
 from fastapi.requests import Request
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
 import uuid
 
 from api.models.auth import LoginSchema, SignupSchema
@@ -21,12 +21,12 @@ def hasDeviceToken(func):
         return await func(clireq, *args, **kwargs)
     return wrapper
 
-@authRouter.get("/device-token")
-async def getDeviceToken(clireq: Request):
-    if clireq.cookies.get("deviceToken"):
-        return resp204()
+async def noDeviceToken(clireq: Request) -> bool:
+    return clireq.cookies.get("deviceToken") == None
+
+async def addDeviceToken(clireq: Request) -> JSONResponse:
     deviceToken = str(uuid.uuid4())
-    resp = miniResp(status=201)
+    resp = mini401("Setting device token")
     setCookie(resp, "deviceToken", deviceToken)
     resp.delete_cookie("sessionToken")
     return resp
@@ -34,6 +34,8 @@ async def getDeviceToken(clireq: Request):
 # TODO make getLogin extend deviceToken expiry age below a threshold of 3 months
 @authRouter.get("/login")
 async def autoLogin(clireq: Request):
+    if await noDeviceToken(clireq):
+        return await addDeviceToken(clireq)
     sessionToken = clireq.cookies.get("sessionToken")
     deviceToken = clireq.cookies.get("deviceToken")
     if sessionToken is None or deviceToken is None:

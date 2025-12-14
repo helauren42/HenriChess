@@ -1,7 +1,8 @@
-import { useState, type ReactNode } from "react"
-import { Link, Outlet } from "react-router-dom"
+import { useContext, useEffect, useState, type ReactNode } from "react"
+import { Link, Outlet, useNavigate } from "react-router-dom"
 import { writeFetch, type MyResp } from "../utils/requests"
 import { Toast409, ToastCustomError, ToastServerError } from "../utils/toastify"
+import { UserContext, type UserContextFace } from "../Contexts/User"
 
 const AuthTitle = ({ title }: { title: string }) => {
   return (
@@ -130,6 +131,12 @@ export const LoginPage = () => {
 }
 
 export const AuthPage = () => {
+  const { user } = useContext<UserContextFace>(UserContext)
+  const nav = useNavigate()
+  useEffect(() => {
+    if (user.username.length > 0)
+      nav("/")
+  }, [user, nav])
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div className="h-fit w-fit min-h-80 min-w-50 bg-(--nav-color) rounded-3xl p-10 pt-2 shadow-(--auth-shadow)">
