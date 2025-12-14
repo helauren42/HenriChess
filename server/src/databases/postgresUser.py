@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from psycopg.errors import UniqueViolation
 from databases.apostgres import APostgres
+from databases.models.sessions import PgUserSession
 from utils.errors import HttpErrors
 import bcrypt
 
@@ -30,10 +31,19 @@ class PostgresUser(APostgresUser):
         super().__init__()
 
     async def storeSession(self, sessionToken: str, deviceToken: str):
-        if self.deviceTokenExists(deviceToken):
+        if await self.deviceTokenExists(deviceToken):
             await self.updateSession(sessionToken, deviceToken)
         else:
             await self.createSession(sessionToken, deviceToken)
+
+    async def isValidSession(self, sessionToken:str, deviceToken: str) -> None | int:
+        await self.executeQueryValues("select userId, sessionToken where deviceToken=%s", (deviceToken,))
+        fetched = await self.cursor.fetchone()
+        if fetched is None:
+            return None
+        if not bcrypt.checkpw(sessionToken.encode(), fetched[1]):
+            return None
+        return int(fetched[0])
 
     async def createUser(self, username: str, email: str, password: str, sessionToken: str, deviceToken: str):
         try:

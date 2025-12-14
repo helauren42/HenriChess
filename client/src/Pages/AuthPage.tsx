@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react"
 import { Link, Outlet } from "react-router-dom"
-import { writeFetch, type writeResp } from "../utils/requests"
-import { ToastInputError, ToastServerError } from "../utils/toastify"
+import { writeFetch, type MyResp } from "../utils/requests"
+import { Toast409, ToastCustomError, ToastServerError } from "../utils/toastify"
 
 const AuthTitle = ({ title }: { title: string }) => {
   return (
@@ -54,13 +54,16 @@ export const SignupPage = () => {
     if (loading)
       return
     setLoading(true)
-    const resp: writeResp | null = await writeFetch("/auth/signup", "POST", values)
+    const resp: MyResp | null = await writeFetch("/auth/signup", "POST", values)
     if (!resp)
       return setLoading(false)
     if (!resp.ok) {
       switch (resp.status) {
+        case 401:
+          ToastCustomError(resp.message)
+          break
         case 409:
-          ToastInputError(resp.message)
+          Toast409(resp.message)
           break
       }
     }
@@ -90,13 +93,16 @@ export const LoginPage = () => {
     if (loading)
       return
     setLoading(true)
-    const resp: writeResp | null = await writeFetch("/auth/login", "POST", values)
+    const resp: MyResp | null = await writeFetch("/auth/login", "POST", values)
     if (!resp)
       return setLoading(false)
     if (!resp.ok) {
       switch (resp.status) {
+        case 401:
+          ToastCustomError(resp.message)
+          break
         case 409:
-          ToastInputError(resp.message)
+          Toast409(resp.message)
           break
         case 500:
           ToastServerError(resp.message)

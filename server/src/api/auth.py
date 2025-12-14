@@ -1,25 +1,57 @@
+from functools import wraps
+from typing import cast
 from fastapi import APIRouter
 from fastapi.requests import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import Response
 import uuid
 
 from api.models.auth import SignupModel
 from databases.postgres import postgres
+from utils.api import mini401, miniResp, resp204, setCookie, setSessionCookie
 
 authRouter = APIRouter(prefix="/auth")
 
+# TODO convert to check user session
+def hasDeviceToken(func):
+    @wraps(func)
+    async def wrapper(clireq: Request, *args, **kwargs):
+        if clireq.cookies.get("deviceToken") is None:
+            return mini401()
+        return await func(clireq, *args, **kwargs)
+    return wrapper
 
-@authRouter.patch("/login")
-async def patchLogin():
-    pass
+@authRouter.get("/device-token")
+async def getDeviceToken(clireq: Request):
+    if clireq.cookies.get("deviceToken"):
+        return resp204()
+    deviceToken = str(uuid.uuid4())
+    resp = miniResp(status=201)
+    setCookie(resp, "deviceToken", deviceToken)
+    resp.delete_cookie("sessionToken")
+    return resp
+
+@authRouter.get("/login")
+async def autoLogin(clireq: Request):
+    sessionToken = clireq.cookies.get("sessionToken")
+    deviceToken = clireq.cookies.get("deviceToken")
+    if sessionToken is None or deviceToken is None:
+        return mini401()
+    # TODO log potential hacker if not in db
+    userId = await postgres.isValidSession(sessionToken, deviceToken)
+    print("userId: ", userId)
 
 @authRouter.post("/login")
-async def postLogin():
+async def Login():
     pass
 
 @authRouter.post("/signup")
-async def signup(data: SignupModel, clireq: Request):
+@hasDeviceToken
+async def signup(clireq: Request, data: SignupModel):
     sessionToken = str(uuid.uuid4())
-    deviceToken = str(uuid.uuid4())
+    deviceToken = clireq.cookies.get("deviceToken")
+    if deviceToken is None:
+        return mini401()
     await postgres.createUser(data.username, data.email, data.password, sessionToken, deviceToken)
-    return JSONResponse({}, 200)
+    resp = resp204()
+    setSessionCookie(resp, sessionToken)
+    return resp

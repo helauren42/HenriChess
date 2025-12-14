@@ -27,12 +27,15 @@ class APostgres(ABC):
         self.cursor = self.conn.cursor()
 
     async def executeQueryValues(self, query: str, values: tuple):
+            closed = False
             if self.cursor.closed:
-                mylog.info(f"connection to mysql was closed attempted reconnection and query execution")
+                mylog.info(f"Connection to postgres was closed attempting reconnection and query execution")
             try:
                 await self.connectCursor()
             except Exception as e:
                 mylog.critical("Cursor failed to connect to postgres")
                 await HttpErrors.postgres(e)
+            if closed:
+                mylog.info("Reconnection to postgres successfull")
             await self.cursor.execute(query.encode(), values)
 

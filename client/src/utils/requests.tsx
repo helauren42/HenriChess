@@ -1,13 +1,45 @@
 import { SERVER_URL } from "./const"
+import { ToastNetworkError } from "./toastify"
 
-export interface writeResp {
+export interface MyResp {
   status: number
   ok: boolean
-  message: string
-  data: object
+  message: string | null
+  data: object | null
 }
 
-export const writeFetch = async (path: string, method: "POST" | "PUT" | "PATCH" | "DELETE", body: object): Promise<writeResp | null> => {
+export const readFetch = async (path: string): Promise<MyResp | null> => {
+  try {
+    const resp = await fetch(SERVER_URL + path, {
+      method: "GET",
+      credentials: "same-origin",
+    })
+    console.log(resp)
+    if (resp.status == 204) {
+      return {
+        status: resp.status,
+        ok: resp.ok,
+        message: null,
+        data: null
+      }
+    }
+    const jsonResp: object = await resp.json()
+    Object.hasOwn(jsonResp, "message")
+    return {
+      status: resp.status,
+      ok: resp.ok,
+      message: Object.hasOwn(jsonResp, "message") ? jsonResp["message"] : null,
+      data: Object.hasOwn(jsonResp, "data") ? jsonResp["data"] : null,
+    }
+  }
+  catch (e) {
+    console.error("request error ", path, ": ", e)
+    ToastNetworkError()
+    return null
+  }
+}
+
+export const writeFetch = async (path: string, method: "POST" | "PUT" | "PATCH" | "DELETE", body: object): Promise<MyResp | null> => {
   try {
     const resp = await fetch(SERVER_URL + path, {
       method: method,
@@ -15,16 +47,19 @@ export const writeFetch = async (path: string, method: "POST" | "PUT" | "PATCH" 
       credentials: "same-origin",
       body: JSON.stringify(body)
     })
-    const jsonResp = await resp.json()
+    const jsonResp: object = await resp.json()
+    // const hasMessage = Object.hasOwn(jsonResp, "message")
+    // const hasData = Object.hasOwn(jsonResp, "data")
     return {
       status: resp.status,
       ok: resp.ok,
-      message: jsonResp["message"],
-      data: jsonResp["data"],
+      message: Object.hasOwn(jsonResp, "message") ? jsonResp["message"] : null,
+      data: Object.hasOwn(jsonResp, "data") ? jsonResp["data"] : null,
     }
   }
   catch (e) {
     console.error("request error ", path, ": ", e)
+    ToastNetworkError()
     return null
   }
 }
