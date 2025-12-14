@@ -10,15 +10,22 @@ import { UserContext, type UserContextFace } from './Contexts/User'
 function App() {
   const { user, setUser } = useContext<UserContextFace>(UserContext)
   const initUser = async () => {
-    // if ((!(await readFetch("/auth/device-token")).ok))
-    //   return
+    const storeUsername = localStorage.getItem("username")
+    const storeEmail = localStorage.getItem("email")
+    if (storeUsername && storeEmail) {
+      setUser({
+        username: storeUsername,
+        email: storeEmail
+      })
+    }
     const resp: MyResp = await readFetch("/auth/login")
     if (resp.ok) {
-      // TODO create user context
       setUser({
         username: resp.data["username"],
         email: resp.data["email"],
       })
+      localStorage.setItem("username", resp.data["username"])
+      localStorage.setItem("email", resp.data["email"])
     }
   }
   useEffect(() => {
