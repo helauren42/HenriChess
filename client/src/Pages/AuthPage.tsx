@@ -65,9 +65,14 @@ export const SignupPage = () => {
         case 409:
           Toast409(resp.message)
           break
+        case 500:
+          ToastServerError(resp.message)
+          break
       }
+      return setLoading(false)
     }
     setLoading(false)
+    location.reload()
   }
   return (
     <>
@@ -84,7 +89,7 @@ export const SignupPage = () => {
 
 export const LoginPage = () => {
   const [values, setValues] = useState({
-    username: "",
+    usernameEmail: "",
     password: ""
   })
   const [loading, setLoading] = useState<boolean>(false)
@@ -108,14 +113,16 @@ export const LoginPage = () => {
           ToastServerError(resp.message)
           break
       }
+      return setLoading(false)
     }
     setLoading(false)
+    location.reload()
   }
   return (
     <>
       <AuthTitle title="Login" />
       <FormWrapper onSubmit={(e) => handleSubmit(e)} submitText="Login" >
-        <InputField title="Username" type="text" value={values.username} setter={(val) => setValues({ ...values, username: val })} />
+        <InputField title="Username or Email" type="text" value={values.usernameEmail} setter={(val) => setValues({ ...values, usernameEmail: val })} />
         <InputField title="Password" type="text" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
       </FormWrapper>
       <AuthRedir path={"/auth/signup"} text="Signup instead?" /> </>

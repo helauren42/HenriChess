@@ -24,7 +24,6 @@ export const readFetch = async (path: string): Promise<MyResp | null> => {
       }
     }
     const jsonResp: object = await resp.json()
-    Object.hasOwn(jsonResp, "message")
     return {
       status: resp.status,
       ok: resp.ok,
@@ -47,9 +46,15 @@ export const writeFetch = async (path: string, method: "POST" | "PUT" | "PATCH" 
       credentials: "same-origin",
       body: JSON.stringify(body)
     })
+    if (resp.status == 204) {
+      return {
+        status: resp.status,
+        ok: resp.ok,
+        message: null,
+        data: null
+      }
+    }
     const jsonResp: object = await resp.json()
-    // const hasMessage = Object.hasOwn(jsonResp, "message")
-    // const hasData = Object.hasOwn(jsonResp, "data")
     return {
       status: resp.status,
       ok: resp.ok,

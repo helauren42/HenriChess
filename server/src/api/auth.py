@@ -5,7 +5,7 @@ from fastapi.requests import Request
 from fastapi.responses import Response
 import uuid
 
-from api.models.auth import SignupModel
+from api.models.auth import LoginSchema, SignupSchema
 from databases.postgres import postgres
 from utils.api import mini401, miniResp, resp204, setCookie, setSessionCookie
 
@@ -37,16 +37,28 @@ async def autoLogin(clireq: Request):
     if sessionToken is None or deviceToken is None:
         return mini401()
     # TODO log potential hacker if not in db
-    userId = await postgres.isValidSession(sessionToken, deviceToken)
+    userId = await postgres.sessionsUserId(sessionToken, deviceToken)
     print("userId: ", userId)
+    if userId:
+        return resp204()
+    return mini401()
+# TODO make getLogin extend deviceToken expiry age below a threshold of 3 months
 
 @authRouter.post("/login")
-async def Login():
-    pass
+@hasDeviceToken
+async def Login(clireq: Request, data: LoginSchema):
+    userId = await postgres.usersUserId(data)
+    if userId is None:
+        return mini401("Invalid credentials")
+    sessionToken = str(uuid.uuid4())
+    deviceToken = cast(str, clireq.cookies.get("deviceToken"))
+    await postgres.storeSession(sessionToken, deviceToken)
+    resp = resp204()
+    setSessionCookie(resp, sessionToken)
+    return resp
 
 @authRouter.post("/signup")
-@hasDeviceToken
-async def signup(clireq: Request, data: SignupModel):
+async def signup(clireq: Request, data: SignupSchema):
     sessionToken = str(uuid.uuid4())
     deviceToken = clireq.cookies.get("deviceToken")
     if deviceToken is None:

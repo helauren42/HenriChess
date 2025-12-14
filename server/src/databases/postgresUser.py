@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from psycopg.errors import UniqueViolation
+from api.models.auth import LoginSchema
 from databases.apostgres import APostgres
 from databases.models.sessions import PgUserSession
 from utils.errors import HttpErrors
@@ -19,31 +20,45 @@ class APostgresUser(APostgres):
             raise e
         return True
 
-    async def updateSession(self, sessionToken: str, deviceToken: str):
-        await self.executeQueryValues("update sessions set sessionToken=%s where deviceToken=%s", (bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken))
+    async def updateSession(self, sessionToken: str, deviceToken: str, userId: int):
+        await self.executeQueryValues("update sessions set userId=%s sessionToken=%s where deviceToken=%s", (userId, bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken))
 
-    async def createSession(self, sessionToken: str, deviceToken: str):
-        await self.executeQueryValues("insert into sessions (sessionToken, deviceToken) values(%s, %s)", (bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken, ))
+    async def createSession(self, sessionToken: str, deviceToken: str, userId: int):
+        await self.executeQueryValues("insert into sessions (userId, sessionToken, deviceToken) values(%s, %s, %s)", (userId, bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken, ))
 
 
 class PostgresUser(APostgresUser):
     def __init__(self) -> None:
         super().__init__()
 
-    async def storeSession(self, sessionToken: str, deviceToken: str):
-        if await self.deviceTokenExists(deviceToken):
-            await self.updateSession(sessionToken, deviceToken)
-        else:
-            await self.createSession(sessionToken, deviceToken)
-
-    async def isValidSession(self, sessionToken:str, deviceToken: str) -> None | int:
-        await self.executeQueryValues("select userId, sessionToken where deviceToken=%s", (deviceToken,))
+    async def sessionsUserId(self, sessionToken:str, deviceToken: str) -> None | int:
+        await self.executeQueryValues("select userId, sessionToken from sessions where deviceToken=%s", (deviceToken,))
         fetched = await self.cursor.fetchone()
         if fetched is None:
             return None
         if not bcrypt.checkpw(sessionToken.encode(), fetched[1]):
             return None
         return int(fetched[0])
+
+    async def usersUserId(self, data: LoginSchema) -> None | int:
+        await self.executeQueryValues("select id,password from users where username=%s", (data.usernameEmail,))
+        fetched = await self.cursor.fetchone()
+        if fetched is None:
+            await self.executeQueryValues("select id, password from users where email=%s", (data.usernameEmail,))
+            fetched = await self.cursor.fetchone()
+            if fetched is None:
+                return None
+        passwordDb = fetched[1]
+        if bcrypt.checkpw(data.password.encode(), passwordDb):
+            return fetched[0]
+        return None
+
+    async def storeSession(self, sessionToken: str, deviceToken: str, userId):
+        if await self.deviceTokenExists(deviceToken):
+            await self.updateSession(sessionToken, deviceToken, userId)
+        else:
+            await self.createSession(sessionToken, deviceToken, userId)
+
 
     async def createUser(self, username: str, email: str, password: str, sessionToken: str, deviceToken: str):
         try:
@@ -54,7 +69,7 @@ class PostgresUser(APostgresUser):
                 raise HTTPException(500, "failed to get returning id")
             await self.commit()
             userId = int(fetched[0])
-            await self.storeSession(sessionToken, deviceToken)
+            await self.storeSession(sessionToken, deviceToken, userId)
             await self.commit()
         except UniqueViolation as e:
             columnName = e.diag.constraint_name.split("_")[1:-1]
@@ -67,3 +82,5 @@ class PostgresUser(APostgresUser):
                     await HttpErrors.uniquenessViolation(e, "Unexpected Unique Violation")
         except Exception as e:
             await HttpErrors.postgres(e, "Failed to create user")
+
+    # async def userClientData(userId: int)-> UserModel:
