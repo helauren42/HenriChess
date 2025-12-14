@@ -3,7 +3,6 @@ from psycopg import postgres
 from psycopg.errors import UniqueViolation
 from api.models.auth import LoginSchema
 from databases.apostgres import APostgres
-from databases.models.sessions import PgUserSession
 from databases.models.users import BasicUserModel
 from utils.errors import HttpErrors
 from utils.logger import mylog
@@ -87,7 +86,7 @@ class PostgresUser(APostgresUser):
         except Exception as e:
             await HttpErrors.postgres(e, "Failed to create user")
 
-    async def basicUserData(self, userId: int)-> BasicUserModel:
+    async def publicUserData(self, userId: int)-> BasicUserModel:
         keys = [
             "username",
             "email",

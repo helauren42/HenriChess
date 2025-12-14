@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from api.auth import authRouter
+from api.users import accountRouter
 from utils.logger import mylog
 
 app = FastAPI()
 app.include_router(authRouter, prefix="/api")
+app.include_router(accountRouter, prefix="/api")
 
 @app.exception_handler(ValueError)
 async def valueExcept(req: Request, e: ValueError):
@@ -18,5 +20,5 @@ async def httpExcept(req: Request, e: HTTPException):
 
 @app.exception_handler(Exception)
 async def defaultExcept(req: Request, e: ValueError):
-    mylog.error(f"unhandled exception: {e.__class__.__name__}\n{e.__str__()}")
-    return JSONResponse(status_code=400, content={"message": "Invalid value", "data": {}})
+    mylog.error(f"unhandled exception from {req.base_url}: {e.__class__.__name__}\n{e.__str__()}")
+    return JSONResponse(status_code=500, content={"message": "Unexpected Server Error", "data": {}})

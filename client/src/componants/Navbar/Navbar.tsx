@@ -34,7 +34,7 @@ export const Navbar = () => {
       </ul>
       {
         user.username ?
-          <button className="mt-4" onClick={() => nav("/account")}>Account</button>
+          <button className="mt-4" onClick={() => nav(`/user/${user.username}`)}>Account</button>
           :
           <button className="mt-4" onClick={() => nav("/auth/login")}>Sign in</button>
       }

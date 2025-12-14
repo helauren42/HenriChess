@@ -5,16 +5,13 @@ from abc import ABC
 from utils.const import Env
 from utils.errors import HttpErrors
 from utils.logger import mylog
+import psycopg_pool
+from contextlib import asynccontextmanager
 
 class APostgres(ABC):
+    # pool: psycopg_pool.AsyncConnectionPool | None = None
     def __init__(self) -> None:
         asyncio.run(self.connectCursor())
-
-    async def commit(self) -> None:
-        await self.conn.commit()
-
-    async def rollback(self) -> None:
-        await self.conn.rollback()
 
     async def connectCursor(self) -> None:
         self.conn = await psycopg.AsyncConnection.connect(
@@ -25,6 +22,12 @@ class APostgres(ABC):
             host=Env.DB_HOST,
         )
         self.cursor = self.conn.cursor()
+
+    async def commit(self) -> None:
+        await self.conn.commit()
+
+    async def rollback(self) -> None:
+        await self.conn.rollback()
 
     async def executeQueryValues(self, query: str, values: tuple):
             closed = False

@@ -44,7 +44,8 @@ async def autoLogin(clireq: Request):
     userId = await postgres.sessionsUserId(sessionToken, deviceToken)
     if not userId:
         return mini401()
-    userData: BasicUserModel = await postgres.basicUserData(userId)
+    userData: BasicUserModel = await postgres.publicUserData(userId)
+    # extend deviceToken or sessionToken if near expiration
     return miniResp(200, "login success", userData.myjson())
 
 @authRouter.post("/login")

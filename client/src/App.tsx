@@ -6,9 +6,10 @@ import { AuthPage, LoginPage, SignupPage } from './Pages/AuthPage'
 import { useContext, useEffect } from 'react'
 import { readFetch, type MyResp } from './utils/requests'
 import { UserContext, type UserContextFace } from './Contexts/User'
+import { UserPage } from './Pages/UserPage'
 
 function App() {
-  const { user, setUser } = useContext<UserContextFace>(UserContext)
+  const { setUser } = useContext<UserContextFace>(UserContext)
   const initUser = async () => {
     const storeUsername = localStorage.getItem("username")
     const storeEmail = localStorage.getItem("email")
@@ -36,6 +37,7 @@ function App() {
       <ToastContainer />
       <Routes>
         <Route path='/' element={<HomePage />} />
+        <Route path='/user/*' element={<UserPage />} />
         <Route path='/auth/' element={<AuthPage />}>
           <Route path='/auth/login' element={<LoginPage />} />
           <Route path='/auth/signup' element={<SignupPage />} />
