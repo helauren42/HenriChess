@@ -1,10 +1,18 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from api.auth import authRouter
 from api.users import accountRouter
 from utils.logger import mylog
+from databases.postgres import postgres
 
-app = FastAPI()
+@asynccontextmanager
+async def lifeIsTooShort(app: FastAPI):
+    app.async_pool = await postgres.init_pool()
+    yield
+    await postgres.close_pool()
+
+app = FastAPI(lifespan=lifeIsTooShort)
 app.include_router(authRouter, prefix="/api")
 app.include_router(accountRouter, prefix="/api")
 

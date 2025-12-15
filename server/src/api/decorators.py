@@ -18,4 +18,3 @@ def validateTokens(func):
         kwargs["userId"] = userId
         return await func(clireq, *args, **kwargs)
     return wrapper
-

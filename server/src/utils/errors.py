@@ -12,14 +12,14 @@ class HttpErrors():
     @staticmethod
     async def postgres(e: Exception, message: str = "Unexpected DB error"):
         mylog.error(f"{message}: {e}")
-        raise HTTPException(500, "Server error")
+        return HTTPException(500, "Server error")
 
     @staticmethod
     async def badRequest(e: Exception, message: str = "Bad request"):
         mylog.info(f"{message}: {e}")
-        raise HTTPException(400, message)
+        return HTTPException(400, message)
 
     @staticmethod
     async def uniquenessViolation(e: Exception, message: str = "Uniqueness Violation"):
         mylog.info(f"{message}: {e}")
-        raise HTTPException(409, message)
+        return HTTPException(409, message)

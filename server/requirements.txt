@@ -2,6 +2,7 @@ fastapi
 fastapi-wraps
 psycopg[binary]
 psycopg_pool
+asyncpg
 redis[hiredis]
 uvicorn
 pydantic

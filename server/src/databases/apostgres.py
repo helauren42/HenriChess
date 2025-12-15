@@ -1,44 +1,72 @@
-import asyncio
-import psycopg
+from contextlib import asynccontextmanager
 from abc import ABC
+
+from psycopg import AsyncCursor, ProgrammingError
+from psycopg.rows import TupleRow
 
 from utils.const import Env
 from utils.errors import HttpErrors
 from utils.logger import mylog
 import psycopg_pool
-from contextlib import asynccontextmanager
 
 class APostgres(ABC):
-    # pool: psycopg_pool.AsyncConnectionPool | None = None
-    def __init__(self) -> None:
-        asyncio.run(self.connectCursor())
+    pool: psycopg_pool.AsyncConnectionPool | None = None
+    
+    @classmethod
+    async def init_pool(cls) -> None:
+        """Initialize the connection pool once at app startup"""
+        if cls.pool is None:
+            cls.pool = psycopg_pool.AsyncConnectionPool(
+                conninfo=f"user={Env.DB_USER} password={Env.DB_PWD} host={Env.DB_HOST} port={Env.DB_PORT} dbname={Env.DB_NAME}",
+                min_size=5,
+                timeout=30,
+                open=False
+            )
+            await cls.pool.open()
+    
+    @classmethod
+    async def close_pool(cls) -> None:
+        """Close the pool at app shutdown"""
+        if cls.pool:
+            await cls.pool.close()
+            cls.pool = None
+    
+    @asynccontextmanager
+    async def getConn(self):
+        if self.pool is None:
+            raise ProgrammingError("pool not initialized yet")
+        async with self.pool.connection() as conn:
+            yield conn
 
-    async def connectCursor(self) -> None:
-        self.conn = await psycopg.AsyncConnection.connect(
-            dbname=Env.DB_NAME,
-            user=Env.DB_USER,
-            password=Env.DB_PWD,
-            port=Env.DB_PORT,
-            host=Env.DB_HOST,
-        )
-        self.cursor = self.conn.cursor()
+    @asynccontextmanager
+    async def getCursor(self):
+        if self.pool is None:
+            raise ProgrammingError("pool not initialized yet")
+        async with self.pool.connection() as conn:
+            async with conn.cursor() as cursor:
+                yield cursor
 
-    async def commit(self) -> None:
-        await self.conn.commit()
+    async def execFetchone(self, query: str, values: tuple) -> None | TupleRow:
+        try:
+            async with self.getConn() as conn:
+                async with conn.cursor() as cursor:
+                    await cursor.execute(query=query.encode(), params=values)
+                    return await cursor.fetchone()
+        except Exception as e:
+            raise await HttpErrors.postgres(e, "execFetchone() failed")
+    
+    async def execCommit(self, query: str, values: tuple):
+        try:
+            async with self.getConn() as conn:
+                async with conn.cursor() as cursor:
+                    await cursor.execute(query=query.encode(), params=values)
+                await conn.commit()
+        except Exception as e:
+            raise await HttpErrors.postgres(e, "execCommit() failed")
 
-    async def rollback(self) -> None:
-        await self.conn.rollback()
-
-    async def executeQueryValues(self, query: str, values: tuple):
-            closed = False
-            if self.cursor.closed:
-                mylog.info(f"Connection to postgres was closed attempting reconnection and query execution")
-            try:
-                await self.connectCursor()
-            except Exception as e:
-                mylog.critical("Cursor failed to connect to postgres")
-                await HttpErrors.postgres(e)
-            if closed:
-                mylog.info("Reconnection to postgres successfull")
-            await self.cursor.execute(query.encode(), values)
+    async def exec(self, cursor: AsyncCursor, query: str, values: tuple):
+        try:
+            await cursor.execute(query=query.encode(), params=values)
+        except Exception as e:
+            raise await HttpErrors.postgres(e, "execCommit() failed")
 
