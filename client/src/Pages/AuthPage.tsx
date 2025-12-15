@@ -49,6 +49,7 @@ export const SignupPage = () => {
     email: "",
     password: ""
   })
+  const nav = useNavigate()
   const [loading, setLoading] = useState<boolean>(false)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -73,6 +74,7 @@ export const SignupPage = () => {
       return setLoading(false)
     }
     setLoading(false)
+    nav("/")
     location.reload()
   }
   return (
@@ -93,6 +95,7 @@ export const LoginPage = () => {
     usernameEmail: "",
     password: ""
   })
+  const nav = useNavigate()
   const [loading, setLoading] = useState<boolean>(false)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -117,6 +120,7 @@ export const LoginPage = () => {
       return setLoading(false)
     }
     setLoading(false)
+    nav("/")
     location.reload()
   }
   return (

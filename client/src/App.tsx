@@ -7,6 +7,7 @@ import { useContext, useEffect } from 'react'
 import { readFetch, type MyResp } from './utils/requests'
 import { UserContext, type UserContextFace } from './Contexts/User'
 import { UserPage } from './Pages/UserPage'
+import { ToastSessionExpired } from './utils/toastify'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
@@ -27,6 +28,16 @@ function App() {
       })
       localStorage.setItem("username", resp.data["username"])
       localStorage.setItem("email", resp.data["email"])
+    }
+    else {
+      if (localStorage.getItem("username"))
+        ToastSessionExpired()
+      setUser({
+        username: "",
+        email: "",
+      })
+      localStorage.removeItem("username")
+      localStorage.removeItem("email")
     }
   }
   useEffect(() => {

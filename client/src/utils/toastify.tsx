@@ -1,5 +1,12 @@
 import { toast } from "react-toastify";
 
+export const ToastSessionExpired = () => {
+  toast.error("Your session has expired, please reconnect", {
+    toastId: "custom",
+    position: "top-right",
+    autoClose: 2000
+  })
+}
 export const ToastNetworkError = () => {
   toast.error("Request failed, please verify your internet connection", {
     toastId: "network-error",
