@@ -24,11 +24,14 @@ const Navlink = ({ name, to, imgsrc }: NavlinkProps) => {
 
 export const Navbar = () => {
   const { user } = useContext(UserContext)
-  const { open } = useContext(AuthCompContext)
+  const { openAuth } = useContext(AuthCompContext)
   const nav = useNavigate()
   return (
     <nav>
-      <h3>HenriChess</h3>
+      <div onClick={() => nav("/")}>
+        <h3 className="text-center">Henri</h3>
+        <h3 className="text-center">Chess</h3>
+      </div>
       <ul className="flex flex-col gap-5">
         <Navlink name="Play" to="/play" imgsrc="/images/nav/pawn.svg" />
         <Navlink name="Watch" to="/watch" imgsrc="/images/nav/eyes.svg" />
@@ -38,7 +41,7 @@ export const Navbar = () => {
         user.username ?
           <button className="mt-4" onClick={() => nav(`/user/${user.username}`)}>Account</button>
           :
-          <button className="mt-4" onClick={() => open("login")}>Sign in</button>
+          <button className="mt-4" onClick={() => openAuth("login")}>Sign in</button>
       }
     </nav >
   )

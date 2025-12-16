@@ -1,10 +1,11 @@
 from functools import wraps
 from typing import cast
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse, Response
 import uuid
 
+from api.decorators import getUserId
 from api.models.auth import LoginSchema, SignupSchema
 from databases.models.users import BasicUserModel
 from databases.postgres import postgres
@@ -30,6 +31,11 @@ async def addDeviceToken(clireq: Request) -> JSONResponse:
     setCookie(resp, "deviceToken", deviceToken)
     resp.delete_cookie("sessionToken")
     return resp
+
+@authRouter.delete("/logout")
+async def logout(clireq: Request, userId: int = Depends(getUserId)):
+    await postgres.execCommit("delete from sessions where userId=%s", values=(userId,))
+    return resp204()
 
 # TODO make getLogin extend deviceToken expiry age below a threshold of 3 months
 @authRouter.get("/login")

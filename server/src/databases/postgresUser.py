@@ -3,7 +3,7 @@ from psycopg.errors import UniqueViolation
 from api.models.auth import LoginSchema
 from databases.apostgres import APostgres
 from databases.models.users import BasicUserModel
-from utils.errors import HttpErrors
+from utils.errors import HttpCatch
 from utils.logger import mylog
 import bcrypt
 
@@ -63,13 +63,13 @@ class PostgresUser(APostgresUser):
             columnName = e.diag.constraint_name.split("_")[1:-1]
             match columnName[0]:
                 case "username":
-                    return await HttpErrors.uniquenessViolation(e, "Username already exists")
+                    return await HttpCatch.uniquenessViolation(e, "Username already exists")
                 case "email":
-                    return await HttpErrors.uniquenessViolation(e, "Email already exists")
+                    return await HttpCatch.uniquenessViolation(e, "Email already exists")
                 case _:
-                    return await HttpErrors.uniquenessViolation(e, "Unexpected Unique Violation")
+                    return await HttpCatch.uniquenessViolation(e, "Unexpected Unique Violation")
         except Exception as e:
-            return await HttpErrors.postgres(e, "Failed to create user")
+            return await HttpCatch.postgres(e, "Failed to create user")
 
     async def publicUserData(self, userId: int)-> BasicUserModel:
         keys = [

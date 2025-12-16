@@ -1,18 +1,17 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 import asyncio
 
-from api.decorators import validateTokens
-from databases import postgres
+from api.decorators import getUserId
+from databases.postgres import postgres
 from utils.api import miniResp, resp204
 
 accountRouter = APIRouter(prefix="/account")
 
 @accountRouter.get("/{username}")
-@validateTokens
-async def getUserPageData(clireq: Request, username: str, userId: int | None = None):
-    print(userId)
-    # postgres.
-    return miniResp(200, "success")
+async def getUserPageData(clireq: Request, username: str, userId: int = Depends(getUserId)):
+    print("userId: ", userId)
+    basicUser = await postgres.publicUserData(userId)
+    return miniResp(200, "success", basicUser.myjson())
 
 @accountRouter.delete("/{username}")
 async def deleteAccount(clireq: Request, username: str):

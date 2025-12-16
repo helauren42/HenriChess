@@ -5,7 +5,7 @@ from psycopg import AsyncCursor, ProgrammingError
 from psycopg.rows import TupleRow
 
 from utils.const import Env
-from utils.errors import HttpErrors
+from utils.errors import HttpCatch
 from utils.logger import mylog
 import psycopg_pool
 
@@ -53,7 +53,7 @@ class APostgres(ABC):
                     await cursor.execute(query=query.encode(), params=values)
                     return await cursor.fetchone()
         except Exception as e:
-            raise await HttpErrors.postgres(e, "execFetchone() failed")
+            raise await HttpCatch.postgres(e, "execFetchone() failed")
     
     async def execCommit(self, query: str, values: tuple):
         try:
@@ -62,11 +62,11 @@ class APostgres(ABC):
                     await cursor.execute(query=query.encode(), params=values)
                 await conn.commit()
         except Exception as e:
-            raise await HttpErrors.postgres(e, "execCommit() failed")
+            raise await HttpCatch.postgres(e, "execCommit() failed")
 
     async def exec(self, cursor: AsyncCursor, query: str, values: tuple):
         try:
             await cursor.execute(query=query.encode(), params=values)
         except Exception as e:
-            raise await HttpErrors.postgres(e, "execCommit() failed")
+            raise await HttpCatch.postgres(e, "execCommit() failed")
 

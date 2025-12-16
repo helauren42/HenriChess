@@ -8,7 +8,7 @@ class FlexException(Exception):
         self.error = error
         self.msg = msg
 
-class HttpErrors():
+class HttpCatch():
     @staticmethod
     async def postgres(e: Exception, message: str = "Unexpected DB error"):
         mylog.error(f"{message}: {e}")

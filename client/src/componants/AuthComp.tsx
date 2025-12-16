@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState, type ReactNode } from "react"
-import { Link } from "react-router-dom"
 import { writeFetch, type MyResp } from "../utils/requests"
 import { Toast409, ToastCustomError, ToastServerError } from "../utils/toastify"
 import { UserContext, type UserContextFace } from "../Contexts/User"
@@ -50,7 +49,7 @@ export const SignupPage = () => {
     email: "",
     password: ""
   })
-  const { openAuth: open } = useContext(AuthCompContext)
+  const { openAuth } = useContext(AuthCompContext)
   const [loading, setLoading] = useState<boolean>(false)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -85,7 +84,7 @@ export const SignupPage = () => {
         <InputField title="Email" type="text" value={values.email} setter={(val) => setValues({ ...values, email: val })} />
         <InputField title="Password" type="password" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
       </FormWrapper>
-      <AuthRedir onClick={() => open("login")} text="Login instead?" />
+      <AuthRedir onClick={() => openAuth("login")} text="Login instead?" />
     </>
   )
 }
@@ -95,7 +94,7 @@ export const LoginPage = () => {
     usernameEmail: "",
     password: ""
   })
-  const { openAuth: open } = useContext(AuthCompContext)
+  const { openAuth } = useContext(AuthCompContext)
   const [loading, setLoading] = useState<boolean>(false)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -129,20 +128,20 @@ export const LoginPage = () => {
         <InputField title="Username or Email" type="text" value={values.usernameEmail} setter={(val) => setValues({ ...values, usernameEmail: val })} />
         <InputField title="Password" type="text" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
       </FormWrapper>
-      <AuthRedir onClick={() => open("signup")} text="Signup instead?" />
+      <AuthRedir onClick={() => openAuth("signup")} text="Signup instead?" />
     </>
   )
 }
 
 export const Unauthorized = () => {
-  const { openAuth: open } = useContext(AuthCompContext)
+  const { openAuth } = useContext(AuthCompContext)
   return (
     <div className="flex flex-col justify-between gap-5 max-w-[350px]">
       <AuthTitle title="Unauthorized" />
       <h4>You need to signin to view the page</h4>
       <div className="grid place-items-center">
         <button onClick={() => {
-          open("login")
+          openAuth("login")
         }} >Signin</button>
       </div>
     </div>
@@ -150,16 +149,8 @@ export const Unauthorized = () => {
 }
 
 export const AuthPage = () => {
-  const { user } = useContext<UserContextFace>(UserContext)
-  const { authComp, openAuth, closeAuth
+  const { authComp
   } = useContext(AuthCompContext)
-  useEffect(() => {
-    console.log("user: ", user)
-    if (user.username.length > 0)
-      closeAuth()
-    else if (user.username == "")
-      openAuth("login")
-  }, [user])
   useEffect(() => {
     const elem = document.getElementById("auth-page")
     if (!elem)

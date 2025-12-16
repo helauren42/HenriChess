@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { AuthCompContext, type AuthCompFaceFace } from "../Contexts/AuthComp"
 
 export const AuthCompProvider = ({ children }:
