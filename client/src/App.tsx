@@ -2,7 +2,6 @@ import { Routes, Route } from 'react-router-dom'
 import { ToastContainer } from "react-toastify"
 import './App.css'
 import { HomePage } from './Pages/HomePage'
-import { AuthPage, LoginPage, SignupPage } from './Pages/AuthPage'
 import { useContext, useEffect } from 'react'
 import { readFetch, type MyResp } from './utils/requests'
 import { UserContext, type UserContextFace } from './Contexts/User'
@@ -47,11 +46,8 @@ function App() {
     <>
       <ToastContainer />
       <Routes>
-        <Route path='/' element={<HomePage />} />
-        <Route path='/user/*' element={<UserPage />} />
-        <Route path='/auth/' element={<AuthPage />}>
-          <Route path='/auth/login' element={<LoginPage />} />
-          <Route path='/auth/signup' element={<SignupPage />} />
+        <Route path='/' element={<HomePage />}>
+          <Route path='/user/*' element={<UserPage />} />
         </Route>
       </Routes>
     </>

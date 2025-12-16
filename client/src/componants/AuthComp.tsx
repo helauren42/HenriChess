@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState, type ReactNode } from "react"
-import { Link, Outlet, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { writeFetch, type MyResp } from "../utils/requests"
 import { Toast409, ToastCustomError, ToastServerError } from "../utils/toastify"
 import { UserContext, type UserContextFace } from "../Contexts/User"
+import { AuthCompContext } from "../Contexts/AuthComp"
 
 const AuthTitle = ({ title }: { title: string }) => {
   return (
@@ -35,10 +36,10 @@ const FormWrapper = ({ onSubmit, submitText, children }:
   )
 }
 
-const AuthRedir = ({ path, text }: { path: string, text: string }) => {
+const AuthRedir = ({ onClick, text }: { onClick: () => void, text: string }) => {
   return (
     <div className="mt-5">
-      <Link to={path}>{text}</Link>
+      <p className="cursor-pointer" onClick={() => onClick()}>{text}</p>
     </div>
   )
 }
@@ -49,7 +50,7 @@ export const SignupPage = () => {
     email: "",
     password: ""
   })
-  const nav = useNavigate()
+  const { openAuth: open } = useContext(AuthCompContext)
   const [loading, setLoading] = useState<boolean>(false)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -74,7 +75,6 @@ export const SignupPage = () => {
       return setLoading(false)
     }
     setLoading(false)
-    nav("/")
     location.reload()
   }
   return (
@@ -85,7 +85,7 @@ export const SignupPage = () => {
         <InputField title="Email" type="text" value={values.email} setter={(val) => setValues({ ...values, email: val })} />
         <InputField title="Password" type="password" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
       </FormWrapper>
-      <AuthRedir path={"/auth/login"} text="Login instead?" />
+      <AuthRedir onClick={() => open("login")} text="Login instead?" />
     </>
   )
 }
@@ -95,7 +95,7 @@ export const LoginPage = () => {
     usernameEmail: "",
     password: ""
   })
-  const nav = useNavigate()
+  const { openAuth: open } = useContext(AuthCompContext)
   const [loading, setLoading] = useState<boolean>(false)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -120,7 +120,6 @@ export const LoginPage = () => {
       return setLoading(false)
     }
     setLoading(false)
-    nav("/")
     location.reload()
   }
   return (
@@ -130,22 +129,55 @@ export const LoginPage = () => {
         <InputField title="Username or Email" type="text" value={values.usernameEmail} setter={(val) => setValues({ ...values, usernameEmail: val })} />
         <InputField title="Password" type="text" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
       </FormWrapper>
-      <AuthRedir path={"/auth/signup"} text="Signup instead?" /> </>
+      <AuthRedir onClick={() => open("signup")} text="Signup instead?" />
+    </>
+  )
+}
+
+export const Unauthorized = () => {
+  const { openAuth: open } = useContext(AuthCompContext)
+  return (
+    <div className="flex flex-col justify-between gap-5 max-w-[350px]">
+      <AuthTitle title="Unauthorized" />
+      <h4>You need to signin to view the page</h4>
+      <div className="grid place-items-center">
+        <button onClick={() => {
+          open("login")
+        }} >Signin</button>
+      </div>
+    </div>
   )
 }
 
 export const AuthPage = () => {
   const { user } = useContext<UserContextFace>(UserContext)
-  const nav = useNavigate()
+  const { authComp, openAuth, closeAuth
+  } = useContext(AuthCompContext)
   useEffect(() => {
+    console.log("user: ", user)
     if (user.username.length > 0)
-      nav("/")
-  }, [user, nav])
+      closeAuth()
+    else if (user.username == "")
+      openAuth("login")
+  }, [user])
+  useEffect(() => {
+    const elem = document.getElementById("auth-page")
+    if (!elem)
+      return
+    if (authComp.on)
+      elem.style.display = "flex"
+    else
+      elem.style.display = "none"
+  }, [authComp.on])
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="h-fit w-fit min-h-80 min-w-50 bg-(--nav-color) rounded-3xl p-10 pt-2 shadow-(--auth-shadow)">
-        <Outlet />
-      </div>
-    </div>
+    <div id="auth-page" className={`absolute w-full h-full flex items-center justify-center`}>
+      < div className="h-fit w-fit min-h-80 min-w-50 bg-(--nav-color) rounded-3xl p-10 pt-2 shadow-(--auth-shadow)">
+        {
+          authComp.section == "login" ? <LoginPage />
+            : authComp.section == "signup" ? <SignupPage />
+              : <Unauthorized />
+        }
+      </div >
+    </div >
   )
 }

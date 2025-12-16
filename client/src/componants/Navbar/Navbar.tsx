@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom"
 import "./Navbar.css"
 import { useContext } from "react"
 import { UserContext } from "../../Contexts/User"
+import { AuthCompContext } from "../../Contexts/AuthComp"
 
 interface NavlinkProps {
   name: string,
@@ -23,6 +24,7 @@ const Navlink = ({ name, to, imgsrc }: NavlinkProps) => {
 
 export const Navbar = () => {
   const { user } = useContext(UserContext)
+  const { open } = useContext(AuthCompContext)
   const nav = useNavigate()
   return (
     <nav>
@@ -36,8 +38,8 @@ export const Navbar = () => {
         user.username ?
           <button className="mt-4" onClick={() => nav(`/user/${user.username}`)}>Account</button>
           :
-          <button className="mt-4" onClick={() => nav("/auth/login")}>Sign in</button>
+          <button className="mt-4" onClick={() => open("login")}>Sign in</button>
       }
-    </nav>
+    </nav >
   )
 }
