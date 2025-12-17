@@ -161,8 +161,8 @@ export const AuthPage = () => {
       elem.style.display = "none"
   }, [authComp.on])
   return (
-    <div id="auth-page" className={`absolute w-full h-full flex items-center justify-center`}>
-      < div className="h-fit w-fit min-h-80 min-w-50 bg-(--nav-color) rounded-3xl p-10 pt-2 shadow-(--auth-shadow)">
+    <div id="auth-page" className={`absolute w-full h-full flex items-center justify-center z-10 pointer-events-none`}>
+      < div className="h-fit w-fit min-h-80 min-w-50 bg-(--nav-color) rounded-3xl p-10 pt-2 shadow-(--auth-shadow) pointer-events-auto">
         {
           authComp.section == "login" ? <LoginPage />
             : authComp.section == "signup" ? <SignupPage />

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { AuthCompContext, type AuthCompFaceFace } from "../Contexts/AuthComp"
 
 export const AuthCompProvider = ({ children }:
@@ -19,6 +19,9 @@ export const AuthCompProvider = ({ children }:
       on: false
     })
   }
+  useEffect(() => {
+    console.log("authComp: ", authComp)
+  }, [authComp])
   return (
     <AuthCompContext.Provider value={{ authComp, setAuthComp, openAuth, closeAuth }} >
       {children}

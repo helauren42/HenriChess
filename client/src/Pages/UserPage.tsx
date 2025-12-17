@@ -52,7 +52,7 @@ export const UserPage = () => {
   const splits = addr.pathname.split("/")
   const username = splits[splits.length - 1]
   const fetchUser = async () => {
-    const resp: MyResp = await readFetch(`/account/${username}`)
+    const resp: MyResp = await readFetch(`/user/${username}`)
     if (resp.status == 200 && resp.data) {
       setUserData(resp.data)
     }

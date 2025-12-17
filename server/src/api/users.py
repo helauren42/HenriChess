@@ -5,7 +5,7 @@ from api.decorators import getUserId
 from databases.postgres import postgres
 from utils.api import miniResp, resp204
 
-accountRouter = APIRouter(prefix="/account")
+accountRouter = APIRouter(prefix="/user")
 
 @accountRouter.get("/{username}")
 async def getUserPageData(clireq: Request, username: str, userId: int = Depends(getUserId)):
