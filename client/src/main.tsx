@@ -4,13 +4,16 @@ import './index.css'
 import App from './App.tsx'
 import { UserProvider } from './Providers/User'
 import { AuthCompProvider } from './Providers/AuthComp.tsx'
+import { GameProvider } from './Providers/Board.tsx'
 
 createRoot(document.getElementById('root')!).render(
-  <UserProvider>
-    <AuthCompProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </AuthCompProvider>
-  </UserProvider>
+  <BrowserRouter>
+    <UserProvider>
+      <AuthCompProvider>
+        <GameProvider>
+          <App />
+        </GameProvider>
+      </AuthCompProvider>
+    </UserProvider>
+  </BrowserRouter>
 )

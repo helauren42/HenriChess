@@ -28,7 +28,7 @@ export const Navbar = () => {
   const nav = useNavigate()
   return (
     <nav>
-      <div onClick={() => nav("/")}>
+      <div onClick={() => nav("/")} className="cursor-pointer">
         <h3 className="text-center">Henri</h3>
         <h3 className="text-center">Chess</h3>
       </div>

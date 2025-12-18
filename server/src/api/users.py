@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Request
-import asyncio
 
 from api.decorators import getUserId
 from databases.postgres import postgres

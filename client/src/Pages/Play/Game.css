@@ -1,0 +1,48 @@
+#play-board {
+  width: 80vh;
+  height: 80vh;
+  max-height: 100vw;
+  max-width: 100vw;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+#chessboard {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.rank {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
+.square {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  border: 1px solid cadetblue;
+  cursor: pointer;
+}
+
+.square-white {
+  background-color: white;
+}
+
+.square-black {
+  background-color: black;
+}
+
+.piece {
+  will-change: transform;
+  /* GPU layer */
+  transform: translateZ(0);
+  /* Force hardware acceleration */
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

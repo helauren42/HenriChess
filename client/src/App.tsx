@@ -7,6 +7,7 @@ import { readFetch, type MyResp } from './utils/requests'
 import { UserContext, type UserContextFace } from './Contexts/User'
 import { UserPage } from './Pages/UserPage'
 import { ToastSessionExpired } from './utils/toastify'
+import { PlayPage } from './Pages/Play/PlayPage'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
@@ -47,6 +48,7 @@ function App() {
       <ToastContainer />
       <Routes>
         <Route path='/' element={<HomePage />}>
+          <Route path='/play' element={<PlayPage />} />
           <Route path='/user/*' element={<UserPage />} />
         </Route>
       </Routes>
