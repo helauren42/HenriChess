@@ -5,11 +5,11 @@ import "./Game.css"
 import { Board } from "./Board.tsx"
 
 export const Game = () => {
-  const { state, color, board, newBoard } = useContext(GameContext)
+  const { state, playerColor, board, newBoard } = useContext(GameContext)
   return (
     <div id="play-board">
       {
-        <Board board={board} playerColor={color} />
+        <Board board={board} playerColor={playerColor} />
       }
     </div>
   )
