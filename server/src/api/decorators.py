@@ -5,6 +5,18 @@ from databases.postgres import postgres
 from utils.api import mini401
 from utils.logger import mylog
 
+
+async def getUserIdReq(clireq: Request) -> int:
+    deviceToken = clireq.cookies.get("deviceToken")
+    sessionToken = clireq.cookies.get("sessionToken")
+    if not deviceToken or not sessionToken:
+        # TODO log client request data
+        raise HTTPException(401, "Not authorized")
+    userId = await postgres.sessionsUserId(sessionToken, deviceToken)
+    if userId is None:
+        raise HTTPException(401, "Not authorized")
+    return userId
+
 async def getUserId(cookies: dict) -> int:
     deviceToken = cookies.get("deviceToken")
     sessionToken = cookies.get("sessionToken")

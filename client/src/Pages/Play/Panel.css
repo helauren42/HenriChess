@@ -1,11 +1,27 @@
 #play-panel {
-  height: 80vh;
+  position: relative;
+  height: fit-content;
   width: 30vw;
   background-color: var(--nav-color);
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
   border-radius: 1rem;
   border: 1px;
   padding: 1.5rem;
-  border-radius: 1rem;
-  border: 1px solid var(--border-color);
+  border-radius: 0.4rem;
+  /* border: 1px solid var(--border-color); */
+  text-align: center;
+  z-index: 0;
+}
+
+.game-mode-block {
+  position: relative;
+  background-color: rgb(150, 100, 90);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 1.5rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
 }

@@ -5,7 +5,7 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse, Response
 import uuid
 
-from api.decorators import getUserId
+from api.decorators import getUserId, getUserIdReq
 from api.models.auth import LoginSchema, SignupSchema
 from databases.models.users import BasicUserModel
 from databases.postgres import postgres
@@ -33,7 +33,7 @@ async def addDeviceToken(clireq: Request) -> JSONResponse:
     return resp
 
 @authRouter.delete("/logout")
-async def logout(clireq: Request, userId: int = Depends(getUserId)):
+async def logout(clireq: Request, userId: int = Depends(getUserIdReq)):
     await postgres.execCommit("delete from sessions where userId=%s", values=(userId,))
     return resp204()
 

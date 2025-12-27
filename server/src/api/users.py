@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, Request
 
-from api.decorators import getUserId
+from api.decorators import getUserId, getUserIdReq
 from databases.postgres import postgres
 from utils.api import miniResp, resp204
 
 accountRouter = APIRouter(prefix="/user")
 
 @accountRouter.get("/{username}")
-async def getUserPageData(clireq: Request, username: str, userId: int = Depends(getUserId)):
+async def getUserPageData(clireq: Request, username: str, userId: int = Depends(getUserIdReq)):
     print("userId: ", userId)
     basicUser = await postgres.publicUserData(userId)
     return miniResp(200, "success", basicUser.myjson())

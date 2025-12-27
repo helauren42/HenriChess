@@ -112,7 +112,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
       ws.current = sock
     }
-    console.log("!!!hereeee")
     makeSocket()
   }, [])
   return (
