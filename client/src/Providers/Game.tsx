@@ -1,9 +1,12 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { GameContext, type Pos, type SelectedFace } from "../Contexts/Game.tsx";
 import { baseBoardBlack, baseBoardWhite, isBlack, isWhite } from "../utils/Game";
+import { SERVER_URL_WS } from "../utils/const.tsx";
 
 export const GameProvider = ({ children }: { children: ReactNode }) => {
-  const state = "inactive"
+  const [gameId, setGameId] = useState<string | null>(null)
+  // const [ws, setWs] = useState<WebSocket>(new WebSocket(SERVER_URL_WS))
+  const ws = useRef<WebSocket | null>(null)
   const [board, setBoard] = useState<Int8Array>(baseBoardWhite)
   const [playerColor, setPlayerColor] = useState<"w" | "b">("w")
   const [selected, setSelected] = useState<SelectedFace>({
@@ -43,35 +46,77 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       file: "",
     })
   }
-  const squareClick = (id: string, makeMove: (source: Pos, dest: Pos) => void) => {
+  const gameMove = (src: Pos, dest: Pos) => {
+    const rawData = {
+      type: "gameMove",
+      src,
+      dest
+    }
+    const stringData = JSON.stringify(rawData)
+    const open = ws.current?.OPEN
+    const readyState = ws.current?.readyState
+    console.log("open: ", open)
+    console.log("readyState: ", readyState)
+    if (ws.current) {
+      ws.current.send(stringData)
+      console.log("sent")
+    }
+    return true
+  }
+  const squareClick = (id: string) => {
     // TODO add check that player clicks piece of appropriate color and type on first and second clicks
     const splitId = id.split("-")
     const newRank = parseInt(splitId[0])
     const newFile = splitId[1]
-    console.log("selected: ", selected)
-    console.log("newrank ", newRank)
-    console.log("newFile ", newFile)
+    console.log(1)
     if (selected.rank == newRank && selected.file == newFile) {
       unselect()
     }
     else if (selected.id == "" && pieceIsPlayerColor(newRank, newFile)) {
       setSelected({ id: id, rank: newRank, file: newFile })
     }
-    else
-      makeMove({ rank: selected.rank, file: selected.file }, { rank: newRank, file: newFile })
+    else if (selected.id.length > 0) {
+      console.log(2)
+      gameMove({ rank: selected.rank, file: selected.file }, { rank: newRank, file: newFile })
+      unselect()
+    }
   }
   useEffect(() => {
     setBoard(playerColor == "w" ? baseBoardWhite : baseBoardBlack)
   }, [playerColor])
   useEffect(() => {
     if (selected.id.length > 0) {
-      console.log("here")
       const elem = document.getElementById(selected.id)
       elem!.style.filter = "brightness(0.8)"
     }
   }, [selected])
+  useEffect(() => {
+    const makeSocket = () => {
+      const sock = new WebSocket(SERVER_URL_WS)
+      sock.onopen = (e) => {
+        console.log("websocket on open: ", e)
+      }
+      sock.onmessage = (event) => {
+        console.log('Message from server:', event.data);
+        // hadnleMessages(event.data);
+      };
+      sock.onerror = (e) => {
+        console.error("websocket on error: ", e)
+      }
+      sock.onclose = (e) => {
+        console.log("websocket on close: ", e)
+        ws.current?.close()
+        ws.current = null
+        setTimeout(makeSocket, 1000)
+        return
+      }
+      ws.current = sock
+    }
+    console.log("!!!hereeee")
+    makeSocket()
+  }, [])
   return (
-    <GameContext.Provider value={{ state, board, setBoard, newBoard, playerColor, setPlayerColor, selected, setSelected, unselect, squareClick, getFileNum, getSquare }} >
+    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, newBoard, playerColor, setPlayerColor, selected, setSelected, unselect, squareClick, getFileNum, getSquare, gameMove }} >
       {children}
     </GameContext.Provider>
   )

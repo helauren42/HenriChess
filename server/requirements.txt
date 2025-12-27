@@ -1,12 +1,13 @@
 fastapi
 fastapi-wraps
+websockets
 psycopg[binary]
 psycopg_pool
 asyncpg
 redis[hiredis]
 uvicorn
 pydantic
-websockets
 dotenv
 bcrypt
 requests
+chess

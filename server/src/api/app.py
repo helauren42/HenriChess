@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from api.auth import authRouter
 from api.users import accountRouter
+from api.ws.ws import wsRouter
 from utils.logger import mylog
 from databases.postgres import postgres
 
@@ -15,6 +16,7 @@ async def lifeIsTooShort(app: FastAPI):
 app = FastAPI(lifespan=lifeIsTooShort)
 app.include_router(authRouter, prefix="/api")
 app.include_router(accountRouter, prefix="/api")
+app.include_router(wsRouter, prefix="/api")
 
 @app.exception_handler(ValueError)
 async def valueExcept(req: Request, e: ValueError):

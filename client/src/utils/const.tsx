@@ -1,4 +1,5 @@
 export const SERVER_URL = "https://localhost:8290/api"
+export const SERVER_URL_WS = "wss://localhost:8290/api/ws"
 
 export const SQUARE = Object.freeze({
   WPAWN: 0, WKNIGHT: 1, WBISHOP: 2, WROOK: 3, WQUEEN: 4, WKING: 5,

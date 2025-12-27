@@ -1,6 +1,7 @@
 import { memo, useContext } from "react";
 import { SQUARE } from "../../utils/const.tsx";
 import { GameContext, type Pos } from "../../Contexts/Game";
+import { writeFetch } from "../../utils/requests.tsx";
 
 const ranksWhites = [8, 7, 6, 5, 4, 3, 2, 1] as const;
 const filesBlacks = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
@@ -56,14 +57,12 @@ export const Square = memo(({ square, rank, file }: { square: number, rank: numb
     // console.log(path)
     return path
   }
-  const makeMove = async (src: Pos, dest: Pos) => {
-    return
-  }
   const handleClick = (id: string) => {
-    squareClick(id, makeMove)
+    // TODO pass game id
+    squareClick(id)
   }
   return (
-    <span onClick={(e) => handleClick(e.currentTarget.id)} key={`${rank}-${file}`} id={`${rank}-${file}`} className={`square ${squareColor == "white" ? "square-white" : "square-black"}`}>
+    <span onClick={(e) => handleClick(e.currentTarget.id)} id={`${rank}-${file}`} className={`square ${squareColor == "white" ? "square-white" : "square-black"}`}>
       {/* <svg><use ></use></svg> */}
       <img src={square == SQUARE.EMPTY ? undefined : fileName()} />
     </span>)
@@ -76,10 +75,10 @@ export const Rank = memo(({ playerColor, rank }: { playerColor: "w" | "b", rank:
       {
         playerColor == "w" ?
           filesWhites.map((file) => {
-            return <Square square={getSquare(rank, file)} rank={rank} file={file} />
+            return <Square key={`square-${rank}-${file}`} square={getSquare(rank, file)} rank={rank} file={file} />
           }) :
           filesBlacks.map((file) => {
-            return <Square square={getSquare(rank, file)} rank={rank} file={file} />
+            return <Square key={`square-${rank}-${file}`} square={getSquare(rank, file)} rank={rank} file={file} />
           })
       }
     </div>
@@ -92,11 +91,11 @@ export const Board = ({ playerColor, board }: { playerColor: "w" | "b", board: I
     <div id="chessboard">
       {
         playerColor == "w" ?
-          ranksWhites.map((val) => {
-            return <Rank playerColor={playerColor} rank={val} />
+          ranksWhites.map((val, index) => {
+            return <Rank key={`rank-${index}`} playerColor={playerColor} rank={val} />
           }) :
-          ranksBlacks.map((val) => {
-            return <Rank playerColor={playerColor} rank={val} />
+          ranksBlacks.map((val, index) => {
+            return <Rank key={`rank-${index}`} playerColor={playerColor} rank={val} />
           })
       }
     </div>

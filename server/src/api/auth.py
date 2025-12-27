@@ -42,12 +42,7 @@ async def logout(clireq: Request, userId: int = Depends(getUserId)):
 async def autoLogin(clireq: Request):
     if await noDeviceToken(clireq):
         return await addDeviceToken(clireq)
-    sessionToken = clireq.cookies.get("sessionToken")
-    deviceToken = clireq.cookies.get("deviceToken")
-    if sessionToken is None or deviceToken is None:
-        return mini401()
-    # TODO log potential hacker if not in db
-    userId = await postgres.sessionsUserId(sessionToken, deviceToken)
+    userId = await getUserId(clireq.cookies)
     if not userId:
         return mini401()
     userData: BasicUserModel = await postgres.publicUserData(userId)
