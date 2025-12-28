@@ -5,7 +5,6 @@ from databases.postgres import postgres
 from utils.api import mini401
 from utils.logger import mylog
 
-
 async def getUserIdReq(clireq: Request) -> int:
     deviceToken = clireq.cookies.get("deviceToken")
     sessionToken = clireq.cookies.get("sessionToken")

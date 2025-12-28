@@ -48,6 +48,10 @@ rmpy:
 	sudo rm -rf $(VENV)
 	sudo rm -rf $(PIP_LATEST)
 
+resetDb: down
+	sudo rm -rf .data
+	make up
+
 clean: down
 	docker container prune -f
 	docker builder prune --all --force

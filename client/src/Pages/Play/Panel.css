@@ -25,3 +25,11 @@
   text-align: left;
   cursor: pointer;
 }
+
+.game-mode-block:hover {
+  filter: brightness(0.96);
+}
+
+.game-mode-block:active {
+  filter: brightness(0.9);
+}
