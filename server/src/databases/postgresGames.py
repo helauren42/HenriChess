@@ -5,8 +5,10 @@ class PostgresGames(APostgres):
         super().__init__()
 
     async def newHotseatGame(self, userId: int):
-        if await self.execFetchone(query="select * from hotseatGames where id=%s", values=(userId,)):
-            await self.execCommit(query="update hotseatGame set hotseatGames=%s where id=%s", values=("somedefaultstringvalue", userId))
-        else:
-            await self.execCommit(query="insert into hotseatGames (userId) values(%s)", values=(userId,))
+        gameId = await self.execFetchone(query="select * from hotseatGames where id=%s", values=(userId,))
+        if gameId:
+            await self.execCommit(query="delete from hotseatgames where id=%s", values=(gameId,))
+            # reinit hotseat game
+            # await self.execCommit(query="update hotseatGames set hotseatGames=%s where id=%s", values=("somedefaultstringvalue", userId))
+        await self.execCommit(query="insert into hotseatGames (userId) values(%s)", values=(userId,))
 
