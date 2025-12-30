@@ -66,15 +66,19 @@ export const Rank = memo(({ playerColor, rank, pieces }: { playerColor: "w" | "b
   const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
   const incr = playerColor == "w" ? 1 : -1
   const squares = []
-  let i: number = playerColor == "w" ? 0 : 7
-  let fileIndex = i
+  let i: number = playerColor == "w" ? 0 : pieces.length - 1
+  let fileIndex: number = playerColor == "w" ? 0 : 7
   while (i >= 0 && i < pieces.length) {
-    console.log("pieces: ", pieces)
+    console.log("!!!pieces: ", pieces)
     const emptySquares: number = pieces.charCodeAt(i)
     // if it is a digit, the digit represents the number of empty squares on the rank
     if (emptySquares >= 48 && emptySquares <= 57) {
+      console.log(emptySquares)
       for (let j = 48; j < emptySquares; j++) {
+        console.log("j:", j)
+        console.log("fileIndex:", fileIndex)
         const file = files[fileIndex]
+        console.log("file: ", file)
         squares.push(
           <Square key={`square-${rank}-${file}`} piece={""} rank={rank} file={file} />
         )
@@ -100,7 +104,7 @@ export const Rank = memo(({ playerColor, rank, pieces }: { playerColor: "w" | "b
 export const Board = ({ playerColor }: { playerColor: "w" | "b" }) => {
   console.log("playerColor: ", playerColor)
   const { board } = useContext(GameContext)
-  const rankPieces = board.split("/")
+  const rankPieces = board.split("/").reverse()
   const iIncr = playerColor == "w" ? -1 : 1
   const firstRank = playerColor == "w" ? 7 : 0
   const ranks = []
