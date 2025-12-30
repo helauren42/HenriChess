@@ -8,57 +8,67 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS sessions (
   id SERIAL PRIMARY KEY,
-  userId INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-	sessionToken BYTEA UNIQUE NOT NULL,
-	deviceToken TEXT UNIQUE NOT NULL
-  -- maybe make UUID
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+	session_token BYTEA UNIQUE NOT NULL,
+	device_token TEXT UNIQUE NOT NULL
+  -- may_be make UUID
 );
 
-CREATE INDEX idxSessionsDeviceToken ON sessions(deviceToken);
+CREATE INDEX idx_sessions_device_token ON sessions(device_token);
 
 CREATE TABLE IF NOT EXISTS agames (
   id SERIAL PRIMARY KEY,
-  playerTurn TEXT CHECK (playerTurn IN ('black', 'white')) NOT NULL DEFAULT 'white',
-  winner TEXT CHECK (winner IN ('black', 'white', 'draw')) DEFAULT NULL
-  creation TIMESTAMP DEFAULT NOW();
+  winner TEXT CHECK (winner IN ('black', 'white', 'draw')) DEFAULT NULL,
+  creation TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS hotseatgames (
-  userId INTEGER UNIQUE PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE NOT NULL
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE NOT NULL
 ) INHERITS(agames);
 
 CREATE TABLE IF NOT EXISTS onlinegames (
-  whiteId INTEGER REFERENCES users(id) NOT NULL,
-  blackId INTEGER REFERENCES users(id) NOT NULL,
-  CHECK (whiteId <> blackId)
+  id SERIAL PRIMARY KEY,
+  white_id INTEGER REFERENCES users(id) NOT NULL,
+  black_id INTEGER REFERENCES users(id) NOT NULL,
+  CHECK (white_id <> black_id)
 ) INHERITS(agames);
 
-CREATE TABLE IF NOT EXISTS gamepositions (
+CREATE TABLE IF NOT EXISTS agamepositions (
   id SERIAL PRIMARY KEY,
-  positionNumber INTEGER NOT NULL,
-  gameId INTEGER NOT NULL REFERENCES agames(id) ON DELETE CASCADE,
+  position_number INTEGER NOT NULL,
   fen TEXT NOT NULL DEFAULT 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 );
 
-CREATE INDEX idxGamePositionsGameId on gamepositions(gameId)
-CREATE INDEX idxGamePositionsGameIdPositionNumber on gamepositions(gameId, positionNumber)
+CREATE TABLE IF NOT EXISTS hotseatgamepositions (
+  id SERIAL PRIMARY KEY,
+  game_id INTEGER UNIQUE NOT NULL REFERENCES hotseatgames(id) ON DELETE CASCADE
+) INHERITS(agamepositions);
+
+CREATE INDEX idx_hotseat_game_positions_game_id on hotseatgamepositions(game_id);
+CREATE INDEX idx_hotseat_game_positions_game_id_position_number on hotseatgamepositions(game_id, position_number);
+
+CREATE TABLE IF NOT EXISTS onlinegamepositions (
+  id SERIAL PRIMARY KEY,
+  game_id INTEGER UNIQUE NOT NULL REFERENCES onlinegames(id) ON DELETE CASCADE
+) INHERITS(agamepositions);
+
+CREATE INDEX idx_online_game_positions_game_id on onlinegamepositions(game_id);
+CREATE INDEX idx_online_game_positions_game_id_position_number on onlinegamepositions(game_id, position_number);
 
 CREATE TABLE IF NOT EXISTS gamemoves (
     id SERIAL PRIMARY KEY,
-    moveNumber INTEGER NOT NULL,
-    gameId INTEGER NOT NULL REFERENCES agames(id) ON DELETE CASCADE,
-    playerTurn TEXT CHECK (playerTurn IN ('black', 'white')) NOT NULL,
-    moveFrom TEXT NOT NULL,
-    moveTo TEXT NOT NULL,
+    move_number INTEGER NOT NULL CHECK(move_number > 0),
+    game_id INTEGER NOT NULL REFERENCES agames(id) ON DELETE CASCADE,
+    move_from TEXT NOT NULL,
+    move_to TEXT NOT NULL,
     piece TEXT NOT NULL,
-    capturedPiece TEXT DEFAULT NULL,
-    promotionTo TEXT DEFAULT NULL,
+    captured_piece TEXT DEFAULT NULL,
+    promotion_to TEXT DEFAULT NULL,
     san TEXT NOT NULL, -- Standard Algebraic Notation
  
-    UNIQUE (gameId, moveNumber)
+    UNIQUE (game_id, move_number)
 );
 
-ALTER SEQUENCE moveNumberSeq RESTART 2
-
-CREATE INDEX idxGameMovesGameId on gamemoves(gameId);
-CREATE INDEX idxGameMovesGameIdMoveNumber ON gamemoves(gameId, moveNumber); -- composite index
+CREATE INDEX idx_game_moves_game_id on gamemoves(game_id);
+CREATE INDEX idx_game_moves_game_id_move_number ON gamemoves(game_id, move_number); -- composite index

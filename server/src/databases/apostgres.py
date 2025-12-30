@@ -54,7 +54,15 @@ class APostgres(ABC):
                     return await cursor.fetchone()
         except Exception as e:
             raise await HttpCatch.postgres(e, "execFetchone() failed")
-    
+
+    async def execFetchall(self, query: str, values: tuple) -> None | list[TupleRow]:
+        try:
+            async with self.getConn() as conn:
+                async with conn.cursor() as cursor:
+                    await cursor.execute(query=query.encode(), params=values)
+                    return await cursor.fetchall()
+        except Exception as e:
+            raise await HttpCatch.postgres(e, "execFetchone() failed")
     async def execCommit(self, query: str, values: tuple):
         try:
             async with self.getConn() as conn:

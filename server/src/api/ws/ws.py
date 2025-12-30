@@ -22,19 +22,30 @@ class GameMove(Message):
 
 wsRouter = APIRouter(prefix="/ws")
 
+async def sendError(ws: WebSocket, msg: str):
+    await ws.send_json({
+        "type": "error",
+        "error": msg
+    })
+
 async def handleGameMove(ws: WebSocket, data: GameMove):
     mylog.debug("handleGameMove")
 
 async def startGameHotseat(ws: WebSocket, userId: int):
     mylog.debug("startGameHotseat")
     try:
-        await postgres.newHotseatGame(userId)
+        mylog.debug(f"userId: {userId}")
+        hotseatGame = await postgres.fetchHotseatGame(userId)
+        mylog.debug(f"found active hotseat game?: {hotseatGame}")
+        if hotseatGame:
+            await ws.send_json({ "type": "continueHotseatGame" })
+        else:
+            mylog.debug("entering newGameHotseatGame")
+            await postgres.newHotseatGame(userId)
+            await ws.send_json({ "type": "newGameHotseatGame" })
     except Exception as e:
         mylog.error(f"failed to startGameHotseat {e}")
-    await ws.send_json({
-        "type": "error",
-        "error": "a servor error occured faled to start game"
-    })
+        await sendError(ws, "a servor error occured failed to start game")
     # check if game already in db and ask if user wants to start from scratch or continue playing
 
 @wsRouter.websocket("")

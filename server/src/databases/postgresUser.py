@@ -12,21 +12,21 @@ class APostgresUser(APostgres):
         super().__init__()
 
     async def deviceTokenExists(self, deviceToken: str) -> bool:
-        caught = await self.execFetchone(query="select * from sessions where deviceToken=%s", values=(deviceToken,))
+        caught = await self.execFetchone(query="select * from sessions where device_token=%s", values=(deviceToken,))
         return caught is not None
 
     async def updateSession(self, sessionToken: str, deviceToken: str, userId: int):
-        await self.execCommit("update sessions set userId=%s, sessionToken=%s where deviceToken=%s", (userId, bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken))
+        await self.execCommit("update sessions set user_id=%s, session_token=%s where device_token=%s", (userId, bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken))
 
     async def createSession(self, sessionToken: str, deviceToken: str, userId: int):
-        await self.execCommit("insert into sessions (userId, sessionToken, deviceToken) values(%s, %s, %s)", (userId, bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken, ))
+        await self.execCommit("insert into sessions (user_id, session_token, device_token) values(%s, %s, %s)", (userId, bcrypt.hashpw(sessionToken.encode(), bcrypt.gensalt()), deviceToken, ))
 
 class PostgresUser(APostgresUser):
     def __init__(self) -> None:
         super().__init__()
 
     async def sessionsUserId(self, sessionToken:str, deviceToken: str) -> None | int:
-        fetched = await self.execFetchone("select userId, sessionToken from sessions where deviceToken=%s", (deviceToken,))
+        fetched = await self.execFetchone("select user_id, session_token from sessions where device_token=%s", (deviceToken,))
         if fetched is None:
             return None
         if not bcrypt.checkpw(sessionToken.encode(), fetched[1]):
@@ -52,7 +52,7 @@ class PostgresUser(APostgresUser):
 
     async def createUser(self, username: str, email: str, password: str, sessionToken: str, deviceToken: str):
         try:
-            fetched = await self.execFetchone( query="INSERT INTO users (username, email, password) values(%s, %s, %s) returning id", values=(username, email, bcrypt.hashpw(password.encode(), bcrypt.gensalt())))
+            fetched = await self.execFetchone(query="INSERT INTO users (username, email, password) values(%s, %s, %s) returning id", values=(username, email, bcrypt.hashpw(password.encode(), bcrypt.gensalt())))
             if fetched is None:
                 raise HTTPException(500, "failed to get returning id")
             userId = int(fetched[0])
