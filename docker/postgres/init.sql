@@ -36,22 +36,24 @@ CREATE TABLE IF NOT EXISTS onlinegames (
 
 CREATE TABLE IF NOT EXISTS agamepositions (
   id SERIAL PRIMARY KEY,
-  position_number INTEGER NOT NULL,
+  position_number INTEGER NOT NULL DEFAULT 0,
   fen TEXT NOT NULL DEFAULT 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 );
 
 CREATE TABLE IF NOT EXISTS hotseatgamepositions (
   id SERIAL PRIMARY KEY,
-  game_id INTEGER UNIQUE NOT NULL REFERENCES hotseatgames(id) ON DELETE CASCADE
+  game_id INTEGER UNIQUE NOT NULL REFERENCES hotseatgames(id) ON DELETE CASCADE,
+  UNIQUE (position_number, game_id)
 ) INHERITS(agamepositions);
-
-CREATE INDEX idx_hotseat_game_positions_game_id on hotseatgamepositions(game_id);
-CREATE INDEX idx_hotseat_game_positions_game_id_position_number on hotseatgamepositions(game_id, position_number);
 
 CREATE TABLE IF NOT EXISTS onlinegamepositions (
   id SERIAL PRIMARY KEY,
   game_id INTEGER UNIQUE NOT NULL REFERENCES onlinegames(id) ON DELETE CASCADE
+  UNIQUE (position_number, game_id)
 ) INHERITS(agamepositions);
+
+CREATE INDEX idx_hotseat_game_positions_game_id on hotseatgamepositions(game_id);
+CREATE INDEX idx_hotseat_game_positions_game_id_position_number on hotseatgamepositions(game_id, position_number);
 
 CREATE INDEX idx_online_game_positions_game_id on onlinegamepositions(game_id);
 CREATE INDEX idx_online_game_positions_game_id_position_number on onlinegamepositions(game_id, position_number);

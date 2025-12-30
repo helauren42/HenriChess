@@ -8,6 +8,9 @@ import { UserContext, type UserContextFace } from './Contexts/User'
 import { UserPage } from './Pages/UserPage'
 import { ToastSessionExpired } from './utils/toastify'
 import { PlayPage } from './Pages/Play/PlayPage'
+import { HotseatGame } from './Pages/Play/HotseatGame'
+import { OnlineGame } from './Pages/Play/OnlineGame'
+import { ChooseGame } from './Pages/Play/Panel'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
@@ -48,7 +51,11 @@ function App() {
       <ToastContainer />
       <Routes>
         <Route path='/' element={<HomePage />}>
-          <Route path='/play' element={<PlayPage />} />
+          <Route path='/play' element={<PlayPage />}>
+            <Route path='/play/hotseat/*' element={<HotseatGame />} />
+            <Route path='/play/online/*' element={<OnlineGame />} />
+            <Route path='/play/' element={<ChooseGame />} />
+          </Route>
           <Route path='/user/*' element={<UserPage />} />
         </Route>
       </Routes>

@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from api.decorators import getUserId
 from databases.postgres import postgres
+from databases.postgresGames import Game
 from utils.logger import mylog
 import chess
 import json
@@ -17,7 +18,7 @@ class Square(BaseModel):
     rank: int
     file: str
 
-class GameMove(Message):
+class ClientMove(Message):
     src: Square
     dest: Square
 
@@ -29,23 +30,31 @@ async def sendError(ws: WebSocket, msg: str):
         "error": msg
     })
 
-async def handleGameMove(ws: WebSocket, data: GameMove):
+async def sendGame(ws: WebSocket, mode: Literal["hotseat", "online"], subtype: Literal["new", "continue", "update"], id: int, game: Game):
+    await ws.send_json({
+        "type": "game",
+        "mode": mode,
+        "subtype": subtype,
+        "id": id
+    })
+
+async def handleGameMove(ws: WebSocket, data: ClientMove):
     mylog.debug("handleGameMove")
 
 async def startGameHotseat(ws: WebSocket, userId: int):
     mylog.debug("startGameHotseat")
     try:
-        hotseatGame = await postgres.fetchHotseatGame(userId)
-        mylog.debug(f"found active hotseat game?: {hotseatGame}")
-        if hotseatGame:
-            await ws.send_json({ "type": "continueHotseatGame", "game": hotseatGame })
-        else:
+        res = await postgres.fetchHotseatGame(userId)
+        if res is None:
             await postgres.newHotseatGame(userId)
-            await ws.send_json({ "type": "newGameHotseatGame" })
+            await ws.send_json({ "type": "game", "mode": "hotseat" , "subtype": "new" })
+        else:
+            hotseatGame, gameId = res
+            mylog.debug(f"found active hotseat game?: {hotseatGame}")
+            await ws.send_json({"type": "game", "mode": "hotseat", "subtype": "continue", "game": hotseatGame, "id": gameId})
     except Exception as e:
         mylog.error(f"failed to startGameHotseat {e}")
         await sendError(ws, "a servor error occured failed to start game")
-    # check if game already in db and ask if user wants to start from scratch or continue playing
 
 @wsRouter.websocket("")
 async def websocketEndpoint(ws: WebSocket):
@@ -58,7 +67,7 @@ async def websocketEndpoint(ws: WebSocket):
             mylog.debug(f"msg type: {msg}")
             match msg["type"]:
                 case "gameMove":
-                    await handleGameMove(ws, GameMove(**msg))
+                    await handleGameMove(ws, ClientMove(**msg))
                 case "startGameHotseat":
                     await startGameHotseat(ws, userId)
     except WebSocketDisconnect:

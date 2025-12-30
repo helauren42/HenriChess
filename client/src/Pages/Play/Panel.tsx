@@ -1,6 +1,7 @@
 import { useContext } from "react"
 import "./Panel.css"
 import { GameContext } from "../../Contexts/Game"
+import { Outlet } from "react-router-dom"
 
 interface GameModeBlockFace {
   title: string
@@ -17,10 +18,10 @@ const GameModeBlock = ({ title, subtitle, handleClick }: GameModeBlockFace) => {
   )
 }
 
-export const Panel = () => {
+export const ChooseGame = () => {
   const { startGame } = useContext(GameContext)
   return (
-    <div id="play-panel" className="base-layer" >
+    <>
       <h2>Choose Game</h2>
       <GameModeBlock title="Play Online" subtitle="Random Matchmaking" handleClick={() => {
         console.log("clicked play online")
@@ -29,6 +30,14 @@ export const Panel = () => {
         console.log("clicked play hotseat")
         startGame("hotseat")
       }} />
+    </>
+  )
+}
+
+export const Panel = () => {
+  return (
+    <div id="play-panel" className="base-layer" >
+      <Outlet />
     </div>
   )
 }
