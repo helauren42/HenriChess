@@ -1,25 +1,40 @@
-from typing import Literal, Tuple
+from typing import Literal, TypedDict
 
 from psycopg.rows import TupleRow
 from databases.apostgres import APostgres
 from utils.logger import mylog
 
-class Game():
-    def __init__(self, gamePositions: list[str]) -> None:
-        self.gamePositions: list[str] = gamePositions
+class GameMove(TypedDict):
+    moveFrom: str
+    moveTo: str
+    piece: str
+    capturedPiece: str | None
+    promotionTo: str | None
+    san: str
 
+class Game(TypedDict):
+    gamePositions: list[str]
+    gameMoves: list[GameMove]
 
 class PostgresGames(APostgres):
     def __init__(self) -> None:
         super().__init__()
 
     async def fetchGame(self, gameId: int, type: Literal['hotseat', 'online']) -> None | Game:
+        # game positions
         fetched: list[TupleRow] | None = await self.execFetchall(f"select fen from {type}gamepositions where game_id=%s", values=(gameId,))
         if fetched is None:
             return None
         gamePositions = [x[0] for x in fetched]
         mylog.debug(f"found game positions: {gamePositions}")
-        mylog.debug(f"found game positions fetched: {fetched}")
+        # game moves
+        fetched: list[TupleRow] | None = await self.execFetchall(f"select move_from, move_to, piece, captured_piece, promotion_to, san from gamemoves where game_id=%s", values=(gameId,))
+        mylog.debug(f"fetched Game Moves: {fetched}")
+        if fetched is None:
+            return Game(gamePositions=gamePositions, gameMoves=[])
+        gameMoves: list[GameMove] = [GameMove(*x) for x in fetched]
+        mylog.debug(f"Game Moves: {gameMoves}")
+        return Game(gamePositions=gamePositions, gameMoves=gameMoves)
 
     async def fetchHotseatGame(self, userId: int | None = None, gameId: int | None = None) -> None | Game:
         fetched = None
@@ -29,7 +44,7 @@ class PostgresGames(APostgres):
                 return None
             gameId = int(fetched[0])
         assert gameId is not None
-        return await self.fetchGame(gameId)
+        return await self.fetchGame(gameId, "hotseat")
  
     async def newHotseatGame(self, userId: int, gameId: int | None = None):
         if gameId:

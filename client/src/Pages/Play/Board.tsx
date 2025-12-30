@@ -85,7 +85,7 @@ export const Rank = memo(({ playerColor, rank }: { playerColor: "w" | "b", rank:
   )
 })
 
-export const Board = ({ playerColor, board }: { playerColor: "w" | "b", board: Int8Array }) => {
+export const Board = ({ playerColor }: { playerColor: "w" | "b" }) => {
   console.log("playerColor: ", playerColor)
   return (
     <div id="chessboard">

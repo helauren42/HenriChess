@@ -19,11 +19,11 @@ export interface Pos {
 export interface GameFace {
   gameId: string | null
   setGameId: Dispatch<SetStateAction<string | null>>
-  board: Int8Array
-  setBoard: Dispatch<SetStateAction<Int8Array>>
-  newBoard: () => void
   playerColor: "w" | "b"
   setPlayerColor: Dispatch<SetStateAction<"w" | "b">>
+  board: Int8Array
+  setBoard: Dispatch<SetStateAction<Int8Array>>
+  // square selection
   selected: SelectedFace
   setSelected: Dispatch<SetStateAction<SelectedFace>>
   unselect: Dispatch<SetStateAction<SelectedFace>>
@@ -39,11 +39,11 @@ export interface GameFace {
 export const GameContext = createContext<GameFace>({
   gameId: null,
   setGameId: () => console.error("used outside of context"),
-  board: new Int8Array(baseBoardWhite),
-  setBoard: () => console.error("used outside of context"),
-  newBoard: () => console.error("used outside of context"),
   playerColor: "w",
   setPlayerColor: () => console.error("used outside of context"),
+  board: new Int8Array(baseBoardWhite),
+  setBoard: () => console.error("used outside of context"),
+  // square selction
   selected: { id: "", rank: 0, file: "" },
   setSelected: () => console.error("used outside of context"),
   unselect: () => console.error("used outside of context"),
@@ -56,6 +56,7 @@ export const GameContext = createContext<GameFace>({
     console.error("used outside of context")
     return 0
   },
+  // WS
   ws: { current: null },
   gameMove(src: Pos, dest: Pos) {
     console.error("used outside of context")

@@ -6,6 +6,7 @@ from api.decorators import getUserId
 from databases.postgres import postgres
 from utils.logger import mylog
 import chess
+import json
 
 MESSAGE_TYPES = Literal["gameMove", "gameMessage", "startGameHotseat"]
 
@@ -34,13 +35,11 @@ async def handleGameMove(ws: WebSocket, data: GameMove):
 async def startGameHotseat(ws: WebSocket, userId: int):
     mylog.debug("startGameHotseat")
     try:
-        mylog.debug(f"userId: {userId}")
         hotseatGame = await postgres.fetchHotseatGame(userId)
         mylog.debug(f"found active hotseat game?: {hotseatGame}")
         if hotseatGame:
-            await ws.send_json({ "type": "continueHotseatGame" })
+            await ws.send_json({ "type": "continueHotseatGame", "game": hotseatGame })
         else:
-            mylog.debug("entering newGameHotseatGame")
             await postgres.newHotseatGame(userId)
             await ws.send_json({ "type": "newGameHotseatGame" })
     except Exception as e:

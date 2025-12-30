@@ -121,7 +121,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     makeSocket()
   }, [])
   return (
-    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, newBoard, playerColor, setPlayerColor, selected, setSelected, unselect, squareClick, getFileNum, getSquare, gameMove, startGame }} >
+    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, playerColor, setPlayerColor, selected, setSelected, unselect, squareClick, getFileNum, getSquare, gameMove, startGame }} >
       {children}
     </GameContext.Provider>
   )
