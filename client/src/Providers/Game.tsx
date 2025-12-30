@@ -1,36 +1,27 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { GameContext, type Pos, type SelectedFace } from "../Contexts/Game.tsx";
-import { baseBoardBlack, baseBoardWhite, isBlack, isWhite } from "../utils/Game";
-import { SERVER_URL_WS } from "../utils/const.tsx";
+import { isBlack, isWhite } from "../utils/Game";
+import { INITIAL_BOARD, SERVER_URL_WS } from "../utils/const.tsx";
 import { ToastCustomError } from "../utils/toastify.tsx";
 
 export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [gameId, setGameId] = useState<string | null>(null)
   // const [ws, setWs] = useState<WebSocket>(new WebSocket(SERVER_URL_WS))
   const ws = useRef<WebSocket | null>(null)
-  const [board, setBoard] = useState<Int8Array>(baseBoardWhite)
+  const [board, setBoard] = useState<string>(INITIAL_BOARD)
   const [playerColor, setPlayerColor] = useState<"w" | "b">("w")
   const [selected, setSelected] = useState<SelectedFace>({
     id: "",
     rank: 0,
     file: "",
   })
-  const newBoard = () => {
-    setPlayerColor(Math.random() >= 0.5 ? "w" : "b")
-  }
   const getFileNum = (file: string) => {
     return file.charCodeAt(0) - 'a'.charCodeAt(0) + 1
   }
-  const getSquare = (rank: number, file: string) => {
-    const fileNum = getFileNum(file)
-    const pos = (rank - 1) * 8 + fileNum - 1
-    return board[pos]
-  }
-  const pieceIsPlayerColor = (newRank: number, newFile: string): boolean => {
-    const square = getSquare(newRank, newFile)
-    if (playerColor == "b" && isBlack(square))
+  const pieceIsPlayerColor = (piece: string): boolean => {
+    if (playerColor == "b" && isBlack(piece))
       return true
-    if (playerColor == "w" && isWhite(square))
+    else if (playerColor == "w" && isWhite(piece))
       return true
     return false
   }
@@ -64,7 +55,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     return true
   }
   // ws messages
-  const squareClick = (id: string) => {
+  const squareClick = (id: string, piece: string) => {
     // TODO add check that player clicks piece of appropriate color and type on first and second clicks
     const splitId = id.split("-")
     const newRank = parseInt(splitId[0])
@@ -72,7 +63,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     if (selected.rank == newRank && selected.file == newFile) {
       unselect()
     }
-    else if (selected.id == "" && pieceIsPlayerColor(newRank, newFile)) {
+    else if (selected.id == "" && pieceIsPlayerColor(piece)) {
       setSelected({ id: id, rank: newRank, file: newFile })
     }
     else if (selected.id.length > 0) {
@@ -87,9 +78,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log(fullType)
     ws.current.send(JSON.stringify({ type: fullType }))
   }
-  useEffect(() => {
-    setBoard(playerColor == "w" ? baseBoardWhite : baseBoardBlack)
-  }, [playerColor])
   useEffect(() => {
     if (selected.id.length > 0) {
       const elem = document.getElementById(selected.id)
@@ -121,7 +109,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     makeSocket()
   }, [])
   return (
-    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, playerColor, setPlayerColor, selected, setSelected, unselect, squareClick, getFileNum, getSquare, gameMove, startGame }} >
+    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, playerColor, setPlayerColor, selected, setSelected, unselect, squareClick, getFileNum, gameMove, startGame }} >
       {children}
     </GameContext.Provider>
   )

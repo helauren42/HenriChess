@@ -1,53 +1,47 @@
 import { memo, useContext } from "react";
-import { SQUARE } from "../../utils/const.tsx";
-import { GameContext, type Pos } from "../../Contexts/Game";
-import { writeFetch } from "../../utils/requests.tsx";
+import { GameContext } from "../../Contexts/Game";
 
-const ranksWhites = [8, 7, 6, 5, 4, 3, 2, 1] as const;
-const filesBlacks = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
-const ranksBlacks = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-const filesWhites = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
-
-export const Square = memo(({ square, rank, file }: { square: number, rank: number, file: string }) => {
+export const Square = memo(({ piece, rank, file }: { piece: string, rank: number, file: string }) => {
   const { squareClick, getFileNum } = useContext(GameContext)
   const squareColor: "white" | "black" = (rank + getFileNum(file)) % 2 == 0 ? "white" : "black"
+  // console.log("square ", rank, "-", file, ": ", piece)
   const fileName = () => {
     let path = "/images/"
-    switch (square) {
-      case 0:
+    switch (piece) {
+      case "P":
         path += "whites/pawn"
         break
-      case 6:
+      case "p":
         path += "blacks/pawn"
         break
-      case 1:
+      case "N":
         path += "whites/knight"
         break
-      case 7:
+      case "n":
         path += "blacks/knight"
         break
-      case 2:
+      case "B":
         path += "whites/bishop"
         break
-      case 8:
+      case "b":
         path += "blacks/bishop"
         break
-      case 3:
+      case "R":
         path += "whites/rook"
         break
-      case 9:
+      case "r":
         path += "blacks/rook"
         break
-      case 4:
+      case "Q":
         path += "whites/queen"
         break
-      case 10:
+      case "q":
         path += "blacks/queen"
         break
-      case 5:
+      case "K":
         path += "whites/king"
         break
-      case 11:
+      case "k":
         path += "blacks/king"
         break
       default:
@@ -59,45 +53,65 @@ export const Square = memo(({ square, rank, file }: { square: number, rank: numb
   }
   const handleClick = (id: string) => {
     // TODO pass game id
-    squareClick(id)
+    squareClick(id, piece)
   }
   return (
     <span onClick={(e) => handleClick(e.currentTarget.id)} id={`${rank}-${file}`} className={`square ${squareColor == "white" ? "square-white" : "square-black"}`}>
       {/* <svg><use ></use></svg> */}
-      <img src={square == SQUARE.EMPTY ? undefined : fileName()} />
+      <img src={piece == "" ? undefined : fileName()} />
     </span>)
 })
 
-export const Rank = memo(({ playerColor, rank }: { playerColor: "w" | "b", rank: number }) => {
-  const { getSquare } = useContext(GameContext)
-  return (
-    <div key={`rank${rank}`} id={`rank${rank}`} className="rank">
-      {
-        playerColor == "w" ?
-          filesWhites.map((file) => {
-            return <Square key={`square-${rank}-${file}`} square={getSquare(rank, file)} rank={rank} file={file} />
-          }) :
-          filesBlacks.map((file) => {
-            return <Square key={`square-${rank}-${file}`} square={getSquare(rank, file)} rank={rank} file={file} />
-          })
+export const Rank = memo(({ playerColor, rank, pieces }: { playerColor: "w" | "b", rank: number, pieces: string }) => {
+  const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+  const incr = playerColor == "w" ? 1 : -1
+  const squares = []
+  let i: number = playerColor == "w" ? 0 : 7
+  let fileIndex = i
+  while (i >= 0 && i < pieces.length) {
+    console.log("pieces: ", pieces)
+    const emptySquares: number = pieces.charCodeAt(i)
+    // if it is a digit, the digit represents the number of empty squares on the rank
+    if (emptySquares >= 48 && emptySquares <= 57) {
+      for (let j = 48; j < emptySquares; j++) {
+        const file = files[fileIndex]
+        squares.push(
+          <Square key={`square-${rank}-${file}`} piece={""} rank={rank} file={file} />
+        )
+        fileIndex += incr
       }
+    }
+    else {
+      const file = files[fileIndex]
+      squares.push(
+        <Square key={`square-${rank}-${file}`} piece={pieces[i]} rank={rank} file={file} />
+      )
+      fileIndex += incr
+    }
+    i += incr
+  }
+  return (
+    <div id={`rank${rank}`} className="rank">
+      {squares}
     </div>
   )
 })
 
 export const Board = ({ playerColor }: { playerColor: "w" | "b" }) => {
   console.log("playerColor: ", playerColor)
+  const { board } = useContext(GameContext)
+  const rankPieces = board.split("/")
+  const iIncr = playerColor == "w" ? -1 : 1
+  const firstRank = playerColor == "w" ? 7 : 0
+  const ranks = []
+  let i = firstRank
+  while (i >= 0 && i <= 7) {
+    ranks.push(<Rank key={`key-rank-${i}`} playerColor={playerColor} rank={i} pieces={rankPieces[i]} />)
+    i += iIncr
+  }
   return (
     <div id="chessboard">
-      {
-        playerColor == "w" ?
-          ranksWhites.map((val, index) => {
-            return <Rank key={`rank-${index}`} playerColor={playerColor} rank={val} />
-          }) :
-          ranksBlacks.map((val, index) => {
-            return <Rank key={`rank-${index}`} playerColor={playerColor} rank={val} />
-          })
-      }
+      {ranks}
     </div>
   )
 }
