@@ -5,11 +5,7 @@ from databases.apostgres import APostgres
 from utils.logger import mylog
 
 class GameMove(TypedDict):
-    moveFrom: str
-    moveTo: str
-    piece: str
-    capturedPiece: str | None
-    promotionTo: str | None
+    uci: str
     san: str
 
 class Game(TypedDict):
@@ -20,19 +16,39 @@ class PostgresGames(APostgres):
     def __init__(self) -> None:
         super().__init__()
 
-    async def fetchGame(self, gameId: int, type: Literal['hotseat', 'online']) -> None | Game:
+    async def fetchNextPositionNum(self, gameId: int, mode: Literal["hotseat", "online"])-> int:
+        fetched = await self.execFetchone(f"select max(position_number) from {mode}gamepositions where game_id=%s", (gameId,))
+        if fetched is None:
+            return 0
+        return int(fetched[0]) +1
+
+    async def fetchNextMoveNumber(self, gameId: int, mode: Literal["hotseat", "online"])-> int:
+        fetched = await self.execFetchone(f"select max(move_number) from {mode}gamemoves where game_id=%s", (gameId,))
+        if fetched is None or fetched[0] is None:
+            return 0
+        mylog.debug(f"fetched {fetched}")
+        return int(fetched[0]) +1
+
+    async def fetchGame(self, gameId: int, mode: Literal['hotseat', 'online']) -> None | Game:
         # game positions
-        fetched: list[TupleRow] | None = await self.execFetchall(f"select fen from {type}gamepositions where game_id=%s", values=(gameId,))
+        fetched: list[TupleRow] | None = await self.execFetchall(f"select fen from {mode}gamepositions where game_id=%s order by position_number asc", values=(gameId,))
         if fetched is None:
             return None
         gameFens = [x[0] for x in fetched]
         mylog.debug(f"found game positions: {gameFens}")
         # game moves
-        fetched: list[TupleRow] | None = await self.execFetchall(f"select move_from, move_to, piece, captured_piece, promotion_to, san from gamemoves where game_id=%s", values=(gameId,))
+        fetched: list[TupleRow] | None = await self.execFetchall(f"select uci, san from {mode}gamemoves where game_id=%s order by move_number asc", values=(gameId,))
         mylog.debug(f"fetched Game Moves: {fetched}")
         if fetched is None:
             return Game(gameFens=gameFens, gameMoves=[])
-        gameMoves: list[GameMove] = [GameMove(*x) for x in fetched]
+        mylog.debug("there")
+        gameMoves: list[GameMove] = []
+        # = [GameMove(*x) for x in fetched]
+        for move in fetched:
+            if move is None or move[0] is None:
+                continue
+            gameMoves.append(GameMove(uci=move[0], san=move[0]))
+        mylog.debug("there1")
         mylog.debug(f"Game Moves: {gameMoves}")
         return Game(gameFens=gameFens, gameMoves=gameMoves)
 
@@ -58,4 +74,21 @@ class PostgresGames(APostgres):
         gameId = int(fetched[0])
         await self.execCommit(query="insert into hotseatgamepositions (position_number, game_id) values(%s, %s)", values=(1, gameId))
         mylog.debug("newHotseatGame success")
+
+    async def addNewPositionAndMove(self, gameId: int, mode: Literal["hotseat", "online"], fen: str, uciMove: str, san: str):
+        moveNum = await self.fetchNextMoveNumber(gameId, mode)
+        mylog.debug(f"moveNum: {moveNum}")
+        positionNum = await self.fetchNextPositionNum(gameId, mode)
+        async with self.getConn() as conn:
+            async with conn.cursor() as cursor:
+                try:
+                    await self.exec(cursor=cursor, query=f"insert into {mode}gamemoves (move_number, game_id, uci, san) values(%s, %s, %s, %s)", values=(moveNum, gameId, uciMove, san,))
+                    mylog.debug(f"insert into {mode}gamemoves successfull")
+                    await self.exec(cursor=cursor, query=f"insert into {mode}gamepositions (position_number, fen, game_id) values(%s, %s, %s)", values=(positionNum, fen, gameId))
+                    mylog.debug(f"insert into {mode}gamepositions successfull")
+                    await conn.commit()
+                except Exception as e:
+                    await conn.rollback()
+                    mylog.error(f"Db addNewPositionAndMove error: {e}")
+                    raise Exception("db error")
 

@@ -53,13 +53,12 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     ToastCustomError("Connection error failed to " + action)
     console.error("websocket not open error, failed to " + action)
   }
-  const clientMove = (src: Pos, dest: Pos) => {
+  const clientMove = (uciMove: string) => {
     if (!ws.current)
-      return wsErrorNotOpen("start game")
+      return wsErrorNotOpen("make move")
     const rawData = {
       type: "clientMove",
-      src,
-      dest
+      uciMove: uciMove
     }
     const stringData = JSON.stringify(rawData)
     ws.current.send(stringData)
@@ -78,7 +77,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       setSelected({ id: id, rank: newRank, file: newFile })
     }
     else if (selected.id.length > 0) {
-      clientMove({ rank: selected.rank, file: selected.file }, { rank: newRank, file: newFile })
+      clientMove(selected.file + selected.rank + newFile + newRank)
       unselect()
     }
   }

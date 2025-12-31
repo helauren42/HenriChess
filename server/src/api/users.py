@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 
-from api.decorators import getUserId, getUserIdReq
+from api.decorators import getUserIdReq
 from databases.postgres import postgres
 from utils.api import miniResp, resp204
 

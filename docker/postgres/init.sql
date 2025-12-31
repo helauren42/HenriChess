@@ -42,13 +42,13 @@ CREATE TABLE IF NOT EXISTS agamepositions (
 
 CREATE TABLE IF NOT EXISTS hotseatgamepositions (
   id SERIAL PRIMARY KEY,
-  game_id INTEGER UNIQUE NOT NULL REFERENCES hotseatgames(id) ON DELETE CASCADE,
+  game_id INTEGER NOT NULL REFERENCES hotseatgames(id) ON DELETE CASCADE,
   UNIQUE (position_number, game_id)
 ) INHERITS(agamepositions);
 
 CREATE TABLE IF NOT EXISTS onlinegamepositions (
   id SERIAL PRIMARY KEY,
-  game_id INTEGER UNIQUE NOT NULL REFERENCES onlinegames(id) ON DELETE CASCADE
+  game_id INTEGER NOT NULL REFERENCES onlinegames(id) ON DELETE CASCADE,
   UNIQUE (position_number, game_id)
 ) INHERITS(agamepositions);
 
@@ -58,19 +58,28 @@ CREATE INDEX idx_hotseat_game_positions_game_id_position_number on hotseatgamepo
 CREATE INDEX idx_online_game_positions_game_id on onlinegamepositions(game_id);
 CREATE INDEX idx_online_game_positions_game_id_position_number on onlinegamepositions(game_id, position_number);
 
-CREATE TABLE IF NOT EXISTS gamemoves (
+CREATE TABLE IF NOT EXISTS agamemoves (
     id SERIAL PRIMARY KEY,
-    move_number INTEGER NOT NULL CHECK(move_number > 0),
+    move_number INTEGER NOT NULL CHECK(move_number >= 0),
     game_id INTEGER NOT NULL REFERENCES agames(id) ON DELETE CASCADE,
-    move_from TEXT NOT NULL,
-    move_to TEXT NOT NULL,
-    piece TEXT NOT NULL,
-    captured_piece TEXT DEFAULT NULL,
-    promotion_to TEXT DEFAULT NULL,
+    uci TEXT NOT NULL,
     san TEXT NOT NULL, -- Standard Algebraic Notation
  
     UNIQUE (game_id, move_number)
 );
 
-CREATE INDEX idx_game_moves_game_id on gamemoves(game_id);
-CREATE INDEX idx_game_moves_game_id_move_number ON gamemoves(game_id, move_number); -- composite index
+CREATE TABLE IF NOT EXISTS hotseatgamemoves (
+    id SERIAL PRIMARY KEY,
+    game_id INTEGER NOT NULL REFERENCES hotseatgames(id) ON DELETE CASCADE
+) INHERITS(agamemoves);
+
+CREATE TABLE IF NOT EXISTS onlinegamemoves (
+    id SERIAL PRIMARY KEY,
+    game_id INTEGER NOT NULL REFERENCES onlinegames(id) ON DELETE CASCADE
+) INHERITS(agamemoves);
+
+CREATE INDEX idx_hotseat_game_moves_game_id on hotseatgamemoves(game_id);
+CREATE INDEX idx_hotseat_game_moves_game_id_move_number ON hotseatgamemoves(game_id, move_number); -- composite index
+
+CREATE INDEX idx_online_game_moves_game_id on onlinegamemoves(game_id);
+CREATE INDEX idx_online_game_moves_game_id_move_number ON onlinegamemoves(game_id, move_number); -- composite index

@@ -5,11 +5,11 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse, Response
 import uuid
 
-from api.decorators import getUserId, getUserIdReq
+from api.decorators import getUserIdReq
 from api.models.auth import LoginSchema, SignupSchema
 from databases.models.users import BasicUserModel
 from databases.postgres import postgres
-from utils.api import mini401, miniResp, resp204, setCookie, setSessionCookie
+from utils.api import getUserId, mini401, miniResp, resp204, setCookie, setSessionCookie
 
 authRouter = APIRouter(prefix="/auth")
 

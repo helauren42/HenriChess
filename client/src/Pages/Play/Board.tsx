@@ -105,7 +105,7 @@ export const Board = ({ playerColor }: { playerColor: "w" | "b" }) => {
   const ranks = []
   let i = firstRank
   while (i >= 0 && i <= 7) {
-    ranks.push(<Rank key={`key-rank-${i}`} playerColor={playerColor} rank={i} pieces={rankPieces[i]} />)
+    ranks.push(<Rank key={`key-rank-${i + 1}`} playerColor={playerColor} rank={i + 1} pieces={rankPieces[i]} />)
     i += iIncr
   }
   return (

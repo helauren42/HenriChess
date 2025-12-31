@@ -74,7 +74,8 @@ class APostgres(ABC):
 
     async def exec(self, cursor: AsyncCursor, query: str, values: tuple):
         try:
+            mylog.debug(f"values: {values}")
             await cursor.execute(query=query.encode(), params=values)
         except Exception as e:
-            raise await HttpCatch.postgres(e, "execCommit() failed")
+            raise await HttpCatch.postgres(e, "exec() failed")
 
