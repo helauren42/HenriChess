@@ -9,11 +9,10 @@ export const Game = () => {
   const { playerColor, getGameUpdate } = useContext(GameContext)
   const location = useLocation()
   useEffect(() => {
-    console.log("!!!!!!!!")
     console.log(location.pathname)
     const mode: "hotseat" | "online" = location.pathname.split("/")[2] as "hotseat" | "online"
     console.log(mode)
-    getGameUpdate(mode)
+    getGameUpdate()
   }, [location])
   return (
     <div id="play-board">

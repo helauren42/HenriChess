@@ -1,26 +1,32 @@
 import { memo, useContext } from "react"
 import { GameContext } from "../Contexts/Game"
 
-const GameMoveHistoryLine = memo(({ san, index }: { san: string, index: number }) => {
+const GameMoveHistoryLine = memo(({ whiteSan, index, blackSan }: { whiteSan: string, index: number, blackSan: string | undefined }) => {
+  const moveNumber = Math.floor(index / 2) + 1
   return (
-    <div id="game-moves-history-line" className="flex flex-row">
-      <div id="move-number">{index + "."}</div>
-      <div className="place-content-center">{san}</div>
+    <div key={`move-pair-${index}`} className="flex items-center gap-8">
+      <span className="w-8 text-right">{moveNumber}.</span>
+      <span className="w-20">{whiteSan}</span>
+      <span className="w-20">{blackSan ?? ""}</span>
     </div>
   )
 })
 
 export const GameMovesHistory = () => {
   const { gameMoves } = useContext(GameContext)
-  return (
-    // make it a grid with two sans per line
-    <div id="game-moves-history" className="min-h-32 max-h-32">
-      {
-        gameMoves.map((val, index) => (
-          <GameMoveHistoryLine key={`game-moves-history-line-${index}`} san={val.san} index={index} />
-        ))
-      }
-    </div>
 
+  return (
+    <div id="game-moves-history" className="grid grid-cols-1 gap-x-8 gap-y-2">
+      {gameMoves.map((move, index) => {
+        if (index % 2 === 0) {
+          const whiteMove = move
+          const blackMove = gameMoves[index + 1] // may be undefined if last move was white
+          return (
+            <GameMoveHistoryLine whiteSan={whiteMove.san} blackSan={blackMove != undefined ? blackMove.san : undefined} index={index} />
+          )
+        }
+        return null
+      })}
+    </div>
   )
 }

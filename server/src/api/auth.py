@@ -34,7 +34,7 @@ async def addDeviceToken(clireq: Request) -> JSONResponse:
 
 @authRouter.delete("/logout")
 async def logout(clireq: Request, userId: int = Depends(getUserIdReq)):
-    await postgres.execCommit("delete from sessions where userId=%s", values=(userId,))
+    await postgres.execCommit("delete from sessions where user_id=%s", values=(userId,))
     return resp204()
 
 # TODO make getLogin extend deviceToken expiry age below a threshold of 3 months

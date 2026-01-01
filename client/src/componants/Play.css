@@ -1,0 +1,5 @@
+#game-moves-history {
+  /* className="min-h-32 max-h-32 overflow-scroll" */
+  height: 500px;
+  min-height: 500px;
+}

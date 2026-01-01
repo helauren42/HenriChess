@@ -1,7 +1,25 @@
+/* #play-panel { */
+/*   position: relative; */
+/*   height: fit-content; */
+/*   width: 30vw; */
+/*   background-color: var(--nav-color); */
+/*   display: flex; */
+/*   flex-direction: column; */
+/*   gap: 1rem; */
+/*   border-radius: 1rem; */
+/*   border: 1px; */
+/*   padding: 1.5rem; */
+/*   border-radius: 0.4rem; */
+/*   /* border: 1px solid var(--border-color); */
+/*   text-align: center; */
+/*   z-index: 0; */
+/* } */
+
 #play-panel {
   position: relative;
-  height: fit-content;
-  width: 30vw;
+  height: 90vh;
+  width: 500px;
+  max-width: 30vw;
   background-color: var(--nav-color);
   display: flex;
   flex-direction: column;
@@ -10,7 +28,6 @@
   border: 1px;
   padding: 1.5rem;
   border-radius: 0.4rem;
-  /* border: 1px solid var(--border-color); */
   text-align: center;
   z-index: 0;
 }
@@ -32,4 +49,10 @@
 
 .game-mode-block:active {
   filter: brightness(0.9);
+}
+
+@media(max-width: 1400px) {
+  #play-panel {
+    max-width: 22vw;
+  }
 }
