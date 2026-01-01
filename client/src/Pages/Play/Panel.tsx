@@ -13,7 +13,7 @@ const GameModeBlock = ({ title, subtitle, handleClick }: GameModeBlockFace) => {
   return (
     <div className="game-mode-block" onClick={handleClick}>
       <h3>{title}</h3>
-      <h5>{subtitle}</h5>
+      <p className="font-medium text-xl">{subtitle}</p>
     </div>
   )
 }
@@ -22,7 +22,7 @@ export const ChooseGame = () => {
   const { startGame } = useContext(GameContext)
   return (
     <>
-      <h2>Choose Game</h2>
+      <h3>Choose Game</h3>
       <GameModeBlock title="Play Online" subtitle="Random Matchmaking" handleClick={() => {
         console.log("clicked play online")
       }} />

@@ -6,8 +6,11 @@ const GameMoveHistoryLine = memo(({ whiteSan, index, blackSan }: { whiteSan: str
   return (
     <div key={`move-pair-${index}`} className="flex items-center gap-8">
       <span className="w-8 text-right">{moveNumber}.</span>
-      <span className="w-20">{whiteSan}</span>
-      <span className="w-20">{blackSan ?? ""}</span>
+
+      <div className="flex justify-evenly w-full -ml-5">
+        <span className="w-20">{whiteSan}</span>
+        <span className="w-20">{blackSan ?? ""}</span>
+      </div>
     </div>
   )
 })
@@ -16,13 +19,13 @@ export const GameMovesHistory = () => {
   const { gameMoves } = useContext(GameContext)
 
   return (
-    <div id="game-moves-history" className="grid grid-cols-1 gap-x-8 gap-y-2">
+    <div id="game-moves-history" className="grid grid-cols-1 gap-x-8 gap-y-2 overflow-scroll">
       {gameMoves.map((move, index) => {
         if (index % 2 === 0) {
           const whiteMove = move
           const blackMove = gameMoves[index + 1] // may be undefined if last move was white
           return (
-            <GameMoveHistoryLine whiteSan={whiteMove.san} blackSan={blackMove != undefined ? blackMove.san : undefined} index={index} />
+            <GameMoveHistoryLine key={"move-history-line" + index} whiteSan={whiteMove.san} blackSan={blackMove != undefined ? blackMove.san : undefined} index={index} />
           )
         }
         return null

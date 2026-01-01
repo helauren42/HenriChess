@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { GameContext, type GameFace, type GameUpdateFace, type GameMoveFace, type Pos, type SelectedFace } from "../Contexts/Game.tsx";
+import { GameContext, type GameUpdateFace, type GameMoveFace, type SelectedFace } from "../Contexts/Game.tsx";
 import { isBlack, isWhite } from "../utils/Game";
 import { INITIAL_BOARD, SERVER_URL_WS } from "../utils/const.tsx";
 import { ToastCustomError } from "../utils/toastify.tsx";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export interface DataGame {
   "type": "game",
@@ -29,7 +29,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     file: "",
   })
   // not for context
-  const location = useLocation()
   const nav = useNavigate()
   // functions
   const getFileNum = (file: string) => {
@@ -128,7 +127,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("currBoard: ", currBoard)
     setBoard(currBoard)
     const gamePath = "/play/" + data.mode + "/" + data.id
-    if (location.pathname != gamePath)
+    const pathname = window.location.pathname
+    if (pathname != gamePath)
       nav(gamePath)
     if (data.subtype as string == "continue")
       console.log("!!!prompt user whether he wants to continue or start new game") // TODO
