@@ -18,9 +18,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   // const [ws, setWs] = useState<WebSocket>(new WebSocket(SERVER_URL_WS))
   const ws = useRef<WebSocket | null>(null)
   const [board, setBoard] = useState<string>(INITIAL_BOARD)
+  const [mode, setMode] = useState<"hotseat" | "online">("hotseat")
   const [gameFens, setGameFens] = useState<string[]>([])
   const [gameMoves, setGameMoves] = useState<GameMoveFace[]>([])
   const [playerColor, setPlayerColor] = useState<"w" | "b">("w")
+  const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
   const [selected, setSelected] = useState<SelectedFace>({
     id: "",
     rank: 0,
@@ -58,7 +60,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       return wsErrorNotOpen("make move")
     const rawData = {
       type: "clientMove",
-      uciMove: uciMove
+      uciMove: uciMove,
+      mode
     }
     const stringData = JSON.stringify(rawData)
     ws.current.send(stringData)
@@ -81,6 +84,24 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       unselect()
     }
   }
+  const getGameUpdate = () => {
+    console.log("getGameUpdate")
+    if (!ws.current || ws.current.readyState != ws.current.OPEN) {
+      console.log("not ready")
+      const id = setInterval(() => {
+        if (ws.current && ws.current.readyState === ws.current.OPEN) {
+          console.log("finally ready")
+          ws.current?.send(JSON.stringify({ type: "getGameUpdate", mode }))
+          clearInterval(id)
+          return
+        }
+      }, 100)
+    }
+    else {
+      console.log("is ready")
+      ws.current?.send(JSON.stringify({ type: "getGameUpdate", mode }))
+    }
+  }
   const startGame = (type: "hotseat" | "online") => {
     if (!ws.current)
       return wsErrorNotOpen("start game")
@@ -92,11 +113,20 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const game: GameUpdateFace = data.game
     setGameFens(game.gameFens)
     setGameMoves(game.gameMoves)
-    const currBoard = game.gameFens[game.gameFens.length - 1].split(" ")[0]
-    console.log("currBoard: ", currBoard)
-    if (game.gameFens.length > 0) {
-      setBoard(currBoard)
+    const gameGensLen = game.gameFens.length
+    if (gameGensLen % 2 == 0) {
+      setPlayerTurn("b")
+      if (data.mode == "hotseat")
+        setPlayerColor("b")
     }
+    else {
+      setPlayerTurn("w")
+      if (data.mode == "hotseat")
+        setPlayerColor("w")
+    }
+    const currBoard = game.gameFens[gameGensLen - 1].split(" ")[0]
+    console.log("currBoard: ", currBoard)
+    setBoard(currBoard)
     const gamePath = "/play/" + data.mode + "/" + data.id
     if (location.pathname != gamePath)
       nav(gamePath)
@@ -148,7 +178,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     makeSocket()
   }, [])
   return (
-    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, gameFens, setGameFens, gameMoves, setGameMoves, playerColor, setPlayerColor, selected, setSelected, unselect, squareClick, getFileNum, clientMove, startGame }} >
+    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, selected, setSelected, unselect, squareClick, getFileNum, clientMove, startGame }} >
       {children}
     </GameContext.Provider>
   )

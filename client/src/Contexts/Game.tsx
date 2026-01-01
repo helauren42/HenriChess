@@ -34,13 +34,18 @@ export interface GameFace {
   setGameId: Dispatch<SetStateAction<string | null>>
   playerColor: "w" | "b"
   setPlayerColor: Dispatch<SetStateAction<"w" | "b">>
+  playerTurn: "w" | "b"
+  setPlayerTurn: Dispatch<SetStateAction<"w" | "b">>
   // board game
+  mode: "hotseat" | "online"
+  setMode: Dispatch<SetStateAction<"hotseat" | "online">>
   board: string
   setBoard: Dispatch<SetStateAction<string>>
   gameFens: string[]
   setGameFens: Dispatch<SetStateAction<string[]>>
   gameMoves: GameMoveFace[]
   setGameMoves: Dispatch<SetStateAction<GameMoveFace[]>>
+  getGameUpdate: () => void
   // square selection
   selected: SelectedFace
   setSelected: Dispatch<SetStateAction<SelectedFace>>
@@ -49,21 +54,27 @@ export interface GameFace {
   getFileNum: (file: string) => number
   // WS
   ws: RefObject<WebSocket | null>
-  clientMove: (src: Pos, dest: Pos) => void
+  clientMove: (uciMove: string) => void
   startGame: (type: "hotseat" | "online") => void
 }
 
 export const GameContext = createContext<GameFace>({
   gameId: null,
-  setGameId: () => console.error("used outside of context"), playerColor: "w",
+  setGameId: () => console.error("used outside of context"),
+  playerColor: "w",
   setPlayerColor: () => console.error("used outside of context"),
+  playerTurn: "w",
+  setPlayerTurn: () => console.error("used outside of context"),
   // board game
+  mode: "hotseat",
+  setMode: () => console.error("used outside of context"),
   board: INITIAL_BOARD,
   setBoard: () => console.error("used outside of context"),
   gameFens: [],
   setGameFens: () => console.error("used outside of context"),
   gameMoves: [],
   setGameMoves: () => console.error("used outside of context"),
+  getGameUpdate: () => console.error("used outside of context"),
   // square selection
   selected: { id: "", rank: 0, file: "" },
   setSelected: () => console.error("used outside of context"),
@@ -75,7 +86,7 @@ export const GameContext = createContext<GameFace>({
   },
   // WS
   ws: { current: null },
-  clientMove(src: Pos, dest: Pos) {
+  clientMove(uciMove: string) {
     console.error("used outside of context")
   },
   startGame(type: "hotseat" | "online") {

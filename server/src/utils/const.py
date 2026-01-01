@@ -1,4 +1,5 @@
 import sys
+from typing import Literal
 import dotenv
 import os
 
@@ -14,6 +15,9 @@ def getEnv(key) -> str:
         mylog.critical(f"Could not find key: {key} inside env")
         sys.exit(1)
     return value
+
+MODES = Literal["hotseat", "online"]
+# MESSAGE_TYPES = Literal["clientMove", "gameMessage", "startGameHotseat"]
 
 class Env():
     CADDY_HOST=getEnv("CADDY_HOST")

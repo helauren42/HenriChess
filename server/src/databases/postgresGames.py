@@ -2,6 +2,7 @@ from typing import Literal, TypedDict
 
 from psycopg.rows import TupleRow
 from databases.apostgres import APostgres
+from utils.const import MODES
 from utils.logger import mylog
 
 class GameMove(TypedDict):
@@ -16,20 +17,20 @@ class PostgresGames(APostgres):
     def __init__(self) -> None:
         super().__init__()
 
-    async def fetchNextPositionNum(self, gameId: int, mode: Literal["hotseat", "online"])-> int:
+    async def fetchNextPositionNum(self, gameId: int, mode: MODES)-> int:
         fetched = await self.execFetchone(f"select max(position_number) from {mode}gamepositions where game_id=%s", (gameId,))
         if fetched is None:
             return 0
         return int(fetched[0]) +1
 
-    async def fetchNextMoveNumber(self, gameId: int, mode: Literal["hotseat", "online"])-> int:
+    async def fetchNextMoveNumber(self, gameId: int, mode: MODES)-> int:
         fetched = await self.execFetchone(f"select max(move_number) from {mode}gamemoves where game_id=%s", (gameId,))
         if fetched is None or fetched[0] is None:
             return 0
         mylog.debug(f"fetched {fetched}")
         return int(fetched[0]) +1
 
-    async def fetchGame(self, gameId: int, mode: Literal['hotseat', 'online']) -> None | Game:
+    async def fetchGame(self, gameId: int, mode: MODES) -> None | Game:
         # game positions
         fetched: list[TupleRow] | None = await self.execFetchall(f"select fen from {mode}gamepositions where game_id=%s order by position_number asc", values=(gameId,))
         if fetched is None:
@@ -75,7 +76,7 @@ class PostgresGames(APostgres):
         await self.execCommit(query="insert into hotseatgamepositions (position_number, game_id) values(%s, %s)", values=(1, gameId))
         mylog.debug("newHotseatGame success")
 
-    async def addNewPositionAndMove(self, gameId: int, mode: Literal["hotseat", "online"], fen: str, uciMove: str, san: str):
+    async def addNewPositionAndMove(self, gameId: int, mode: MODES, fen: str, uciMove: str, san: str):
         moveNum = await self.fetchNextMoveNumber(gameId, mode)
         mylog.debug(f"moveNum: {moveNum}")
         positionNum = await self.fetchNextPositionNum(gameId, mode)
