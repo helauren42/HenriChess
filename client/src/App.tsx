@@ -51,11 +51,9 @@ function App() {
       <ToastContainer />
       <Routes>
         <Route path='/' element={<HomePage />}>
-          <Route path='/play' element={<PlayPage />}>
-            <Route path='/play/hotseat/*' element={<HotseatGame />} />
-            <Route path='/play/online/*' element={<OnlineGame />} />
-            <Route path='/play/' element={<ChooseGame />} />
-          </Route>
+          <Route path='/play/' element={<PlayPage />} />
+          <Route path='/play/hotseat/*' element={<HotseatGame />} />
+          <Route path='/play/online/*' element={<OnlineGame />} />
           <Route path='/user/*' element={<UserPage />} />
         </Route>
       </Routes>

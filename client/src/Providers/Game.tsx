@@ -69,9 +69,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   // ws messages
   const squareClick = (id: string, piece: string) => {
     // TODO add check that player clicks piece of appropriate color and type on first and second clicks
-    const splitId = id.split("-")
-    const newRank = parseInt(splitId[0])
-    const newFile = splitId[1]
+    const newRank = parseInt(id[0])
+    const newFile = id[2]
     if (selected.rank == newRank && selected.file == newFile) {
       unselect()
     }

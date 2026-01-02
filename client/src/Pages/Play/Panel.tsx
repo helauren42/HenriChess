@@ -1,7 +1,6 @@
-import { useContext } from "react"
+import { useContext, type ReactNode } from "react"
 import "./Panel.css"
 import { GameContext } from "../../Contexts/Game"
-import { Outlet } from "react-router-dom"
 
 interface GameModeBlockFace {
   title: string
@@ -34,10 +33,10 @@ export const ChooseGame = () => {
   )
 }
 
-export const Panel = () => {
+export const Panel = ({ children }: { children: ReactNode }) => {
   return (
     <div id="play-panel" className="base-layer" >
-      <Outlet />
+      {children}
     </div>
   )
 }
