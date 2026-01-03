@@ -23,6 +23,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [gameMoves, setGameMoves] = useState<GameMoveFace[]>([])
   const [playerColor, setPlayerColor] = useState<"w" | "b">("w")
   const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
+  const [winner, setWinner] = useState<"w" | "b" | "d" | null>(null)
   const [selected, setSelected] = useState<SelectedFace>({
     id: "",
     rank: 0,
@@ -68,6 +69,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   }
   // ws messages
   const squareClick = (id: string, piece: string) => {
+    if (winner != null)
+      return
     // TODO add check that player clicks piece of appropriate color and type on first and second clicks
     const newRank = parseInt(id[0])
     const newFile = id[2]
@@ -111,6 +114,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const game: GameUpdateFace = data.game
     setGameFens(game.gameFens)
     setGameMoves(game.gameMoves)
+    setWinner(game.winner)
     const gameGensLen = game.gameFens.length
     if (gameGensLen % 2 == 0) {
       setPlayerTurn("b")
@@ -133,6 +137,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       console.log("!!!prompt user whether he wants to continue or start new game") // TODO
   }
   useEffect(() => {
+    console.log("!!! winner: ", winner)
+  }, [winner])
+  useEffect(() => {
     console.log("board: ", board)
   }, [board])
   useEffect(() => {
@@ -150,7 +157,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
 
       sock.onmessage = (event) => {
-        console.log('Message from server:', event.data)
+        console.log('Message from server: ', event.data)
         const data: Record<string, any> = JSON.parse(event.data)
         switch (data.type) {
           case "game":
@@ -177,7 +184,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     makeSocket()
   }, [])
   return (
-    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, selected, setSelected, unselect, squareClick, getFileNum, clientMove, startGame }} >
+    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, startGame }} >
       {children}
     </GameContext.Provider>
   )

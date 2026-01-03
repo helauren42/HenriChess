@@ -12,6 +12,7 @@ class GameMove(TypedDict):
 class Game(TypedDict):
     gameFens: list[str]
     gameMoves: list[GameMove]
+    winner: Literal["w", "b", "d"] | None
 
 class PostgresGames(APostgres):
     def __init__(self) -> None:
@@ -31,27 +32,26 @@ class PostgresGames(APostgres):
         return int(fetched[0]) +1
 
     async def fetchGame(self, gameId: int, mode: MODES) -> None | Game:
+        # game result
+        fetchedWinner: TupleRow | None = await self.execFetchone(f"select winner from {mode}games where id=%s", values=(gameId,))
         # game positions
         fetched: list[TupleRow] | None = await self.execFetchall(f"select fen from {mode}gamepositions where game_id=%s order by position_number asc", values=(gameId,))
         if fetched is None:
             return None
         gameFens = [x[0] for x in fetched]
-        mylog.debug(f"found game positions: {gameFens}")
+        # mylog.debug(f"found game positions: {gameFens}")
         # game moves
         fetched: list[TupleRow] | None = await self.execFetchall(f"select uci, san from {mode}gamemoves where game_id=%s order by move_number asc", values=(gameId,))
-        mylog.debug(f"fetched Game Moves: {fetched}")
+        # mylog.debug(f"fetched Game Moves: {fetched}")
         if fetched is None:
-            return Game(gameFens=gameFens, gameMoves=[])
-        mylog.debug("there")
+            return Game(gameFens=gameFens, gameMoves=[], winner=fetchedWinner[0] if fetchedWinner else None)
         gameMoves: list[GameMove] = []
         # = [GameMove(*x) for x in fetched]
         for move in fetched:
             if move is None or move[0] is None:
                 continue
             gameMoves.append(GameMove(uci=move[0], san=move[0]))
-        mylog.debug("there1")
-        mylog.debug(f"Game Moves: {gameMoves}")
-        return Game(gameFens=gameFens, gameMoves=gameMoves)
+        return Game(gameFens=gameFens, gameMoves=gameMoves, winner=fetchedWinner[0] if fetchedWinner else None)
 
     async def fetchHotseatGame(self, userId: int | None = None, gameId: int | None = None) -> None | tuple[Game, int]:
         fetched = None
@@ -75,6 +75,7 @@ class PostgresGames(APostgres):
         gameId = int(fetched[0])
         await self.execCommit(query="insert into hotseatgamepositions (position_number, game_id) values(%s, %s)", values=(1, gameId))
         mylog.debug("newHotseatGame success")
+        return gameId
 
     async def addNewPositionAndMove(self, gameId: int, mode: MODES, fen: str, uciMove: str, san: str):
         moveNum = await self.fetchNextMoveNumber(gameId, mode)
@@ -93,3 +94,5 @@ class PostgresGames(APostgres):
                     mylog.error(f"Db addNewPositionAndMove error: {e}")
                     raise Exception("db error")
 
+    async def storeGameResult(self, mode: MODES, gameId: int, winner: Literal["w", "b", "d"]):
+        await self.execCommit(f"update {mode}games set winner=%s", (winner, ))

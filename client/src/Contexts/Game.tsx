@@ -27,6 +27,7 @@ export interface GameMoveFace {
 export interface GameUpdateFace {
   gameFens: string[]
   gameMoves: GameMoveFace[]
+  winner: "w" | "b" | "d" | null
 }
 
 export interface GameFace {
@@ -36,6 +37,8 @@ export interface GameFace {
   setPlayerColor: Dispatch<SetStateAction<"w" | "b">>
   playerTurn: "w" | "b"
   setPlayerTurn: Dispatch<SetStateAction<"w" | "b">>
+  winner: "w" | "b" | "d" | null
+  setWinner: Dispatch<SetStateAction<"w" | "b" | "d" | null>>
   // board game
   mode: "hotseat" | "online"
   setMode: Dispatch<SetStateAction<"hotseat" | "online">>
@@ -65,6 +68,8 @@ export const GameContext = createContext<GameFace>({
   setPlayerColor: () => console.error("used outside of context"),
   playerTurn: "w",
   setPlayerTurn: () => console.error("used outside of context"),
+  winner: null,
+  setWinner: () => console.error("used outside of context"),
   // board game
   mode: "hotseat",
   setMode: () => console.error("used outside of context"),

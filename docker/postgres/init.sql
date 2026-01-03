@@ -18,8 +18,8 @@ CREATE INDEX idx_sessions_device_token ON sessions(device_token);
 
 CREATE TABLE IF NOT EXISTS agames (
   id SERIAL PRIMARY KEY,
-  winner TEXT CHECK (winner IN ('black', 'white', 'draw')) DEFAULT NULL,
-  creation TIMESTAMP DEFAULT NOW()
+  creation TIMESTAMP DEFAULT NOW(),
+  winner TEXT CHECK (winner IN ('b', 'w', 'd')) DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS hotseatgames (
