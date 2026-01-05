@@ -157,7 +157,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
 
       sock.onmessage = (event) => {
-        console.log('Message from server: ', event.data)
+        // console.log('Message from server: ', event.data)
         const data: Record<string, any> = JSON.parse(event.data)
         switch (data.type) {
           case "game":

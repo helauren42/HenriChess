@@ -1,5 +1,6 @@
-import { memo, useContext } from "react"
+import { memo, useContext, useEffect } from "react"
 import { GameContext } from "../Contexts/Game"
+import "./Play.css"
 
 const GameMoveHistoryLine = memo(({ whiteSan, index, blackSan }: { whiteSan: string, index: number, blackSan: string | undefined }) => {
   const moveNumber = Math.floor(index / 2) + 1
@@ -18,8 +19,13 @@ const GameMoveHistoryLine = memo(({ whiteSan, index, blackSan }: { whiteSan: str
 export const GameMovesHistory = () => {
   const { gameMoves } = useContext(GameContext)
 
+  useEffect(() => {
+    console.log("change here")
+    const elem = document.getElementById("game-moves-history")
+    elem?.scrollBy({ top: elem.scrollHeight })
+  }, [gameMoves])
   return (
-    <div id="game-moves-history" className="grid grid-cols-1 gap-x-8 gap-y-2 overflow-scroll">
+    <div id="game-moves-history">
       {gameMoves.map((move, index) => {
         if (index % 2 === 0) {
           const whiteMove = move

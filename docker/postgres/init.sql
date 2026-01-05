@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS agames (
 
 CREATE TABLE IF NOT EXISTS hotseatgames (
   id SERIAL PRIMARY KEY,
-  user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE NOT NULL
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
 ) INHERITS(agames);
 
 CREATE TABLE IF NOT EXISTS onlinegames (
@@ -34,10 +34,14 @@ CREATE TABLE IF NOT EXISTS onlinegames (
   CHECK (white_id <> black_id)
 ) INHERITS(agames);
 
+CREATE INDEX idx_hotseat_games_winner on hotseatgames(winner);
+CREATE INDEX idx_online_games_winner on onlinegames(winner);
+
 CREATE TABLE IF NOT EXISTS agamepositions (
   id SERIAL PRIMARY KEY,
   position_number INTEGER NOT NULL DEFAULT 0,
   fen TEXT NOT NULL DEFAULT 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+  -- capturedWhites 
 );
 
 CREATE TABLE IF NOT EXISTS hotseatgamepositions (
