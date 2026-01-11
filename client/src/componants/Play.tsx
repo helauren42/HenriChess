@@ -5,13 +5,10 @@ import "./Play.css"
 const GameMoveHistoryLine = memo(({ whiteSan, index, blackSan }: { whiteSan: string, index: number, blackSan: string | undefined }) => {
   const moveNumber = Math.floor(index / 2) + 1
   return (
-    <div key={`move-pair-${index}`} className="flex items-center gap-8">
-      <span className="w-8 text-right">{moveNumber}.</span>
-
-      <div className="flex justify-evenly w-full -ml-5">
-        <span className="w-20">{whiteSan}</span>
-        <span className="w-20">{blackSan ?? ""}</span>
-      </div>
+    <div key={`move-pair-${index}`} className="flex w-full justify-between">
+      <p className="w-8 text-left flex-1">{moveNumber}.</p>
+      <p className="w-20 text-left flex-1">{whiteSan}</p>
+      <p className="w-20 text-right flex-1">{blackSan ?? ""}</p>
     </div>
   )
 })
