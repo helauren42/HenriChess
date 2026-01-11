@@ -120,6 +120,16 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log(fullType)
     ws.current.send(JSON.stringify({ type: fullType }))
   }
+  const resignGame = () => {
+    if (!ws.current)
+      return wsErrorNotOpen("start game")
+    ws.current.send(JSON.stringify({
+      type: "resignGame",
+      gameId,
+      mode,
+      playerColor
+    }))
+  }
   const parseGame = (data: DataGame) => {
     const game: GameUpdateFace = data.game
     setGameFens(game.gameFens)
@@ -149,9 +159,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     if (data.subtype as string == "continue")
       console.log("!!!prompt user whether he wants to continue or start new game") // TODO
   }
-  useEffect(() => {
-    console.log("!!! winner: ", winner)
-  }, [winner])
   useEffect(() => {
     console.log("board: ", board)
   }, [board])
@@ -201,7 +208,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGame }} >
+    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGame, resignGame }} >
       {children}
     </GameContext.Provider>
   )

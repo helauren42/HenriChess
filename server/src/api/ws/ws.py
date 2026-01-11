@@ -113,6 +113,10 @@ async def getGame(ws: WebSocket, userId: int, mode: MODES, gameId: int)-> None |
         return None
     return game, gameId
 
+async def resignGame(ws: WebSocket, userId: int, mode: MODES, gameId: int, resignerColor: Literal["w", "b"]):
+    winner: Literal["w", "b"] = "b" if resignerColor == "w" else "w"
+    await postgres.storeGameResult(mode, gameId, winner)
+
 @wsRouter.websocket("")
 async def websocketEndpoint(ws: WebSocket):
     userId = await getUserId(ws.cookies)
@@ -136,6 +140,12 @@ async def websocketEndpoint(ws: WebSocket):
                 case "restartGameHotseat":
                     await startGameHotseat(ws, userId, True)
                 case "getGameUpdate":
+                    res = await getGame(ws, userId, msg["mode"], msg["gameId"])
+                    if res is None:
+                        break
+                    await updateGame(ws, userId, msg["mode"], res[0], res[1])
+                case "resignGame":
+                    await resignGame(ws, userId, msg["mode"], msg["gameId"], msg["playerColor"])
                     res = await getGame(ws, userId, msg["mode"], msg["gameId"])
                     if res is None:
                         break

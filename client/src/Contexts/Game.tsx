@@ -61,6 +61,7 @@ export interface GameFace {
   clientMove: (uciMove: string) => void
   restartGame: () => void
   startGame: () => void
+  resignGame: () => void
 }
 
 export const GameContext = createContext<GameFace>({
@@ -100,6 +101,9 @@ export const GameContext = createContext<GameFace>({
     console.error("used outside of context")
   },
   startGame() {
+    console.error("used outside of context")
+  },
+  resignGame() {
     console.error("used outside of context")
   },
 })
