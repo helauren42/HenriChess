@@ -13,6 +13,7 @@ class Game(TypedDict):
     gameFens: list[str]
     gameMoves: list[GameMove]
     winner: Literal["w", "b", "d"] | None
+    id: int
 
 class PostgresGames(APostgres):
     def __init__(self) -> None:
@@ -44,19 +45,19 @@ class PostgresGames(APostgres):
         fetched: list[TupleRow] | None = await self.execFetchall(f"select uci, san from {mode}gamemoves where game_id=%s order by move_number asc", values=(gameId,))
         # mylog.debug(f"fetched Game Moves: {fetched}")
         if fetched is None:
-            return Game(gameFens=gameFens, gameMoves=[], winner=fetchedWinner[0] if fetchedWinner else None)
+            return Game(gameFens=gameFens, gameMoves=[], winner=fetchedWinner[0] if fetchedWinner else None, id=gameId)
         gameMoves: list[GameMove] = []
         # = [GameMove(*x) for x in fetched]
         for move in fetched:
             if move is None or move[0] is None:
                 continue
             gameMoves.append(GameMove(uci=move[0], san=move[0]))
-        return Game(gameFens=gameFens, gameMoves=gameMoves, winner=fetchedWinner[0] if fetchedWinner else None)
+        return Game(gameFens=gameFens, gameMoves=gameMoves, winner=fetchedWinner[0] if fetchedWinner else None, id=gameId)
 
-    async def fetchHotseatGame(self, userId: int | None = None, gameId: int | None = None) -> None | tuple[Game, int]:
+    async def fetchHotseatGame(self, userId: int | None = None, gameId: int | None = None, active: bool = False) -> None | tuple[Game, int]:
         fetched = None
         if gameId is None and userId:
-            fetched = await self.execFetchone(query="select id from hotseatgames where user_id=%s", values=(userId,))
+            fetched = await self.execFetchone(query=f"select id from hotseatgames where user_id=%s {'and winner is null' if active else ''}", values=(userId,))
             if fetched is None:
                 return None
             gameId = int(fetched[0])
@@ -66,13 +67,17 @@ class PostgresGames(APostgres):
             return None
         return (game, gameId,)
  
-    async def newHotseatGame(self, userId: int, gameId: int | None = None):
-        if gameId:
-            await self.execCommit(query="delete from hotseatgames where id=%s", values=(gameId,))
-        await self.execCommit(query="insert into hotseatgames (user_id) values(%s) returning id", values=(userId,))
-        fetched = await self.execFetchone(query="select id from hotseatgames where user_id=%s", values=(userId,))
-        assert fetched is not None
-        gameId = int(fetched[0])
+    async def newHotseatGame(self, userId: int) -> int:
+        # remove unfinished active hotseatgame
+        mylog.debug("newHotseatGame step1")
+        await self.execCommit(query="delete from hotseatgames where user_id=%s and winner is null", values=(userId,))
+        # add new game
+        mylog.debug("newHotseatGame here1")
+        gameId = await self.execCommit(query="insert into hotseatgames (user_id) values(%s) returning id", values=(userId,), getReturn=True)
+        mylog.debug(f"newHotseatGame here2: {gameId}")
+        mylog.debug(f"type: {gameId}")
+        assert isinstance(gameId, int)
+        mylog.debug("newHotseatGame here3")
         await self.execCommit(query="insert into hotseatgamepositions (position_number, game_id) values(%s, %s)", values=(1, gameId))
         mylog.debug("newHotseatGame success")
         return gameId

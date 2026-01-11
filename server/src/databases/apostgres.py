@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from abc import ABC
+from typing import Any
 
 from psycopg import AsyncCursor, ProgrammingError
 from psycopg.rows import TupleRow
@@ -63,11 +64,17 @@ class APostgres(ABC):
                     return await cursor.fetchall()
         except Exception as e:
             raise await HttpCatch.postgres(e, "execFetchone() failed")
-    async def execCommit(self, query: str, values: tuple):
+
+    async def execCommit(self, query: str, values: tuple, getReturn: bool = False)-> None | Any:
         try:
             async with self.getConn() as conn:
                 async with conn.cursor() as cursor:
                     await cursor.execute(query=query.encode(), params=values)
+                    if getReturn:
+                        fetched = await cursor.fetchone()
+                        if fetched is None:
+                            return None
+                        return fetched[0]
                 await conn.commit()
         except Exception as e:
             raise await HttpCatch.postgres(e, "execCommit() failed")

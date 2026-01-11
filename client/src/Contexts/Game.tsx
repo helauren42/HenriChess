@@ -28,11 +28,12 @@ export interface GameUpdateFace {
   gameFens: string[]
   gameMoves: GameMoveFace[]
   winner: "w" | "b" | "d" | null
+  id: number
 }
 
 export interface GameFace {
-  gameId: string | null
-  setGameId: Dispatch<SetStateAction<string | null>>
+  gameId: number | null
+  setGameId: Dispatch<SetStateAction<number | null>>
   playerColor: "w" | "b"
   setPlayerColor: Dispatch<SetStateAction<"w" | "b">>
   playerTurn: "w" | "b"
@@ -48,7 +49,7 @@ export interface GameFace {
   setGameFens: Dispatch<SetStateAction<string[]>>
   gameMoves: GameMoveFace[]
   setGameMoves: Dispatch<SetStateAction<GameMoveFace[]>>
-  getGameUpdate: () => void
+  getGameUpdate: (tempId: number | null) => void
   // square selection
   selected: SelectedFace
   setSelected: Dispatch<SetStateAction<SelectedFace>>
@@ -79,7 +80,7 @@ export const GameContext = createContext<GameFace>({
   setGameFens: () => console.error("used outside of context"),
   gameMoves: [],
   setGameMoves: () => console.error("used outside of context"),
-  getGameUpdate: () => console.error("used outside of context"),
+  getGameUpdate: (tempId: number | null) => console.error("used outside of context"),
   // square selection
   selected: { id: "", rank: 0, file: "" },
   setSelected: () => console.error("used outside of context"),

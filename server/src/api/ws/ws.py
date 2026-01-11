@@ -10,8 +10,8 @@ import chess
 
 wsRouter = APIRouter(prefix="/ws")
 
-def newGame()-> Game:
-    return Game(gameFens=['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'], gameMoves=[], winner=None)
+def newGame(gameId: int)-> Game:
+    return Game(gameFens=['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'], gameMoves=[], winner=None, id=gameId)
 
 async def sendError(ws: WebSocket, msg: str):
     await ws.send_json({
@@ -72,18 +72,19 @@ async def handleGameMove(ws: WebSocket, userId: int, uciMove: str, gameData: Gam
 async def startGameHotseat(ws: WebSocket, userId: int):
     mylog.debug("startGameHotseat")
     try:
-        res = await postgres.fetchHotseatGame(userId)
+        res = await postgres.fetchHotseatGame(userId, None, True)
+        mylog.debug(f"res: {res}")
         if res is None:
-            await postgres.newHotseatGame(userId)
+            gameId = await postgres.newHotseatGame(userId)
             # await ws.send_json({ "type": "game", "mode": "hotseat" , "subtype": "new", "game": newGame() })
-            await sendGame(ws, "hotseat", "new", userId, newGame())
+            await sendGame(ws, "hotseat", "new", gameId, newGame(gameId))
         else:
             hotseatGame, gameId = res
             # mylog.debug(f"found active hotseat game?: {hotseatGame}")
             # await ws.send_json({"type": "game", "mode": "hotseat", "subtype": "continue", "game": hotseatGame, "id": gameId})
-            await sendGame(ws, "hotseat", "continue", userId, hotseatGame)
+            await sendGame(ws, "hotseat", "continue", gameId, hotseatGame)
     except Exception as e:
-        mylog.error(f"failed to startGameHotseat {e}")
+        mylog.error(f"failed to startGameHotseat: {e}")
         await sendError(ws, "a servor error occured failed to start game")
 
 async def updateGame(ws: WebSocket, userId: int, mode: MODES, game: Game, gameId: int):
@@ -96,15 +97,16 @@ async def updateGame(ws: WebSocket, userId: int, mode: MODES, game: Game, gameId
         mylog.error(f"failed to provide update for {mode} game for userId {userId}: {e}")
         await sendError(ws, "a servor error occured failed to get Game")
 
-async def getGame(ws: WebSocket, userId: int, mode: MODES)-> None | tuple[Game, int]:
-    res = None
-    if mode == "hotseat":
-        res = await postgres.fetchHotseatGame(userId)
-    mylog.debug(f"fetchHotseatGame: {res}")
-    if res is None:
+async def getGame(ws: WebSocket, userId: int, mode: MODES, gameId: int)-> None | tuple[Game, int]:
+    # res = None
+    # if mode == "hotseat":
+    #     res = await postgres.fetchHotseatGame(userId)
+    game = await postgres.fetchGame(gameId, mode)
+    # mylog.debug(f"fetchHotseatGame: {res}")
+    if game is None:
         await sendError(ws, "a servor error occured: failed to find game data")
         return None
-    return res
+    return game, gameId
 
 @wsRouter.websocket("")
 async def websocketEndpoint(ws: WebSocket):
@@ -117,7 +119,7 @@ async def websocketEndpoint(ws: WebSocket):
             mylog.debug(f"msg type: {msg}")
             match msg["type"]:
                 case "clientMove":
-                    res = await getGame(ws, userId, msg["mode"])
+                    res = await getGame(ws, userId, msg["mode"], msg["gameId"])
                     if res is None:
                         break
                     gameData, gameId = res
@@ -127,7 +129,7 @@ async def websocketEndpoint(ws: WebSocket):
                 case "startGameHotseat":
                     await startGameHotseat(ws, userId)
                 case "getGameUpdate":
-                    res = await getGame(ws, userId, msg["mode"])
+                    res = await getGame(ws, userId, msg["mode"], msg["gameId"])
                     if res is None:
                         break
                     await updateGame(ws, userId, msg["mode"], res[0], res[1])

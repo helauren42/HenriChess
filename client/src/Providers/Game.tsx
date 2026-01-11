@@ -14,7 +14,7 @@ export interface DataGame {
 }
 
 export const GameProvider = ({ children }: { children: ReactNode }) => {
-  const [gameId, setGameId] = useState<string | null>(null)
+  const [gameId, setGameId] = useState<number | null>(null)
   // const [ws, setWs] = useState<WebSocket>(new WebSocket(SERVER_URL_WS))
   const ws = useRef<WebSocket | null>(null)
   const [board, setBoard] = useState<string>(INITIAL_BOARD)
@@ -61,7 +61,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const rawData = {
       type: "clientMove",
       uciMove: uciMove,
-      mode
+      mode: mode,
+      gameId: gameId
     }
     const stringData = JSON.stringify(rawData)
     ws.current.send(stringData)
@@ -85,14 +86,15 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       unselect()
     }
   }
-  const getGameUpdate = () => {
+  const getGameUpdate = (tempId: number | null = null) => {
     console.log("getGameUpdate")
     if (!ws.current || ws.current.readyState != ws.current.OPEN) {
       console.log("not ready")
       const id = setInterval(() => {
         if (ws.current && ws.current.readyState === ws.current.OPEN) {
           console.log("finally ready")
-          ws.current?.send(JSON.stringify({ type: "getGameUpdate", mode }))
+          console.log("gameId: ", gameId)
+          ws.current?.send(JSON.stringify({ type: "getGameUpdate", mode, "gameId": tempId ? tempId : gameId }))
           clearInterval(id)
           return
         }
@@ -100,7 +102,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     }
     else {
       console.log("is ready")
-      ws.current?.send(JSON.stringify({ type: "getGameUpdate", mode }))
+      console.log("gameId: ", gameId)
+      ws.current?.send(JSON.stringify({ type: "getGameUpdate", mode, gameId }))
     }
   }
   const startGame = (type: "hotseat" | "online") => {
@@ -115,6 +118,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setGameFens(game.gameFens)
     setGameMoves(game.gameMoves)
     setWinner(game.winner)
+    console.log("game Id from parse Game: ", game.id)
+    setGameId(game.id)
     const gameGensLen = game.gameFens.length
     if (gameGensLen % 2 == 0) {
       setPlayerTurn("b")
@@ -126,6 +131,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       if (data.mode == "hotseat")
         setPlayerColor("w")
     }
+    console.log("game: ", game)
     const currBoard = game.gameFens[gameGensLen - 1].split(" ")[0]
     console.log("currBoard: ", currBoard)
     setBoard(currBoard)
@@ -157,13 +163,14 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
 
       sock.onmessage = (event) => {
-        // console.log('Message from server: ', event.data)
         const data: Record<string, any> = JSON.parse(event.data)
+        console.log('Message from server: ', data)
         switch (data.type) {
           case "game":
             parseGame(data as DataGame)
             break
-          // case "gameMessage":
+          case "gameMessage":
+            break
         }
       }
 
@@ -183,6 +190,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
     makeSocket()
   }, [])
+  useEffect(() => {
+    console.log("new gameId value: ", gameId)
+  }, [gameId])
   return (
     <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, startGame }} >
       {children}
