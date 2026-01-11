@@ -2,22 +2,36 @@ import { useContext } from "react"
 import { GameMovesHistory } from "../../componants/Play"
 import { Game } from "./Game"
 import { Panel } from "./Panel"
-import { GameResult } from "./Result"
 import { GameContext } from "../../Contexts/Game"
 
+const LowerPanelHotseat = () => {
+  const { winner, restartGame, startGame } = useContext(GameContext)
+  return (
+    <div id="lower-panel-hotseat">
+      <button onClick={() => {
+        if (winner)
+          startGame()
+        else
+          restartGame()
+      }} >{winner ? "Replay" : "Restart"}</button>
+    </div>
+  )
+}
+
 export const HotseatGame = () => {
-  const { winner } = useContext(GameContext)
+  const { winner, mode } = useContext(GameContext)
   return (
     <div className="w-full flex items-center gap-2 justify-evenly">
       <Game />
       <Panel>
         <h3>Hotseat Game</h3>
         <GameMovesHistory />
-        {
-          winner ?
-            <GameResult winner={winner} />
-            : null
-        }
+        {/* { */}
+        {/*   winner ? */}
+        {/*     <GameResult winner={winner} /> */}
+        {/*     : null */}
+        {/* } */}
+        <LowerPanelHotseat />
       </Panel>
     </div>
   )

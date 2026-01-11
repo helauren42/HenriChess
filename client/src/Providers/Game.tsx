@@ -106,10 +106,17 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       ws.current?.send(JSON.stringify({ type: "getGameUpdate", mode, gameId }))
     }
   }
-  const startGame = (type: "hotseat" | "online") => {
+  const restartGame = () => {
+    if (!ws.current)
+      return wsErrorNotOpen("re start game")
+    const fullType = "restartGame" + mode[0].toUpperCase() + mode.slice(1)
+    console.log(fullType)
+    ws.current.send(JSON.stringify({ type: fullType }))
+  }
+  const startGame = () => {
     if (!ws.current)
       return wsErrorNotOpen("start game")
-    const fullType = "startGame" + type[0].toUpperCase() + type.slice(1)
+    const fullType = "startGame" + mode[0].toUpperCase() + mode.slice(1)
     console.log(fullType)
     ws.current.send(JSON.stringify({ type: fullType }))
   }
@@ -194,7 +201,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, startGame }} >
+    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGame }} >
       {children}
     </GameContext.Provider>
   )

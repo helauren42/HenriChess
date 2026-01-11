@@ -69,10 +69,15 @@ async def handleGameMove(ws: WebSocket, userId: int, uciMove: str, gameData: Gam
         await sendError(ws, "Error failed to make move")
         return None
 
-async def startGameHotseat(ws: WebSocket, userId: int):
+async def startGameHotseat(ws: WebSocket, userId: int, re: bool = False):
     mylog.debug("startGameHotseat")
     try:
         res = await postgres.fetchHotseatGame(userId, None, True)
+        if re and res is not None:
+            mylog.debug("deleteActiveGame")
+            game, gameId = res
+            await postgres.deleteActiveGame("hotseat", gameId)
+            res = None
         mylog.debug(f"res: {res}")
         if res is None:
             gameId = await postgres.newHotseatGame(userId)
@@ -128,6 +133,8 @@ async def websocketEndpoint(ws: WebSocket):
                         await updateGame(ws, userId, msg["mode"], updatedGame, gameId)
                 case "startGameHotseat":
                     await startGameHotseat(ws, userId)
+                case "restartGameHotseat":
+                    await startGameHotseat(ws, userId, True)
                 case "getGameUpdate":
                     res = await getGame(ws, userId, msg["mode"], msg["gameId"])
                     if res is None:

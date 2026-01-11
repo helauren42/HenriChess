@@ -59,7 +59,8 @@ export interface GameFace {
   // WS
   ws: RefObject<WebSocket | null>
   clientMove: (uciMove: string) => void
-  startGame: (type: "hotseat" | "online") => void
+  restartGame: () => void
+  startGame: () => void
 }
 
 export const GameContext = createContext<GameFace>({
@@ -95,7 +96,10 @@ export const GameContext = createContext<GameFace>({
   clientMove(uciMove: string) {
     console.error("used outside of context")
   },
-  startGame(type: "hotseat" | "online") {
+  restartGame() {
+    console.error("used outside of context")
+  },
+  startGame() {
     console.error("used outside of context")
   },
 })

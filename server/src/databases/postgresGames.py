@@ -100,4 +100,7 @@ class PostgresGames(APostgres):
                     raise Exception("db error")
 
     async def storeGameResult(self, mode: MODES, gameId: int, winner: Literal["w", "b", "d"]):
-        await self.execCommit(f"update {mode}games set winner=%s", (winner, ))
+        await self.execCommit(f"update {mode}games set winner=%s where id=%s", (winner, gameId ))
+
+    async def deleteActiveGame(self, mode: MODES, gameId: int):
+        await self.execCommit(f"delete from {mode}games where id=%s", values=(gameId, ))
