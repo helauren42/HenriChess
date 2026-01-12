@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { GameContext, type GameUpdateFace, type GameMoveFace, type SelectedFace } from "../Contexts/Game.tsx";
 import { isBlack, isWhite } from "../utils/Game";
 import { INITIAL_BOARD, SERVER_URL_WS } from "../utils/const.tsx";
 import { ToastCustomError } from "../utils/toastify.tsx";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../Contexts/User.tsx";
 
 export interface DataGame {
   "type": "game",
@@ -14,6 +15,7 @@ export interface DataGame {
 }
 
 export const GameProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useContext(UserContext)
   const [gameId, setGameId] = useState<number | null>(null)
   // const [ws, setWs] = useState<WebSocket>(new WebSocket(SERVER_URL_WS))
   const ws = useRef<WebSocket | null>(null)
@@ -106,30 +108,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       ws.current?.send(JSON.stringify({ type: "getGameUpdate", mode, gameId }))
     }
   }
-  const restartGame = () => {
-    if (!ws.current)
-      return wsErrorNotOpen("re start game")
-    const fullType = "restartGame" + mode[0].toUpperCase() + mode.slice(1)
-    console.log(fullType)
-    ws.current.send(JSON.stringify({ type: fullType }))
-  }
-  const startGame = () => {
-    if (!ws.current)
-      return wsErrorNotOpen("start game")
-    const fullType = "startGame" + mode[0].toUpperCase() + mode.slice(1)
-    console.log(fullType)
-    ws.current.send(JSON.stringify({ type: fullType }))
-  }
-  const resignGame = () => {
-    if (!ws.current)
-      return wsErrorNotOpen("start game")
-    ws.current.send(JSON.stringify({
-      type: "resignGame",
-      gameId,
-      mode,
-      playerColor
-    }))
-  }
   const parseGame = (data: DataGame) => {
     const game: GameUpdateFace = data.game
     setGameFens(game.gameFens)
@@ -159,6 +137,37 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     if (data.subtype as string == "continue")
       console.log("!!!prompt user whether he wants to continue or start new game") // TODO
   }
+  const restartGame = () => {
+    if (!ws.current)
+      return wsErrorNotOpen("re start game")
+    const fullType = "restartGame" + mode[0].toUpperCase() + mode.slice(1)
+    console.log(fullType)
+    ws.current.send(JSON.stringify({ type: fullType }))
+  }
+  const startGame = () => {
+    if (!ws.current)
+      return wsErrorNotOpen("start game")
+    const fullType = "startGame" + mode[0].toUpperCase() + mode.slice(1)
+    console.log(fullType)
+    ws.current.send(JSON.stringify({ type: fullType }))
+  }
+  const resignGame = () => {
+    if (!ws.current)
+      return wsErrorNotOpen("start game")
+    ws.current.send(JSON.stringify({
+      type: "resignGame",
+      gameId,
+      mode,
+      playerColor
+    }))
+  }
+  const startMatchmaking = () => {
+    if (!ws.current)
+      return wsErrorNotOpen("startMatchmaking")
+    ws.current.send(JSON.stringify({
+      type: "startMatchmaking"
+    }))
+  }
   useEffect(() => {
     console.log("board: ", board)
   }, [board])
@@ -168,47 +177,60 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       elem!.style.filter = "brightness(0.8)"
     }
   }, [selected])
-  useEffect(() => {
-    const makeSocket = () => {
-      const sock = new WebSocket(SERVER_URL_WS)
+  const makeSocket = () => {
+    const sock = new WebSocket(SERVER_URL_WS)
+    const timeout = setTimeout(() => {
+      if (sock.readyState != sock.OPEN)
+        sock.close()
+    }, 4000)
 
-      sock.onopen = (e) => {
-        console.log("websocket on open: ", e)
-      }
+    sock.onopen = (e) => {
+      clearTimeout(timeout)
+      console.log("websocket on open: ", e)
+    }
 
-      sock.onmessage = (event) => {
-        const data: Record<string, any> = JSON.parse(event.data)
-        console.log('Message from server: ', data)
-        switch (data.type) {
-          case "game":
-            parseGame(data as DataGame)
-            break
-          case "gameMessage":
-            break
-        }
-      }
+    sock.onerror = (e) => {
+      clearTimeout(timeout)
+      console.error("websocket on error: ", e)
+    }
 
-      sock.onerror = (e) => {
-        console.error("websocket on error: ", e)
-      }
-
-      sock.onclose = (e) => {
-        console.log("websocket on close: ", e)
-        ws.current?.close()
-        ws.current = null
-        setTimeout(makeSocket, 1000)
-      };
-
-      ws.current = sock
+    sock.onclose = (e) => {
+      clearTimeout(timeout)
+      console.log("websocket on close: ", e)
+      ws.current?.close()
+      ws.current = null
+      relaunchMakeSocket()
     };
 
+    sock.onmessage = (event) => {
+      const data: Record<string, any> = JSON.parse(event.data)
+      console.log('Message from server: ', data)
+      switch (data.type) {
+        case "game":
+          parseGame(data as DataGame)
+          break
+        case "gameMessage":
+          break
+      }
+    }
+
+    ws.current = sock
+  };
+  const relaunchMakeSocket = async () => {
+    const found = await cookieStore.get("sessionToken")
+    console.log("FOUND: ", found)
+    if (found)
+      setTimeout(makeSocket, 200)
+  }
+
+  useEffect(() => {
     makeSocket()
   }, [])
   useEffect(() => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGame, resignGame }} >
+    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGame, resignGame, startMatchmaking }} >
       {children}
     </GameContext.Provider>
   )

@@ -27,7 +27,7 @@ export const ChooseGame = () => {
       }} />
       <GameModeBlock title="Play Hotseat" subtitle="Play on your computer" handleClick={() => {
         console.log("clicked play hotseat")
-        startGame("hotseat")
+        startGame()
       }} />
     </>
   )

@@ -62,6 +62,8 @@ export interface GameFace {
   restartGame: () => void
   startGame: () => void
   resignGame: () => void
+  // Online Game
+  startMatchmaking: () => void
 }
 
 export const GameContext = createContext<GameFace>({
@@ -104,6 +106,10 @@ export const GameContext = createContext<GameFace>({
     console.error("used outside of context")
   },
   resignGame() {
+    console.error("used outside of context")
+  },
+  // Online Game
+  startMatchmaking() {
     console.error("used outside of context")
   },
 })
