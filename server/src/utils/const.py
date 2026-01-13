@@ -3,7 +3,12 @@ from typing import Literal
 import dotenv
 import os
 
+from fastapi import WebSocket
+
 from utils.logger import mylog
+
+matchmakePool: list[int] = []
+onlinePlayers: dict[int, WebSocket] = {} # userId, WebSocket
 
 if dotenv.load_dotenv() is False:
     mylog.critical("failed load env file")

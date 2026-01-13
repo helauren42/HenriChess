@@ -57,13 +57,15 @@ export interface GameFace {
   squareClick: (id: string, piece: string) => void
   getFileNum: (file: string) => number
   // WS
-  ws: RefObject<WebSocket | null>
+  ws: WebSocket | null
+  setWs: Dispatch<SetStateAction<WebSocket | null>>
   clientMove: (uciMove: string) => void
   restartGame: () => void
   startGame: () => void
   resignGame: () => void
   // Online Game
   startMatchmaking: () => void
+  endMatchmaking: () => void
 }
 
 export const GameContext = createContext<GameFace>({
@@ -95,7 +97,8 @@ export const GameContext = createContext<GameFace>({
     return 0
   },
   // WS
-  ws: { current: null },
+  ws: null,
+  setWs: () => console.error("used outside of context"),
   clientMove(uciMove: string) {
     console.error("used outside of context")
   },
@@ -110,6 +113,9 @@ export const GameContext = createContext<GameFace>({
   },
   // Online Game
   startMatchmaking() {
+    console.error("used outside of context")
+  },
+  endMatchmaking() {
     console.error("used outside of context")
   },
 })

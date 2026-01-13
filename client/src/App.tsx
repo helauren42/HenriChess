@@ -10,7 +10,7 @@ import { ToastSessionExpired } from './utils/toastify'
 import { PlayPage } from './Pages/Play/PlayPage'
 import { HotseatGame } from './Pages/Play/HotseatGame'
 import { OnlineGame } from './Pages/Play/OnlineGame'
-import { ChooseGame } from './Pages/Play/Panel'
+import { MatchmakeOnline } from './Pages/Play/MatchmakeOnline'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
@@ -54,6 +54,7 @@ function App() {
           <Route path='/play/' element={<PlayPage />} />
           <Route path='/play/hotseat/*' element={<HotseatGame />} />
           <Route path='/play/online/*' element={<OnlineGame />} />
+          <Route path='/play/matchmake-online' element={<MatchmakeOnline />} />
           <Route path='/user/*' element={<UserPage />} />
         </Route>
       </Routes>

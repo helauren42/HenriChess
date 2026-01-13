@@ -4,14 +4,15 @@ from fastapi import APIRouter
 from databases.postgres import postgres
 from databases.postgresGames import Game, GameMove
 from utils.api import getUserId
-from utils.const import MODES
+from utils.const import MODES, matchmakePool, onlinePlayers
 from utils.logger import mylog
 import chess
+import random
 
 wsRouter = APIRouter(prefix="/ws")
 
 def newGame(gameId: int)-> Game:
-    return Game(gameFens=['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'], gameMoves=[], winner=None, id=gameId)
+    return Game(gameFens=['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'], gameMoves=[], winner=None, whiteUsername="white", blackUsername="black", id=gameId)
 
 async def sendError(ws: WebSocket, msg: str):
     await ws.send_json({
@@ -95,8 +96,8 @@ async def startGameHotseat(ws: WebSocket, userId: int, re: bool = False):
 async def updateGame(ws: WebSocket, userId: int, mode: MODES, game: Game, gameId: int):
     mylog.debug("updateGame")
     try:
-        await ws.send_json({"type": "game", "mode": "hotseat", "subtype": "update", "game": game, "id": gameId})
-        await sendGame(ws, "hotseat", "update", gameId, game)
+        # await ws.send_json({"type": "game", "mode": mode, "subtype": "update", "game": game, "id": gameId})
+        await sendGame(ws, mode, "update", gameId, game)
         mylog.debug(f"sent update for game {gameId}")
     except Exception as e:
         mylog.error(f"failed to provide update for {mode} game for userId {userId}: {e}")
@@ -117,12 +118,50 @@ async def resignGame(ws: WebSocket, userId: int, mode: MODES, gameId: int, resig
     winner: Literal["w", "b"] = "b" if resignerColor == "w" else "w"
     await postgres.storeGameResult(mode, gameId, winner)
 
+async def matchmakePoolAdd(ws: WebSocket, userId: int):
+    matchmakePool.append(userId)
+    mylog.info(f"active users user ids: {matchmakePool}")
+
+async def matchmakePoolRemove(userId: int):
+    if userId in matchmakePool:
+        matchmakePool.remove(userId)
+        mylog.info(f"active users user ids: {matchmakePool}")
+
+async def findOpponent(userId: int)-> int:
+    if len(matchmakePool) <= 1:
+        return 0
+    for playerId in matchmakePool:
+        if playerId != userId:
+            matchmakePool.remove(playerId)
+            matchmakePool.remove(userId)
+            return playerId
+    return 0
+
+async def startOnlineMatch(userId: int, opponentId: int):
+    color: bool = random.choice([True, False])
+    if color:
+        gameId = await postgres.newOnlineGame(userId, opponentId)
+    else:
+        gameId = await postgres.newOnlineGame(opponentId, userId)
+    game = await postgres.fetchGame(gameId, "online")
+    mylog.debug(f"!!! Found online game: {game}")
+    if game:
+        # await updateGame(onlinePlayers[userId], userId, "online", game, gameId)
+        await sendGame(onlinePlayers[userId], "online", "new", gameId, game)
+        # await updateGame(onlinePlayers[opponentId], opponentId, "online", game, gameId)
+        await sendGame(onlinePlayers[opponentId], "online", "new", gameId, game)
+
 @wsRouter.websocket("")
 async def websocketEndpoint(ws: WebSocket):
-    userId = await getUserId(ws.cookies)
-    await ws.accept()
-    mylog.debug(f"accepted new ws connection")
     try:
+        userId = await getUserId(ws.cookies)
+    except:
+        mylog.debug("refusing ws connection")
+        return
+    try:
+        await ws.accept()
+        onlinePlayers[userId] = ws
+        mylog.debug(f"accepted new ws connection")
         while True:
             msg:dict = await ws.receive_json()
             mylog.debug(f"msg type: {msg}")
@@ -150,8 +189,21 @@ async def websocketEndpoint(ws: WebSocket):
                     if res is None:
                         break
                     await updateGame(ws, userId, msg["mode"], res[0], res[1])
+                case "startMatchmaking":
+                    await matchmakePoolAdd(ws, userId)
+                    mylog.debug("startMatchmaking")
+                    opponentId = await findOpponent(userId)
+                    if opponentId:
+                        await startOnlineMatch(userId, opponentId)
+                case "endMatchmaking":
+                    await matchmakePoolRemove(userId)
+                    mylog.debug("endMatchmaking")
     except WebSocketDisconnect:
         mylog.debug(f"websocket disconnected normally")
     except Exception as e:
         mylog.debug(f"websocket connection failed: {e}")
+    finally:
+        await matchmakePoolRemove(userId)
+        if userId in onlinePlayers:
+            onlinePlayers.pop(userId)
 

@@ -1,6 +1,7 @@
 import { useContext, type ReactNode } from "react"
 import "./Panel.css"
 import { GameContext } from "../../Contexts/Game"
+import { useNavigate } from "react-router-dom"
 
 interface GameModeBlockFace {
   title: string
@@ -19,11 +20,14 @@ const GameModeBlock = ({ title, subtitle, handleClick }: GameModeBlockFace) => {
 
 export const ChooseGame = () => {
   const { startGame } = useContext(GameContext)
+  const nav = useNavigate()
   return (
     <>
       <h3>Choose Game</h3>
       <GameModeBlock title="Play Online" subtitle="Random Matchmaking" handleClick={() => {
         console.log("clicked play online")
+        nav("/play/matchmake-online")
+        // startMatchmaking()
       }} />
       <GameModeBlock title="Play Hotseat" subtitle="Play on your computer" handleClick={() => {
         console.log("clicked play hotseat")

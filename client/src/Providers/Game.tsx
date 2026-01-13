@@ -17,8 +17,8 @@ export interface DataGame {
 export const GameProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useContext(UserContext)
   const [gameId, setGameId] = useState<number | null>(null)
-  // const [ws, setWs] = useState<WebSocket>(new WebSocket(SERVER_URL_WS))
-  const ws = useRef<WebSocket | null>(null)
+  const [ws, setWs] = useState<WebSocket | null>(null)
+  // const ws = useRef<WebSocket | null>(null)
   const [board, setBoard] = useState<string>(INITIAL_BOARD)
   const [mode, setMode] = useState<"hotseat" | "online">("hotseat")
   const [gameFens, setGameFens] = useState<string[]>([])
@@ -58,7 +58,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.error("websocket not open error, failed to " + action)
   }
   const clientMove = (uciMove: string) => {
-    if (!ws.current)
+    if (!ws)
       return wsErrorNotOpen("make move")
     const rawData = {
       type: "clientMove",
@@ -67,7 +67,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       gameId: gameId
     }
     const stringData = JSON.stringify(rawData)
-    ws.current.send(stringData)
+    ws.send(stringData)
     return true
   }
   // ws messages
@@ -90,13 +90,13 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   }
   const getGameUpdate = (tempId: number | null = null) => {
     console.log("getGameUpdate")
-    if (!ws.current || ws.current.readyState != ws.current.OPEN) {
+    if (!ws || ws.readyState != ws.OPEN) {
       console.log("not ready")
       const id = setInterval(() => {
-        if (ws.current && ws.current.readyState === ws.current.OPEN) {
+        if (ws && ws.readyState === ws.OPEN) {
           console.log("finally ready")
           console.log("gameId: ", gameId)
-          ws.current?.send(JSON.stringify({ type: "getGameUpdate", mode, "gameId": tempId ? tempId : gameId }))
+          ws?.send(JSON.stringify({ type: "getGameUpdate", mode, "gameId": tempId ? tempId : gameId }))
           clearInterval(id)
           return
         }
@@ -105,7 +105,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     else {
       console.log("is ready")
       console.log("gameId: ", gameId)
-      ws.current?.send(JSON.stringify({ type: "getGameUpdate", mode, gameId }))
+      ws?.send(JSON.stringify({ type: "getGameUpdate", mode, gameId }))
     }
   }
   const parseGame = (data: DataGame) => {
@@ -138,23 +138,23 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       console.log("!!!prompt user whether he wants to continue or start new game") // TODO
   }
   const restartGame = () => {
-    if (!ws.current)
+    if (!ws)
       return wsErrorNotOpen("re start game")
     const fullType = "restartGame" + mode[0].toUpperCase() + mode.slice(1)
     console.log(fullType)
-    ws.current.send(JSON.stringify({ type: fullType }))
+    ws.send(JSON.stringify({ type: fullType }))
   }
   const startGame = () => {
-    if (!ws.current)
+    if (!ws)
       return wsErrorNotOpen("start game")
     const fullType = "startGame" + mode[0].toUpperCase() + mode.slice(1)
     console.log(fullType)
-    ws.current.send(JSON.stringify({ type: fullType }))
+    ws.send(JSON.stringify({ type: fullType }))
   }
   const resignGame = () => {
-    if (!ws.current)
+    if (!ws)
       return wsErrorNotOpen("start game")
-    ws.current.send(JSON.stringify({
+    ws.send(JSON.stringify({
       type: "resignGame",
       gameId,
       mode,
@@ -162,10 +162,17 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     }))
   }
   const startMatchmaking = () => {
-    if (!ws.current)
+    if (!ws)
       return wsErrorNotOpen("startMatchmaking")
-    ws.current.send(JSON.stringify({
+    ws.send(JSON.stringify({
       type: "startMatchmaking"
+    }))
+  }
+  const endMatchmaking = () => {
+    if (!ws)
+      return wsErrorNotOpen("endMatchmaking")
+    ws.send(JSON.stringify({
+      type: "endMatchmaking"
     }))
   }
   useEffect(() => {
@@ -197,9 +204,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     sock.onclose = (e) => {
       clearTimeout(timeout)
       console.log("websocket on close: ", e)
-      ws.current?.close()
-      ws.current = null
-      relaunchMakeSocket()
+      ws?.close()
+      setWs(null)
     };
 
     sock.onmessage = (event) => {
@@ -213,24 +219,21 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           break
       }
     }
-
-    ws.current = sock
+    setWs(sock)
   };
-  const relaunchMakeSocket = async () => {
-    const found = await cookieStore.get("sessionToken")
-    console.log("FOUND: ", found)
-    if (found)
-      setTimeout(makeSocket, 200)
-  }
-
   useEffect(() => {
-    makeSocket()
-  }, [])
+    if (ws == null || ws?.readyState == ws?.CLOSED || ws?.readyState == ws.CLOSING) {
+      const id = setTimeout(() => {
+        makeSocket()
+      }, 1000)
+      return () => clearTimeout(id)
+    }
+  }, [ws])
   useEffect(() => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGame, resignGame, startMatchmaking }} >
+    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGame, resignGame, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )
