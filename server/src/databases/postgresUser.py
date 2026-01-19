@@ -11,6 +11,18 @@ class APostgresUser(APostgres):
     def __init__(self) -> None:
         super().__init__()
 
+    async def fetchUsername(self, user_id: int) -> None | str:
+        fetched = await self.execFetchone("select username from users where id=%s", (user_id, ))
+        if fetched is None:
+            return None
+        return fetched[0]
+
+    async def fetchUserId(self, username: str) -> int | None:
+        fetched = await self.execFetchone("select id from users where username=%s",(username, ))
+        if fetched is None:
+            return None
+        return fetched[0]
+
     async def deviceTokenExists(self, deviceToken: str) -> bool:
         caught = await self.execFetchone(query="select * from sessions where device_token=%s", values=(deviceToken,))
         return caught is not None

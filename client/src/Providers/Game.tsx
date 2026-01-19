@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useContext, useEffect, useState, type ReactNode } from "react";
 import { GameContext, type GameUpdateFace, type GameMoveFace, type SelectedFace } from "../Contexts/Game.tsx";
 import { isBlack, isWhite } from "../utils/Game";
 import { INITIAL_BOARD, SERVER_URL_WS } from "../utils/const.tsx";
@@ -25,12 +25,17 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [gameMoves, setGameMoves] = useState<GameMoveFace[]>([])
   const [playerColor, setPlayerColor] = useState<"w" | "b">("w")
   const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
+  const [whiteUsername, setWhiteUsername] = useState<string>("")
+  const [blackUsername, setBlackUsername] = useState<string>("")
   const [winner, setWinner] = useState<"w" | "b" | "d" | null>(null)
   const [selected, setSelected] = useState<SelectedFace>({
     id: "",
     rank: 0,
     file: "",
   })
+  useEffect(() => {
+    console.log("!!! user INSIDE game provider: ", user)
+  }, [user])
   // not for context
   const nav = useNavigate()
   // functions
@@ -64,8 +69,10 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       type: "clientMove",
       uciMove: uciMove,
       mode: mode,
-      gameId: gameId
+      gameId: gameId,
+      opponentName: user.username == whiteUsername ? blackUsername : whiteUsername
     }
+    console.log(rawData)
     const stringData = JSON.stringify(rawData)
     ws.send(stringData)
     return true
@@ -89,13 +96,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     }
   }
   const getGameUpdate = (tempId: number | null = null) => {
-    console.log("getGameUpdate")
     if (!ws || ws.readyState != ws.OPEN) {
-      console.log("not ready")
       const id = setInterval(() => {
         if (ws && ws.readyState === ws.OPEN) {
-          console.log("finally ready")
-          console.log("gameId: ", gameId)
           ws?.send(JSON.stringify({ type: "getGameUpdate", mode, "gameId": tempId ? tempId : gameId }))
           clearInterval(id)
           return
@@ -103,8 +106,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }, 100)
     }
     else {
-      console.log("is ready")
-      console.log("gameId: ", gameId)
       ws?.send(JSON.stringify({ type: "getGameUpdate", mode, gameId }))
     }
   }
@@ -116,15 +117,39 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("game Id from parse Game: ", game.id)
     setGameId(game.id)
     const gameGensLen = game.gameFens.length
+    setWhiteUsername(game.whiteUsername)
+    setBlackUsername(game.blackUsername)
+    setMode(data.mode)
+    console.log(user.username)
+    console.log(game.blackUsername)
+    console.log(game.whiteUsername)
     if (gameGensLen % 2 == 0) {
       setPlayerTurn("b")
-      if (data.mode == "hotseat")
+      if (data.mode == "hotseat") {
         setPlayerColor("b")
+      }
+      else {
+        console.log("not hotseat!!!")
+        if (user.username == game.blackUsername)
+          setPlayerColor("b")
+        else
+          setPlayerColor("w")
+      }
     }
     else {
       setPlayerTurn("w")
-      if (data.mode == "hotseat")
+      if (data.mode == "hotseat") {
         setPlayerColor("w")
+      }
+      else {
+        console.log("not hotseat!!!: ", user.username)
+        console.log("not hotseat!!! white: ", game.whiteUsername)
+        console.log("not hotseat!!! black: ", game.blackUsername)
+        if (user.username == game.whiteUsername)
+          setPlayerColor("w")
+        else
+          setPlayerColor("b")
+      }
     }
     console.log("game: ", game)
     const currBoard = game.gameFens[gameGensLen - 1].split(" ")[0]
@@ -184,6 +209,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       elem!.style.filter = "brightness(0.8)"
     }
   }, [selected])
+  useEffect(() => {
+    console.log("ws has updated: ", ws)
+  }, [ws])
   const makeSocket = () => {
     const sock = new WebSocket(SERVER_URL_WS)
     const timeout = setTimeout(() => {
@@ -194,6 +222,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     sock.onopen = (e) => {
       clearTimeout(timeout)
       console.log("websocket on open: ", e)
+      setWs(sock)
     }
 
     sock.onerror = (e) => {
@@ -219,7 +248,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           break
       }
     }
-    setWs(sock)
   };
   useEffect(() => {
     if (ws == null || ws?.readyState == ws?.CLOSED || ws?.readyState == ws.CLOSING) {
@@ -228,12 +256,12 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }, 1000)
       return () => clearTimeout(id)
     }
-  }, [ws])
+  }, [ws, user])
   useEffect(() => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGame, resignGame, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGame, resignGame, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )

@@ -6,3 +6,4 @@ RUN apt update && apt upgrade \
 WORKDIR /app/
 
 CMD ["/bin/sh", "-c", "make server"]
+

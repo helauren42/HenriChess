@@ -1,6 +1,8 @@
 #play-board {
-  height: 90vh;
-  width: 90vh;
+  height: 80vh;
+  width: 80vh;
+  display: flex;
+  flex-direction: column;
   max-height: 55vw;
   max-width: 55vw;
   border-radius: 1rem;

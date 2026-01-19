@@ -1,7 +1,6 @@
 from databases.postgresGames import PostgresGames
-from databases.postgresUser import PostgresUser
 
-class Postgres(PostgresUser, PostgresGames):
+class Postgres(PostgresGames):
     def __init__(self) -> None:
         super().__init__()
 

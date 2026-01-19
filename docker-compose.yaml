@@ -28,7 +28,7 @@ services:
       - "${DB_EXT}:5432"
     volumes:
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./.data/db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     networks:
       - chess-net
     restart: unless-stopped
@@ -42,7 +42,7 @@ services:
     ports:
       - "${REDIS_EXT}:6379"
     volumes:
-      - ./.data/redis_data:/data
+      - redis_data:/data
     networks:
       - chess-net
     restart: unless-stopped
@@ -76,3 +76,7 @@ services:
 networks:
   chess-net:
     driver: bridge
+
+volumes:
+  redis_data:
+  db_data:

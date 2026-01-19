@@ -1,6 +1,6 @@
 import { useContext } from "react"
 import { GameMovesHistory } from "../../componants/Play"
-import { Game } from "./Game"
+import { Game, GameAndPlayers } from "./Game"
 import { Panel } from "./Panel"
 import { GameContext } from "../../Contexts/Game"
 import { GameResult } from "./Result"
@@ -21,10 +21,10 @@ const LowerPanelHotseat = () => {
 }
 
 export const HotseatGame = () => {
-  const { winner, mode } = useContext(GameContext)
+  const { winner } = useContext(GameContext)
   return (
     <div className="w-full flex items-center gap-2 justify-evenly">
-      <Game />
+      <GameAndPlayers />
       <Panel>
         <h3>Hotseat Game</h3>
         <GameMovesHistory />

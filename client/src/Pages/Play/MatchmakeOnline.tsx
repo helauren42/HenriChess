@@ -1,6 +1,8 @@
 import { useContext, useEffect } from "react"
 import { GameContext } from "../../Contexts/Game"
 
+import "../../cssElem/loadingSpinner.css"
+
 // mention if no one there after 15secs
 export const MatchmakeOnline = () => {
   const { startMatchmaking, endMatchmaking, ws } = useContext(GameContext)
@@ -24,7 +26,11 @@ export const MatchmakeOnline = () => {
     }
   }, [ws?.readyState])
   return (
-    <div>
+    <div className="w-full h-full -mt-[8%] flex flex-col justify-center items-center text-center">
+      <div className="w-full flex flex-col items-center gap-15">
+        <h2>Searching for opponents</h2>
+        <div className="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      </div>
     </div>
   )
 }

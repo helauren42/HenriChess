@@ -2,6 +2,7 @@ from typing import Literal, TypedDict
 
 from psycopg.rows import TupleRow
 from databases.apostgres import APostgres
+from databases.postgresUser import PostgresUser
 from utils.const import MODES
 from utils.logger import mylog
 
@@ -17,7 +18,7 @@ class Game(TypedDict):
     blackUsername: str
     id: int
 
-class PostgresGames(APostgres):
+class PostgresGames(PostgresUser):
     def __init__(self) -> None:
         super().__init__()
 
@@ -47,9 +48,11 @@ class PostgresGames(APostgres):
             temp: TupleRow | None = await self.execFetchone(f"select white_id, black_id, winner from onlinegames where id=%s", values=(gameId,))
             if temp is None:
                 return None
-            whiteUsername = temp[0]
-            blackUsername = temp[1]
+            whiteId = temp[0]
+            blackId = temp[1]
             fetchedWinner = temp[2]
+            whiteUsername = str(await self.fetchUsername(whiteId))
+            blackUsername = str(await self.fetchUsername(blackId))
         # game positions
         fetched: list[TupleRow] | None = await self.execFetchall(f"select fen from {mode}gamepositions where game_id=%s order by position_number asc", values=(gameId,))
         if fetched is None:
@@ -102,9 +105,11 @@ class PostgresGames(APostgres):
         return gameId
 
     async def addNewPositionAndMove(self, gameId: int, mode: MODES, fen: str, uciMove: str, san: str):
+        mylog.debug(f"mode: {mode}")
         moveNum = await self.fetchNextMoveNumber(gameId, mode)
         mylog.debug(f"moveNum: {moveNum}")
         positionNum = await self.fetchNextPositionNum(gameId, mode)
+        # mylog.debug("positionNum: ", positionNum)
         async with self.getConn() as conn:
             async with conn.cursor() as cursor:
                 try:

@@ -73,7 +73,6 @@ export const Rank = memo(({ playerColor, rank, pieces }: { playerColor: "w" | "b
     const emptySquares: number = pieces.charCodeAt(i)
     // if it is a digit, the digit represents the number of empty squares on the rank
     if (emptySquares >= 48 && emptySquares <= 57) {
-      console.log(emptySquares)
       for (let j = 48; j < emptySquares; j++) {
         const file = files[fileIndex]
         squares.push(
