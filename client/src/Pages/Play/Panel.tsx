@@ -18,21 +18,28 @@ const GameModeBlock = ({ title, subtitle, handleClick }: GameModeBlockFace) => {
   )
 }
 
-export const ChooseGame = () => {
-  const { startGame } = useContext(GameContext)
+const GameModes = () => {
+  const { startGameHotseat } = useContext(GameContext)
   const nav = useNavigate()
   return (
-    <>
-      <h3>Choose Game</h3>
+    <div className="h-full pt-10 flex flex-col gap-10">
       <GameModeBlock title="Play Online" subtitle="Random Matchmaking" handleClick={() => {
         console.log("clicked play online")
         nav("/play/matchmake-online")
-        // startMatchmaking()
       }} />
       <GameModeBlock title="Play Hotseat" subtitle="Play on your computer" handleClick={() => {
         console.log("clicked play hotseat")
-        startGame()
+        startGameHotseat()
       }} />
+    </div>
+  )
+}
+
+export const ChooseGame = () => {
+  return (
+    <>
+      <h3>Choose Game</h3>
+      <GameModes />
     </>
   )
 }

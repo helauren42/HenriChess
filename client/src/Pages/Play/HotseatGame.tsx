@@ -1,18 +1,19 @@
 import { useContext } from "react"
 import { GameMovesHistory } from "../../componants/Play"
-import { Game, GameAndPlayers } from "./Game"
+import { GameAndPlayers } from "./Game"
 import { Panel } from "./Panel"
 import { GameContext } from "../../Contexts/Game"
 import { GameResult } from "./Result"
 
-const LowerPanelHotseat = () => {
-  const { winner, restartGame, startGame, resignGame } = useContext(GameContext)
+const Buttons = () => {
+  const { winner, restartGame, startGameHotseat, resignGame
+  } = useContext(GameContext)
   return (
     <div id="lower-panel-hotseat" className="flex flex-col gap-3">
       <button onClick={() => resignGame()}>Resign</button>
       <button onClick={() => {
         if (winner)
-          startGame()
+          startGameHotseat()
         else
           restartGame()
       }} >{winner ? "Replay" : "Restart"}</button>
@@ -33,7 +34,7 @@ export const HotseatGame = () => {
             <GameResult winner={winner} />
             : null
         }
-        <LowerPanelHotseat />
+        <Buttons />
       </Panel>
     </div>
   )

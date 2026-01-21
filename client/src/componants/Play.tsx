@@ -26,7 +26,7 @@ export const GameMovesHistory = () => {
       {gameMoves.map((move, index) => {
         if (index % 2 === 0) {
           const whiteMove = move
-          const blackMove = gameMoves[index + 1] // is undefined if last move was white
+          const blackMove = gameMoves[index + 1]
           return (
             <GameMoveHistoryLine key={"move-history-line" + index} whiteSan={whiteMove.san} blackSan={blackMove != undefined ? blackMove.san : undefined} index={index} />
           )

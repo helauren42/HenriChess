@@ -67,7 +67,7 @@ export interface GameFace {
   setWs: Dispatch<SetStateAction<WebSocket | null>>
   clientMove: (uciMove: string) => void
   restartGame: () => void
-  startGame: () => void
+  startGameHotseat: () => void
   resignGame: () => void
   // Online Game
   startMatchmaking: () => void
@@ -115,7 +115,7 @@ export const GameContext = createContext<GameFace>({
   restartGame() {
     console.error("used outside of context")
   },
-  startGame() {
+  startGameHotseat() {
     console.error("used outside of context")
   },
   resignGame() {
