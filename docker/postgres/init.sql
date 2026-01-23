@@ -34,6 +34,13 @@ CREATE TABLE IF NOT EXISTS onlinegames (
   CHECK (white_id <> black_id)
 ) INHERITS(agames);
 
+CREATE TABLE IF NOT EXISTS onlinegamesmessages (
+  id SERIAL PRIMARY KEY,
+  game_id INT REFERENCES onlinegames(id),
+  username TEXT REFERENCES users(username),
+  message TEXT NOT NULL
+)
+
 CREATE INDEX idx_hotseat_games_winner on hotseatgames(winner);
 CREATE INDEX idx_online_games_winner on onlinegames(winner);
 
