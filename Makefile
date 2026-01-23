@@ -52,13 +52,10 @@ resetDb: down
 	sudo rm -rf .data
 	make up
 
-clean: down
-	docker container prune -f
-	docker builder prune --all --force
-	docker images -f "dangling=false" -f "label=org.opencontainers.image.source" -q | sort -u | xargs --no-run-if-empty docker image rm -f
+vclean:
+	docker compose down -v
 
 fclean: down rmpy
-	sudo rm -rf .volumes
-	docker system prune -af
+	docker system prune -af --volumes
 
 .PHONY: down up re server local clean fclean
