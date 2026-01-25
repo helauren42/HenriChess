@@ -1,8 +1,7 @@
 from typing import Literal, TypedDict
 
 from psycopg.rows import TupleRow
-from databases.apostgres import APostgres
-from databases.postgresUser import PostgresUser
+from databases.apostgres.postgresUser import PostgresUser
 from utils.const import MODES
 from utils.logger import mylog
 

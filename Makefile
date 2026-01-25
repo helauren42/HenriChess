@@ -52,6 +52,9 @@ resetDb: down
 	sudo rm -rf .data
 	make up
 
+clean: down
+	docker system prune -af
+
 vclean:
 	docker compose down -v
 

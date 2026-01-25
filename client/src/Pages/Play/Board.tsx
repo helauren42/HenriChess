@@ -63,12 +63,12 @@ export const Square = memo(({ piece, rank, file }: { piece: string, rank: number
     </span>)
 })
 
-export const Rank = memo(({ playerColor, rank, pieces }: { playerColor: "w" | "b", rank: number, pieces: string }) => {
+export const Rank = memo(({ playerColor, rank, pieces }: { playerColor: "w" | "b" | "v", rank: number, pieces: string }) => {
   const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-  const incr = playerColor == "w" ? 1 : -1
+  const incr = playerColor != "b" ? 1 : -1
   const squares = []
-  let i: number = playerColor == "w" ? 0 : pieces.length - 1
-  let fileIndex: number = playerColor == "w" ? 0 : 7
+  let i: number = playerColor != "b" ? 0 : pieces.length - 1
+  let fileIndex: number = playerColor != "b" ? 0 : 7
   while (i >= 0 && i < pieces.length) {
     const emptySquares: number = pieces.charCodeAt(i)
     // if it is a digit, the digit represents the number of empty squares on the rank
@@ -97,11 +97,11 @@ export const Rank = memo(({ playerColor, rank, pieces }: { playerColor: "w" | "b
   )
 })
 
-export const Board = ({ playerColor }: { playerColor: "w" | "b" }) => {
+export const Board = ({ playerColor }: { playerColor: "w" | "b" | "v" }) => {
   const { board } = useContext(GameContext)
   const rankPieces = board.split("/").reverse()
-  const iIncr = playerColor == "w" ? -1 : 1
-  const firstRank = playerColor == "w" ? 7 : 0
+  const iIncr = playerColor == "w" || playerColor == "v" ? -1 : 1
+  const firstRank = playerColor == "w" || playerColor == "v" ? 7 : 0
   const ranks = []
   let i = firstRank
   while (i >= 0 && i <= 7) {
@@ -114,7 +114,6 @@ export const Board = ({ playerColor }: { playerColor: "w" | "b" }) => {
     </div>
   )
 }
-
 
 export const PassiveSquare = memo(({ piece, rank, file }: { piece: string, rank: number, file: string }) => {
   const { getFileNum } = useContext(GameContext)

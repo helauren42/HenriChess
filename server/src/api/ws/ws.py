@@ -2,7 +2,7 @@ from typing import Literal
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 from fastapi import APIRouter
 from databases.postgres import postgres
-from databases.postgresGames import Game, GameMove
+from databases.apostgres.postgresGames import Game, GameMove
 from utils.api import getUserId
 from utils.const import MODES, matchmakePool, onlinePlayers
 from utils.logger import mylog
@@ -156,6 +156,9 @@ async def startOnlineMatch(userId: int, opponentId: int):
 async def websocketEndpoint(ws: WebSocket):
     try:
         userId = await getUserId(ws.cookies)
+        temp = await postgres.fetchUsername(userId)
+        assert temp is not None
+        username = temp
     except:
         mylog.debug("refusing ws connection")
         return
@@ -181,7 +184,7 @@ async def websocketEndpoint(ws: WebSocket):
                 case "getGameUpdate":
                     res = await getGame(ws, userId, msg["mode"], msg["gameId"])
                     if res is None:
-                        # handle this better
+                        # handle this
                         continue
                     await updateGame(ws, userId, msg["mode"], res[0], res[1])
                 case "resignGame":
@@ -198,6 +201,9 @@ async def websocketEndpoint(ws: WebSocket):
                 case "endMatchmaking":
                     await matchmakePoolRemove(userId)
                     mylog.debug("endMatchmaking")
+                # WATCH
+                case "getActiveGames":
+                    mylog.debug("getActiveGames")
     except WebSocketDisconnect:
         mylog.debug(f"websocket disconnected normally")
     except Exception as e:

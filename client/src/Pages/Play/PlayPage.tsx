@@ -1,5 +1,4 @@
 import { PassiveBoard } from "./Board"
-import { Game } from "./Game"
 import { ChooseGame, Panel } from "./Panel"
 
 export const PlayPage = () => {

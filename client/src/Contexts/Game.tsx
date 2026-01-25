@@ -36,8 +36,8 @@ export interface GameUpdateFace {
 export interface GameFace {
   gameId: number | null
   setGameId: Dispatch<SetStateAction<number | null>>
-  playerColor: "w" | "b"
-  setPlayerColor: Dispatch<SetStateAction<"w" | "b">>
+  playerColor: "w" | "b" | "v"
+  setPlayerColor: Dispatch<SetStateAction<"w" | "b" | "v">>
   playerTurn: "w" | "b"
   setPlayerTurn: Dispatch<SetStateAction<"w" | "b">>
   winner: "w" | "b" | "d" | null

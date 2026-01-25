@@ -11,6 +11,7 @@ import { PlayPage } from './Pages/Play/PlayPage'
 import { HotseatGame } from './Pages/Play/HotseatGame'
 import { OnlineGame } from './Pages/Play/OnlineGame'
 import { MatchmakeOnline } from './Pages/Play/MatchmakeOnline'
+import { WatchPage } from './Pages/Watch/Watch'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
@@ -57,6 +58,7 @@ function App() {
           <Route path='/play/hotseat/*' element={<HotseatGame />} />
           <Route path='/play/online/*' element={<OnlineGame />} />
           <Route path='/play/matchmake-online' element={<MatchmakeOnline />} />
+          <Route path='/watch/*' element={<WatchPage />} />
           <Route path='/user/*' element={<UserPage />} />
         </Route>
       </Routes>

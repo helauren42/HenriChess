@@ -1,4 +1,4 @@
-from databases.postgresGames import PostgresGames
+from databases.apostgres.postgresGames import PostgresGames
 
 class Postgres(PostgresGames):
     def __init__(self) -> None:

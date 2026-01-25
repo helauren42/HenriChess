@@ -23,7 +23,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [mode, setMode] = useState<"hotseat" | "online">("hotseat")
   const [gameFens, setGameFens] = useState<string[]>([])
   const [gameMoves, setGameMoves] = useState<GameMoveFace[]>([])
-  const [playerColor, setPlayerColor] = useState<"w" | "b">("w")
+  const [playerColor, setPlayerColor] = useState<"w" | "b" | "v">("w")
   const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
   const [whiteUsername, setWhiteUsername] = useState<string>("")
   const [blackUsername, setBlackUsername] = useState<string>("")
@@ -132,8 +132,10 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         console.log("not hotseat!!!")
         if (user.username == game.blackUsername)
           setPlayerColor("b")
-        else
+        else if (user.username == game.whiteUsername)
           setPlayerColor("w")
+        else
+          setPlayerColor("v")
       }
     }
     else {
@@ -147,8 +149,10 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         console.log("not hotseat!!! black: ", game.blackUsername)
         if (user.username == game.whiteUsername)
           setPlayerColor("w")
-        else
+        else if (user.username == game.blackUsername)
           setPlayerColor("b")
+        else
+          setPlayerColor("v")
       }
     }
     console.log("game: ", game)
@@ -239,12 +243,15 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
     sock.onmessage = (event) => {
       const data: Record<string, any> = JSON.parse(event.data)
+      ws?.send(JSON.stringify({ type: "getActiveGames" }))
       console.log('Message from server: ', data)
       switch (data.type) {
         case "game":
           parseGame(data as DataGame)
           break
         case "gameMessage":
+          break
+        case "activeGames":
           break
       }
     }
@@ -261,7 +268,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGame: startGameHotseat, resignGame, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )

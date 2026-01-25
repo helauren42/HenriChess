@@ -22,7 +22,7 @@ const Buttons = () => {
 }
 
 export const OnlineGame = () => {
-  const { winner } = useContext(GameContext)
+  const { winner, playerColor } = useContext(GameContext)
   return (
     <div className="w-full flex items-center gap-2 justify-evenly">
       <GameAndPlayers />
@@ -34,7 +34,11 @@ export const OnlineGame = () => {
             <GameResult winner={winner} />
             : null
         }
-        <Buttons />
+        {
+          playerColor != "v" ?
+            <Buttons />
+            : null
+        }
       </Panel>
     </div>
   )
