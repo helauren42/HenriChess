@@ -1,7 +1,6 @@
 from abc import ABC
 from random import randint
 import random
-from chess import Literal
 import chess
 import redis.asyncio as redis
 import asyncio
@@ -28,13 +27,13 @@ class AMyRedis(ABC):
         return f"game_move_{gameId}"
 
     def gamePositionKey(self, gameId: int):
-        return f"game_move_{gameId}"
+        return f"game_position_{gameId}"
 
     def gameMoveStr(self, move: GameMove):
         return move.uci + "," + move.san
 
-    def gameMapping(self, game: Game)-> GameMap:
-        self.games.get(self.gameKey(game.id))
+    async def gameMapping(self, game: Game)-> GameMap:
+        await self.games.get(self.gameKey(game.id))
         return {
             "whiteUsername": game.whiteUsername,
             "blackUsername": game.blackUsername,
@@ -69,16 +68,18 @@ class MyRedis(AMyRedis):
         try:
             async with self.lockAddGame:
                 name = self.gameKey(game.id)
-                await self.games.hset(name, mapping=self.gameMapping(game))
-                self.games.hexpire(name, 1200)
+                await self.games.hset(name, mapping=await self.gameMapping(game))
+                await self.games.hexpire(name, 1200)
         except Exception as e:
             mylog.error(f"error adding online game {e}")
 
     async def newOnlineGame(self, username1: str, username2: str, id1: int, id2: int)-> int:
         color: bool = random.choice([True, False])
         id = await self.newGameId()
-        game = Game(id, [chess.STARTING_FEN], [], "", username1, username2, id1, id2)
-        game = Game(id, [chess.STARTING_FEN], [], "", username1, username2, id1, id2)
+        if color:
+            game = Game(id, [chess.STARTING_FEN], [], "", username1, username2, id1, id2)
+        else:
+            game = Game(id, [chess.STARTING_FEN], [], "", username2, username1, id2, id1)
         await self.addGame(game)
         return id
 
@@ -86,14 +87,14 @@ class MyRedis(AMyRedis):
         try:
             async with self.lockAddGame:
                 name = self.gameMoveKey(gameId)
-                self.games.rpush(name, self.gameMoveStr(move))
-                self.games.hexpire(name, 1200)
+                await self.games.rpush(name, self.gameMoveStr(move))
+                await self.games.hexpire(name, 1200)
         except Exception as e:
             mylog.error(f"error adding game move {e}")
 
     async def addOnlineGamePosition(self, fen: str, gameId: int):
         try:
-            self.games.rpush(self.gamePositionKey(gameId), fen)
+            await self.games.rpush(self.gamePositionKey(gameId), fen)
         except Exception as e:
             mylog.error(f"error adding game position {e}")
 
@@ -119,8 +120,8 @@ class MyRedis(AMyRedis):
             if map is None:
                 return None
             return Game(gameId,
-                await self.games.get(self.gamePositionKey(gameId)),
-                await self.games.get(self.gameMoveKey(gameId)),
+                await self.games.lrange(self.gamePositionKey(gameId), 0, -1),
+                await self.games.lrange(self.gameMoveKey(gameId), 0, -1),
                 map["winner"],
                 map["whiteUsername"],
                 map["blackUsername"],
@@ -130,10 +131,10 @@ class MyRedis(AMyRedis):
         except Exception as e:
             mylog.error(f"failed to retrieve curr game state {e}")
 
-    async def updateTime(self, gameId: int):
+    async def updateTime(self, gameId: int, time: int):
         try:
             playerTurn = await self.getPlayerTurn(gameId, True)
-            self.games.hset(self.gameKey(gameId), playerTurn)
+            await self.games.hset(self.gameKey(gameId), playerTurn+"Time", time)
         except Exception as e:
             mylog.debug(f"Redis failed to update time: {e}")
 
