@@ -37,6 +37,8 @@ class AMyRedis(ABC):
         return {
             "whiteUsername": game.whiteUsername,
             "blackUsername": game.blackUsername,
+            "whiteId": game.whiteId,
+            "blackId": game.blackId,
             "whiteTime": game.whiteTime,
             "blackTime": game.blackTime,
             "winner": game.winner
@@ -69,7 +71,7 @@ class MyRedis(AMyRedis):
             async with self.lockAddGame:
                 name = self.gameKey(game.id)
                 await self.games.hset(name, mapping=await self.gameMapping(game))
-                await self.games.hexpire(name, 1200)
+                await self.games.expire(name, 1200)
         except Exception as e:
             mylog.error(f"error adding online game {e}")
 
@@ -88,7 +90,7 @@ class MyRedis(AMyRedis):
             async with self.lockAddGame:
                 name = self.gameMoveKey(gameId)
                 await self.games.rpush(name, self.gameMoveStr(move))
-                await self.games.hexpire(name, 1200)
+                await self.games.expire(name, 1200)
         except Exception as e:
             mylog.error(f"error adding game move {e}")
 
@@ -106,10 +108,14 @@ class MyRedis(AMyRedis):
                 return None
  
             return GameMap(
-                whiteUsername=data[b'whiteUsername'].decode('utf-8'), blackUsername=data[b'blackUsername'].decode('utf-8'),
+                winner=data[b'winner'].decode('utf-8'),
+                whiteUsername=data[b'whiteUsername'].decode('utf-8'),
+                blackUsername=data[b'blackUsername'].decode('utf-8'),
+                whiteId=int(data[b'whiteId']),
+                blackId=int(data[b'blackId']),
                 whiteTime=int(data[b'whiteTime']),
-                blackTime=int(data[b'blackTime']),
-                winner=data[b'winner'].decode('utf-8') if isinstance(data.get(b'winner', data.get('winner', b'')), bytes) else data.get('winner', ''))
+                blackTime=int(data[b'blackTime'])
+        )
         except Exception as e:
             mylog.error(f"error getting game map: {e}")
             return None
@@ -125,6 +131,8 @@ class MyRedis(AMyRedis):
                 map["winner"],
                 map["whiteUsername"],
                 map["blackUsername"],
+                map["whiteId"],
+                map["blackId"],
                 map["whiteTime"],
                 map["blackTime"]
             )
