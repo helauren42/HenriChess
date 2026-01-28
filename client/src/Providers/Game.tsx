@@ -27,7 +27,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
   const [whiteUsername, setWhiteUsername] = useState<string>("")
   const [blackUsername, setBlackUsername] = useState<string>("")
-  const [winner, setWinner] = useState<"w" | "b" | "d" | null>(null)
+  const [winner, setWinner] = useState<"w" | "b" | "d" | "">("")
   const [selected, setSelected] = useState<SelectedFace>({
     id: "",
     rank: 0,
@@ -79,7 +79,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   }
   // ws messages
   const squareClick = (id: string, piece: string) => {
-    if (winner != null)
+    if (winner != "")
       return
     // TODO add check that player clicks piece of appropriate color and type on first and second clicks
     const newRank = parseInt(id[0])
@@ -111,52 +111,24 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   }
   const parseGame = (data: DataGame) => {
     const game: GameUpdateFace = data.game
+    const lastIndex = game.gameFens.length - 1
     setGameFens(game.gameFens)
     setGameMoves(game.gameMoves)
     setWinner(game.winner)
-    console.log("game Id from parse Game: ", game.id)
     setGameId(game.id)
-    const gameGensLen = game.gameFens.length
     setWhiteUsername(game.whiteUsername)
     setBlackUsername(game.blackUsername)
     setMode(data.mode)
-    console.log(user.username)
-    console.log(game.blackUsername)
-    console.log(game.whiteUsername)
-    if (gameGensLen % 2 == 0) {
-      setPlayerTurn("b")
-      if (data.mode == "hotseat") {
-        setPlayerColor("b")
-      }
-      else {
-        console.log("not hotseat!!!")
-        if (user.username == game.blackUsername)
-          setPlayerColor("b")
-        else if (user.username == game.whiteUsername)
-          setPlayerColor("w")
-        else
-          setPlayerColor("v")
-      }
-    }
-    else {
-      setPlayerTurn("w")
-      if (data.mode == "hotseat") {
-        setPlayerColor("w")
-      }
-      else {
-        console.log("not hotseat!!!: ", user.username)
-        console.log("not hotseat!!! white: ", game.whiteUsername)
-        console.log("not hotseat!!! black: ", game.blackUsername)
-        if (user.username == game.whiteUsername)
-          setPlayerColor("w")
-        else if (user.username == game.blackUsername)
-          setPlayerColor("b")
-        else
-          setPlayerColor("v")
-      }
-    }
+    const turnColor: "w" | "b" = game.gameFens[lastIndex].split(" ")[1] as "w" | "b"
+    setPlayerTurn(turnColor)
+    if (user.username == game.blackUsername)
+      setPlayerColor("b")
+    else if (user.username == game.whiteUsername)
+      setPlayerColor("w")
+    else
+      setPlayerColor("v")
     console.log("game: ", game)
-    const currBoard = game.gameFens[gameGensLen - 1].split(" ")[0]
+    const currBoard = game.gameFens[lastIndex].split(" ")[0]
     console.log("currBoard: ", currBoard)
     setBoard(currBoard)
     const gamePath = "/play/" + data.mode + "/" + data.id

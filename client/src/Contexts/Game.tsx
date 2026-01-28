@@ -27,7 +27,7 @@ export interface GameMoveFace {
 export interface GameUpdateFace {
   gameFens: string[]
   gameMoves: GameMoveFace[]
-  winner: "w" | "b" | "d" | null
+  winner: "w" | "b" | "d" | ""
   whiteUsername: string
   blackUsername: string
   id: number
@@ -40,8 +40,8 @@ export interface GameFace {
   setPlayerColor: Dispatch<SetStateAction<"w" | "b" | "v">>
   playerTurn: "w" | "b"
   setPlayerTurn: Dispatch<SetStateAction<"w" | "b">>
-  winner: "w" | "b" | "d" | null
-  setWinner: Dispatch<SetStateAction<"w" | "b" | "d" | null>>
+  winner: "w" | "b" | "d" | ""
+  setWinner: Dispatch<SetStateAction<"w" | "b" | "d" | "">>
   whiteUsername: string
   setWhiteUsername: Dispatch<SetStateAction<string>>
   blackUsername: string
@@ -81,7 +81,7 @@ export const GameContext = createContext<GameFace>({
   setPlayerColor: () => console.error("used outside of context"),
   playerTurn: "w",
   setPlayerTurn: () => console.error("used outside of context"),
-  winner: null,
+  winner: "",
   setWinner: () => console.error("used outside of context"),
   whiteUsername: "",
   setWhiteUsername: () => console.error("used outside of context"),
