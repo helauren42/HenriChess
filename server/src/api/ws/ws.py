@@ -12,6 +12,7 @@ from databases.redis import myred
 from utils.api import getUserId
 from utils.const import MODES, matchmakePool, onlinePlayers
 from utils.logger import mylog
+from manageGames.manageGames import GameMan
 
 wsRouter = APIRouter(prefix="/ws")
 
@@ -92,7 +93,7 @@ async def startGameHotseat(ws: WebSocket, userId: int, re: bool = False):
         else:
             username = await postgres.fetchUsername(userId)
             assert username is not None
-            game = await myred.newHotseatGame(username, userId)
+            game = await GameMan.newHotseatGame(username, userId)
             await sendGame(ws, "hotseat", "continue", game.id, game)
     except Exception as e:
         mylog.error(f"failed to startGameHotseat: {e}")
@@ -192,7 +193,7 @@ async def websocketEndpoint(ws: WebSocket):
                 case "getGameUpdate":
                     # res = await getFinishedGame(ws, userId, msg["mode"], msg["gameId"])
                     # await updateGame(ws, userId, msg["mode"], res[0], res[1])
-                    myred.getActiveGame(msg["mode"], msg["gameId"])
+                    GameMan.getGameUpdate(msg["mode"], msg["gameId"])
                 case "resignGame":
                     await resignGame(ws, userId, msg["mode"], msg["gameId"], msg["playerColor"])
                     res = await getFinishedGame(ws, userId, msg["mode"], msg["gameId"])
