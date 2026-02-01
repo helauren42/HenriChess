@@ -25,12 +25,13 @@ export interface GameMoveFace {
 }
 
 export interface GameUpdateFace {
+  id: number
   gameFens: string[]
   gameMoves: GameMoveFace[]
   winner: "w" | "b" | "d" | ""
   whiteUsername: string
   blackUsername: string
-  id: number
+  // TODO add time
 }
 
 export interface GameFace {

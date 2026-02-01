@@ -1,4 +1,6 @@
 from abc import ABC
+from functools import wraps
+from os import stat
 from random import randint
 import random
 import chess
@@ -6,7 +8,7 @@ import redis.asyncio as redis
 import asyncio
 
 from databases.game import Game, GameMap, GameMove
-from utils.const import Env
+from utils.const import MODES, Env
 from utils.logger import mylog
 
 # TODO
@@ -17,8 +19,17 @@ class AMyRedis(ABC):
         self.usersPool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=0, max_connections=20)
         self.users = redis.Redis(connection_pool=self.usersPool)
 
-        self.gamesPool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=20)
-        self.games = redis.Redis(connection_pool=self.gamesPool)
+        self.onlinePool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=20)
+        self.online = redis.Redis(connection_pool=self.onlinePool)
+
+        self.hotseatPool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=2, max_connections=20)
+        self.hotseat = redis.Redis(connection_pool=self.hotseatPool)
+
+    def modeConnection(self, mode: MODES):
+        if mode == "hotseat":
+            return self.hotseat
+        if mode == "online":
+            return self.online
 
     def gameKey(self, gameId: int):
         return f"game_{gameId}"
@@ -33,7 +44,7 @@ class AMyRedis(ABC):
         return move.uci + "," + move.san
 
     async def gameMapping(self, game: Game)-> GameMap:
-        await self.games.get(self.gameKey(game.id))
+        await self.online.get(self.gameKey(game.id))
         return {
             "whiteUsername": game.whiteUsername,
             "blackUsername": game.blackUsername,
@@ -45,15 +56,15 @@ class AMyRedis(ABC):
         }
 
     async def newGameId(self)-> int:
-        cursor, keys = await self.games.scan()
+        cursor, keys = await self.online.scan()
         newId = randint(21489392, 82489392)
         while self.gameKey(newId) in keys:
-            # also check that it is not inside postgres as finished games get stored in there
+            # TODO also check that it is not inside postgres as finished games get stored in there
             newId = randint(123774, 823678)
         return newId
 
     async def getPlayerTurn(self, gameId: int, full: bool):
-        lastFen = await self.games.lindex(self.gamePositionKey(gameId), -1)
+        lastFen = await self.online.lindex(self.gamePositionKey(gameId), -1)
         assert lastFen is not None
         i = lastFen.find(" ")
         playerTurn = lastFen[i+1]
@@ -69,11 +80,18 @@ class MyRedis(AMyRedis):
     async def addGame(self, game: Game):
         try:
             async with self.lockAddGame:
+                mylog.debug(f"!!! lockAddGame")
                 name = self.gameKey(game.id)
-                await self.games.hset(name, mapping=await self.gameMapping(game))
-                await self.games.expire(name, 1200)
+                await self.online.hset(name, mapping=await self.gameMapping(game))
+                await self.online.expire(name, 1200)
         except Exception as e:
             mylog.error(f"error adding online game {e}")
+
+    # TODO
+    async def findUserActiveHotseatGame(self, userId: int)-> Game | None:
+        return None
+        # try:
+        #     await self.hotseat.hget()
 
     async def newOnlineGame(self, username1: str, username2: str, id1: int, id2: int)-> int:
         color: bool = random.choice([True, False])
@@ -83,26 +101,41 @@ class MyRedis(AMyRedis):
         else:
             game = Game(id, [chess.STARTING_FEN], [], "", username2, username1, id2, id1)
         await self.addGame(game)
+        await self.addGamePosition(chess.STARTING_FEN, game.id, "online")
         return id
+
+    async def newHotseatGame(self, username1: str, id1: int)-> Game:
+        color: bool = random.choice([True, False])
+        id = await self.newGameId()
+        if color:
+            game = Game(id, [chess.STARTING_FEN], [], "", username1, username1, id1, id1)
+        else:
+            game = Game(id, [chess.STARTING_FEN], [], "", username1, username1, id1, id1)
+        await self.addGame(game)
+        await self.addGamePosition(chess.STARTING_FEN, game.id, "hotseat")
+        return game
 
     async def addOnlineGameMove(self, move: GameMove, gameId: int):
         try:
             async with self.lockAddGame:
                 name = self.gameMoveKey(gameId)
-                await self.games.rpush(name, self.gameMoveStr(move))
-                await self.games.expire(name, 1200)
+                await self.online.rpush(name, self.gameMoveStr(move))
+                await self.online.expire(name, 1200)
         except Exception as e:
             mylog.error(f"error adding game move {e}")
 
-    async def addOnlineGamePosition(self, fen: str, gameId: int):
+    async def addGamePosition(self, fen: str, gameId: int, mode: MODES):
         try:
-            await self.games.rpush(self.gamePositionKey(gameId), fen)
+            if mode == "online":
+                await self.online.rpush(self.gamePositionKey(gameId), fen)
+            else:
+                await self.hotseat.rpush(self.gamePositionKey(gameId), fen)
         except Exception as e:
             mylog.error(f"error adding game position {e}")
 
     async def getGameMap(self, gameId: int) -> GameMap | None:
         try:
-            data = await self.games.hgetall(self.gameKey(gameId))
+            data = await self.online.hgetall(self.gameKey(gameId))
  
             if not data:
                 return None
@@ -126,8 +159,8 @@ class MyRedis(AMyRedis):
             if map is None:
                 return None
             return Game(gameId,
-                await self.games.lrange(self.gamePositionKey(gameId), 0, -1),
-                await self.games.lrange(self.gameMoveKey(gameId), 0, -1),
+                await self.online.lrange(self.gamePositionKey(gameId), 0, -1),
+                await self.online.lrange(self.gameMoveKey(gameId), 0, -1),
                 map["winner"],
                 map["whiteUsername"],
                 map["blackUsername"],
@@ -142,9 +175,13 @@ class MyRedis(AMyRedis):
     async def updateTime(self, gameId: int, time: int):
         try:
             playerTurn = await self.getPlayerTurn(gameId, True)
-            await self.games.hset(self.gameKey(gameId), playerTurn+"Time", time)
+            await self.online.hset(self.gameKey(gameId), playerTurn+"Time", str(time))
         except Exception as e:
             mylog.debug(f"Redis failed to update time: {e}")
+
+    async def getActiveGame(self, mode: MODES, gameId: int):
+        if mode == "hotseat":
+
 
 
 myred = MyRedis()

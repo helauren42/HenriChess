@@ -35,6 +35,7 @@ class Game():
     whiteTime: int = 30000 # 0.01 secs
     blackTime: int = 30000
 
+
 class GameMap(TypedDict):
     winner: Literal["w", "b", "d", ""]
     whiteUsername: str
