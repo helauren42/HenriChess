@@ -19,6 +19,8 @@ function App() {
   const initUser = async () => {
     const storeUsername = localStorage.getItem("username")
     const storeEmail = localStorage.getItem("email")
+    console.log("!!! storeUsername: ", storeUsername)
+    console.log("!!! storeEmail: ", storeEmail)
     if (storeUsername && storeEmail && storeUsername != "") {
       setUser({
         username: storeUsername,

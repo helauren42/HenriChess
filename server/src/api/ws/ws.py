@@ -26,7 +26,7 @@ async def sendError(ws: WebSocket, msg: str):
     })
 
 async def sendGame(ws: WebSocket, mode: MODES, subtype: Literal["new", "continue", "update", "finish"], id: int, game: Game):
-    mylog.debug(f"send game called: {game}")
+    mylog.debug(f"send game called: {asdict(game)}")
     await ws.send_json({
         "type": "game",
         "mode": mode,
@@ -91,15 +91,17 @@ async def startGameHotseat(ws: WebSocket, userId: int, username: str, re: bool =
     try:
         # res = await postgres.fetchHotseatGame(userId, None, True)
         gameId = await myred.findActiveHotseatGameId(username)
-        if gameId and re:
-            activeGame = await myred.getCurrGameState(gameId, "hotseat", username)
-            assert activeGame is not None
-            mylog.debug("deleteActiveGame")
-            # await postgres.deleteActiveGame("hotseat", gameId)
-            res = None
-        if gameId and re is False:
-            pass
-            # send the Game to the client
+        mylog.debug(gameId)
+        if gameId:
+            game = await myred.getCurrGameState(gameId, "hotseat", username)
+            assert game is not None
+            if re:
+                mylog.debug("deleteActiveGame")
+                game = await GameMan.newHotseatGame(username, userId)
+                # await postgres.deleteActiveGame("hotseat", gameId)
+                await sendGame(ws, "hotseat", "continue", game.id, game)
+            else:
+                await sendGame(ws, "hotseat", "new", game.id, game)
         else:
             game = await GameMan.newHotseatGame(username, userId)
             await sendGame(ws, "hotseat", "new", game.id, game)

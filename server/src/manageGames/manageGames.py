@@ -18,9 +18,9 @@ class GameMan():
         color: bool = random.choice([True, False])
         id = await myred.newGameId("hotseat")
         if color:
-            game = Game(id, [chess.STARTING_FEN], [], "", username1, username1, id1, id1)
+            game = Game(id, [chess.STARTING_FEN], [], "", "white", "black", id1, id1)
         else:
-            game = Game(id, [chess.STARTING_FEN], [], "", username1, username1, id1, id1)
+            game = Game(id, [chess.STARTING_FEN], [], "", "black", "white", id1, id1)
         await myred.addGame(game, "hotseat", username1)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "hotseat")
         return game

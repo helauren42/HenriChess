@@ -20,7 +20,7 @@ class AMyRedis(ABC):
         self.game = redis.Redis(connection_pool=self.gamePool)
 
     async def extendExpiry(self, name: str):
-        self.game.expire(name, EXPIRY_TIME)
+        await self.game.expire(name, EXPIRY_TIME)
 
     def gameKey(self, gameId: int, mode: MODES, username: Optional[str] = None):
         if mode == "online":
@@ -42,6 +42,14 @@ class AMyRedis(ABC):
 
     def gameMoveStr(self, move: GameMove):
         return move.uci + "," + move.san
+
+    async def decodeList(self, l: list[bytes]):
+        mylog.debug("decodeList")
+        r: list[str] = []
+        for i in range(len(l)):
+            mylog.debug(l[i])
+            r.append(l[i].decode())
+        return r
 
     async def newGameId(self, mode: MODES)-> int:
         cursor, keys = await self.game.scan()
@@ -72,12 +80,11 @@ class AMyRedis(ABC):
             "winner": game.winner
         }
 
-    async def getGameMap(self, gameId: int, mode: MODES, username: str) -> GameMap | None:
+    async def getGameMap(self, gameId: int, mode: MODES, username: Optional[str]) -> GameMap | None:
         try:
             data = await self.game.hgetall(self.gameKey(gameId, mode, username))
             if not data:
                 return None
-            mylog.debug(f"get game map received data: {data}")
             return GameMap(
                 winner=data[b'winner'].decode('utf-8'),
                 whiteUsername=data[b'whiteUsername'].decode('utf-8'),
@@ -96,7 +103,7 @@ class MyRedis(AMyRedis):
         super().__init__()
         self.lockAddGame = asyncio.Lock()
 
-    async def addGame(self, game: Game, mode: MODES, username: Optional[str]):
+    async def addGame(self, game: Game, mode: MODES, username: Optional[str] = None):
         if mode == "hotseat" and username is None:
             raise ValueError("misuse of addGame function if mode is hotseat username must be defined")
         try:
@@ -139,8 +146,8 @@ class MyRedis(AMyRedis):
             if map is None:
                 return None
             return Game(gameId,
-                await self.game.lrange(self.gamePositionKey(gameId), 0, -1),
-                await self.game.lrange(self.gameMoveKey(gameId), 0, -1),
+                await  self.decodeList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
+                await  self.decodeList(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
                 map["winner"],
                 map["whiteUsername"],
                 map["blackUsername"],
