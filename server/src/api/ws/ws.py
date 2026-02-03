@@ -87,7 +87,7 @@ async def handleGameMove(ws: WebSocket, mode: MODES, userId: int, uciMove: str, 
         return None
 
 async def startGameHotseat(ws: WebSocket, userId: int, username: str, re: bool = False):
-    mylog.debug("startGameHotseat")
+    mylog.debug(f"startGameHotseat: {username}")
     try:
         # res = await postgres.fetchHotseatGame(userId, None, True)
         gameId = await myred.findActiveHotseatGameId(username)
@@ -102,7 +102,7 @@ async def startGameHotseat(ws: WebSocket, userId: int, username: str, re: bool =
             # send the Game to the client
         else:
             game = await GameMan.newHotseatGame(username, userId)
-            await sendGame(ws, "hotseat", "continue", game.id, game)
+            await sendGame(ws, "hotseat", "new", game.id, game)
     except Exception as e:
         mylog.error(f"failed to startGameHotseat: {e}")
         await sendError(ws, "a servor error occured failed to start game")

@@ -60,8 +60,8 @@ class AMyRedis(ABC):
             return playerTurn
         return "white" if playerTurn == "w" else "black"
 
-    async def gameMapping(self, game: Game)-> GameMap:
-        await self.game.get(self.gameKey(game.id))
+    async def gameMapping(self, game: Game, mode: MODES)-> GameMap:
+        await self.game.get(self.gameKey(game.id, mode))
         return {
             "whiteUsername": game.whiteUsername,
             "blackUsername": game.blackUsername,
@@ -96,14 +96,17 @@ class MyRedis(AMyRedis):
         super().__init__()
         self.lockAddGame = asyncio.Lock()
 
-    async def addGame(self, game: Game, mode: MODES):
+    async def addGame(self, game: Game, mode: MODES, username: Optional[str]):
+        if mode == "hotseat" and username is None:
+            raise ValueError("misuse of addGame function if mode is hotseat username must be defined")
         try:
             async with self.lockAddGame:
                 mylog.debug(f"!!! lockAddGame")
-                name = self.gameKey(game.id, mode)
+                name = self.gameKey(gameId=game.id, mode=mode, username=username)
                 mylog.debug(f"got key: {name}")
-                await self.game.hset(name, mapping=await self.gameMapping(game))
+                await self.game.hset(name, mapping=await self.gameMapping(game, mode))
                 await self.extendExpiry(name)
+                mylog.debug(f"added game: {name}")
         except Exception as e:
             mylog.error(f"error adding online game {e}")
 

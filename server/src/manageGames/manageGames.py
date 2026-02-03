@@ -5,6 +5,7 @@ from databases.postgres import postgres
 from databases.game import Game
 from databases.redis import myred
 from utils.const import MODES
+from utils.logger import mylog
 
 class GameMan():
     @staticmethod
@@ -13,13 +14,14 @@ class GameMan():
 
     @staticmethod
     async def newHotseatGame(username1: str, id1: int)-> Game:
+        mylog.debug(f"new hotseat game: {username1}, {id1}")
         color: bool = random.choice([True, False])
         id = await myred.newGameId("hotseat")
         if color:
             game = Game(id, [chess.STARTING_FEN], [], "", username1, username1, id1, id1)
         else:
             game = Game(id, [chess.STARTING_FEN], [], "", username1, username1, id1, id1)
-        await myred.addGame(game, "hotseat")
+        await myred.addGame(game, "hotseat", username1)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "hotseat")
         return game
 

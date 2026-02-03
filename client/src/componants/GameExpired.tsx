@@ -27,9 +27,10 @@ const BaseModal = ({ title, text, actionButton }: BaseModalFace) => {
 }
 
 const GameExpiredButton = () => {
-  const { startGameHotseat } = useContext(GameContext)
+  const { startGameHotseat, setGameExpired } = useContext(GameContext)
   return (
-    <button onClick={() => startGameHotseat()}>Replay</button>
+    <button onClick={() => { setGameExpired(false); startGameHotseat() }
+    }> Replay</button >
   )
 }
 
