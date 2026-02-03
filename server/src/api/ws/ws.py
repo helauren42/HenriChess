@@ -35,6 +35,14 @@ async def sendGame(ws: WebSocket, mode: MODES, subtype: Literal["new", "continue
         "game": asdict(game),
     })
 
+async def sendGameExpired(ws: WebSocket, gameId: int):
+    mylog.debug(f"sending game expired for gameId: {gameId}")
+    await ws.send_json({
+        "type": "gameExpired",
+        "id": gameId
+    })
+    # TODO HANDLE CLIENT SIDE
+
 async def handleGameMove(ws: WebSocket, mode: MODES, userId: int, uciMove: str, gameData: Game, gameId: int)-> None | Game:
     try:
         mylog.debug(f"handleGameMove: {uciMove}")
@@ -78,21 +86,21 @@ async def handleGameMove(ws: WebSocket, mode: MODES, userId: int, uciMove: str, 
         await sendError(ws, "Error failed to make move")
         return None
 
-async def startGameHotseat(ws: WebSocket, userId: int, re: bool = False):
+async def startGameHotseat(ws: WebSocket, userId: int, username: str, re: bool = False):
     mylog.debug("startGameHotseat")
     try:
         # res = await postgres.fetchHotseatGame(userId, None, True)
-        activeGame = await myred.findUserActiveHotseatGame(userId)
-        if activeGame and re:
+        gameId = await myred.findActiveHotseatGameId(username)
+        if gameId and re:
+            activeGame = await myred.getCurrGameState(gameId, "hotseat", username)
+            assert activeGame is not None
             mylog.debug("deleteActiveGame")
             # await postgres.deleteActiveGame("hotseat", gameId)
             res = None
-        if activeGame and re is False:
+        if gameId and re is False:
             pass
             # send the Game to the client
         else:
-            username = await postgres.fetchUsername(userId)
-            assert username is not None
             game = await GameMan.newHotseatGame(username, userId)
             await sendGame(ws, "hotseat", "continue", game.id, game)
     except Exception as e:
@@ -113,12 +121,12 @@ async def updateGame(ws: WebSocket, userId: int, mode: MODES, game: Game, gameId
         mylog.error(f"failed to provide update for {mode} game for userId {userId}: {e}")
         await sendError(ws, "a servor error occured failed to get Game")
 
-async def getFinishedGame(ws: WebSocket, userId: int, mode: MODES, gameId: int)-> None | tuple[Game, int]:
-    game = await postgres.fetchGame(gameId, mode)
+async def getActiveGame(ws: WebSocket, username: str, mode: MODES, gameId: int)-> Game | None:
+    game = await myred.getCurrGameState(gameId, mode, username)
     if game is None:
         await sendError(ws, "a servor error occured: failed to find game data")
         return None
-    return game, gameId
+    return game
 
 async def resignGame(ws: WebSocket, userId: int, mode: MODES, gameId: int, resignerColor: Literal["w", "b"]):
     winner: Literal["w", "b"] = "b" if resignerColor == "w" else "w"
@@ -165,9 +173,8 @@ async def startOnlineMatch(userId: int, opponentId: int):
 async def websocketEndpoint(ws: WebSocket):
     try:
         userId = await getUserId(ws.cookies)
-        temp = await postgres.fetchUsername(userId)
-        assert temp is not None
-        username = temp
+        username = await postgres.fetchUsername(userId)
+        assert username is not None
     except:
         mylog.debug("refusing ws connection")
         return
@@ -180,20 +187,24 @@ async def websocketEndpoint(ws: WebSocket):
             mylog.debug(f"ws msg: {msg}")
             match msg["type"]:
                 case "clientMove":
-                    res = await getFinishedGame(ws, userId, msg["mode"], msg["gameId"])
-                    assert res is not None
-                    gameData, gameId = res
+                    gameId = msg["gameId"]
+                    gameData = await getActiveGame(ws, username, msg["mode"], gameId)
+                    assert gameData is not None
                     updatedGame = await handleGameMove(ws, msg["mode"], userId, msg["uciMove"], gameData, gameId) # update game object is returned if move was valid otherwise it returns None
                     if updatedGame:
                         await updateGame(ws, userId, msg["mode"], updatedGame, gameId, msg["opponentName"])
                 case "startGameHotseat":
-                    await startGameHotseat(ws, userId)
+                    await startGameHotseat(ws, userId, username)
                 case "restartGameHotseat":
-                    await startGameHotseat(ws, userId, True)
+                    await startGameHotseat(ws, userId, username, True)
                 case "getGameUpdate":
                     # res = await getFinishedGame(ws, userId, msg["mode"], msg["gameId"])
                     # await updateGame(ws, userId, msg["mode"], res[0], res[1])
-                    GameMan.getGameUpdate(msg["mode"], msg["gameId"])
+                    game = await myred.getCurrGameState(msg["gameId"], msg["mode"], username)
+                    if game:
+                        await updateGame(ws, userId, msg["mode"], game, game.id, await GameMan.opponentName(game, username))
+                    else:
+                        await sendGameExpired(ws, msg["gameId"])
                 case "resignGame":
                     await resignGame(ws, userId, msg["mode"], msg["gameId"], msg["playerColor"])
                     res = await getFinishedGame(ws, userId, msg["mode"], msg["gameId"])
