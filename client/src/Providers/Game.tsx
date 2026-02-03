@@ -33,6 +33,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     rank: 0,
     file: "",
   })
+  const [gameExpired, setGameExpired] = useState<boolean>(false)
   useEffect(() => {
     console.log("!!! user INSIDE game provider: ", user)
   }, [user])
@@ -221,6 +222,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         case "game":
           parseGame(data as DataGame)
           break
+        case "gameExpired":
+          setGameExpired(true)
+          break
         case "gameMessage":
           break
         case "activeGames":
@@ -240,7 +244,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )

@@ -24,7 +24,6 @@ export const Game = () => {
     if (mode != "hotseat" && mode != "online")
       return
     const tempId = parseInt(pathSplit[3])
-    console.log("!!! MODE: ", mode)
     setMode(mode)
     setGameId(tempId)
     getGameUpdate(tempId)

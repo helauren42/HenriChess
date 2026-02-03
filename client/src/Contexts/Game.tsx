@@ -70,6 +70,8 @@ export interface GameFace {
   restartGame: () => void
   startGameHotseat: () => void
   resignGame: () => void
+  gameExpired: boolean
+  setGameExpired: Dispatch<SetStateAction<boolean>>
   // Online Game
   startMatchmaking: () => void
   endMatchmaking: () => void
@@ -120,6 +122,10 @@ export const GameContext = createContext<GameFace>({
     console.error("used outside of context")
   },
   resignGame() {
+    console.error("used outside of context")
+  },
+  gameExpired: false,
+  setGameExpired() {
     console.error("used outside of context")
   },
   // Online Game

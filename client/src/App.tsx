@@ -12,14 +12,13 @@ import { HotseatGame } from './Pages/Play/HotseatGame'
 import { OnlineGame } from './Pages/Play/OnlineGame'
 import { MatchmakeOnline } from './Pages/Play/MatchmakeOnline'
 import { WatchPage } from './Pages/Watch/Watch'
+import { GameExpired } from './componants/GameExpired'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
   const initUser = async () => {
     const storeUsername = localStorage.getItem("username")
     const storeEmail = localStorage.getItem("email")
-    console.log("!!! storeUsername: ", storeUsername)
-    console.log("!!! storeEmail: ", storeEmail)
     if (storeUsername && storeEmail && storeUsername != "") {
       setUser({
         username: storeUsername,
@@ -62,6 +61,7 @@ function App() {
           <Route path='/user/*' element={<UserPage />} />
         </Route>
       </Routes>
+      <GameExpired />
     </>
   )
 }
