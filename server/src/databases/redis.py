@@ -41,14 +41,21 @@ class AMyRedis(ABC):
         return f"game_position_{gameId}"
 
     def gameMoveStr(self, move: GameMove):
-        return move.uci + "," + move.san
+        return move.uci + "|" + move.san
 
     async def decodeList(self, l: list[bytes]):
         mylog.debug("decodeList")
         r: list[str] = []
         for i in range(len(l)):
-            mylog.debug(l[i])
             r.append(l[i].decode())
+        return r
+
+    async def decodeGameMoves(self, l: list[bytes]):
+        mylog.debug(f"decodeGameMoves")
+        r: list[GameMove] = []
+        for i in range(len(l)):
+            sp = l[i].decode().split("|")
+            r.append(GameMove(sp[0], sp[1]))
         return r
 
     async def newGameId(self, mode: MODES)-> int:
@@ -117,7 +124,7 @@ class MyRedis(AMyRedis):
         except Exception as e:
             mylog.error(f"error adding online game {e}")
 
-    async def addOnlineGameMove(self, move: GameMove, gameId: int):
+    async def addGameMove(self, move: GameMove, gameId: int):
         try:
             async with self.lockAddGame:
                 name = self.gameMoveKey(gameId)
@@ -147,7 +154,7 @@ class MyRedis(AMyRedis):
                 return None
             return Game(gameId,
                 await  self.decodeList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
-                await  self.decodeList(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
+                await self.decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
                 map["winner"],
                 map["whiteUsername"],
                 map["blackUsername"],

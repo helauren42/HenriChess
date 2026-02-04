@@ -16,11 +16,12 @@ export interface Pos {
 }
 
 export interface GameMoveFace {
-  moveFrom: string
-  moveTo: string
-  piece: string
-  capturedPiece: string | null
-  promotionTo: string | null
+  // moveFrom: string
+  // moveTo: string
+  // piece: string
+  // capturedPiece: string | null
+  // promotionTo: string | null
+  uci: string
   san: string
 }
 
