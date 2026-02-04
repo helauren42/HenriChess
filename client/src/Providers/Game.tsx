@@ -122,12 +122,16 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setMode(data.mode)
     const turnColor: "w" | "b" = game.gameFens[lastIndex].split(" ")[1] as "w" | "b"
     setPlayerTurn(turnColor)
-    if (user.username == game.blackUsername)
-      setPlayerColor("b")
-    else if (user.username == game.whiteUsername)
-      setPlayerColor("w")
-    else
-      setPlayerColor("v")
+    if (data.mode == "hotseat")
+      setPlayerColor(turnColor)
+    else {
+      if (user.username == game.blackUsername)
+        setPlayerColor("b")
+      else if (user.username == game.whiteUsername)
+        setPlayerColor("w")
+      else
+        setPlayerColor("v")
+    }
     console.log("game: ", game)
     const currBoard = game.gameFens[lastIndex].split(" ")[0]
     console.log("currBoard: ", currBoard)
