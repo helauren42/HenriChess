@@ -1,4 +1,4 @@
-import { createContext, type Dispatch, type RefObject, type SetStateAction } from "react"
+import { createContext, type Dispatch, type SetStateAction } from "react"
 import { INITIAL_BOARD } from "../utils/const"
 
 export const WsContext = createContext({
@@ -29,9 +29,11 @@ export interface GameUpdateFace {
   id: number
   gameFens: string[]
   gameMoves: GameMoveFace[]
-  winner: "w" | "b" | "d" | ""
+  winner: number | null
   whiteUsername: string
   blackUsername: string
+  whiteId: number
+  blackId: number
   // TODO add time
 }
 
@@ -42,12 +44,16 @@ export interface GameFace {
   setPlayerColor: Dispatch<SetStateAction<"w" | "b" | "v">>
   playerTurn: "w" | "b"
   setPlayerTurn: Dispatch<SetStateAction<"w" | "b">>
-  winner: "w" | "b" | "d" | ""
-  setWinner: Dispatch<SetStateAction<"w" | "b" | "d" | "">>
+  winner: null | number
+  setWinner: Dispatch<SetStateAction<null | number>>
   whiteUsername: string
   setWhiteUsername: Dispatch<SetStateAction<string>>
   blackUsername: string
   setBlackUsername: Dispatch<SetStateAction<string>>
+  whiteId: number
+  setWhiteId: Dispatch<SetStateAction<number>>
+  blackId: number
+  setBlackId: Dispatch<SetStateAction<number>>
   // board game
   mode: "hotseat" | "online"
   setMode: Dispatch<SetStateAction<"hotseat" | "online">>
@@ -85,7 +91,7 @@ export const GameContext = createContext<GameFace>({
   setPlayerColor: () => console.error("used outside of context"),
   playerTurn: "w",
   setPlayerTurn: () => console.error("used outside of context"),
-  winner: "",
+  winner: null,
   setWinner: () => console.error("used outside of context"),
   whiteUsername: "",
   setWhiteUsername: () => console.error("used outside of context"),

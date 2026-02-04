@@ -27,7 +27,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
   const [whiteUsername, setWhiteUsername] = useState<string>("")
   const [blackUsername, setBlackUsername] = useState<string>("")
-  const [winner, setWinner] = useState<"w" | "b" | "d" | "">("")
+  const [whiteId, setWhiteId] = useState<number>(0)
+  const [blackId, setBlackId] = useState<number>(0)
+  const [winner, setWinner] = useState<null | number>(null)
   const [selected, setSelected] = useState<SelectedFace>({
     id: "",
     rank: 0,
@@ -80,7 +82,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   }
   // ws messages
   const squareClick = (id: string, piece: string) => {
-    if (winner != "")
+    if (winner)
       return
     // TODO add check that player clicks piece of appropriate color and type on first and second clicks
     const newRank = parseInt(id[0])
@@ -119,6 +121,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setGameId(game.id)
     setWhiteUsername(game.whiteUsername)
     setBlackUsername(game.blackUsername)
+    setWhiteId(game.whiteId)
+    setWhiteId(game.blackId)
     setMode(data.mode)
     const turnColor: "w" | "b" = game.gameFens[lastIndex].split(" ")[1] as "w" | "b"
     setPlayerTurn(turnColor)
@@ -248,7 +252,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )
