@@ -4,7 +4,7 @@ from typing import Optional
 import redis.asyncio as redis
 import asyncio
 
-from databases.game import Game, GameMap, GameMove
+from databases.game import Game, GameMap, GameMove, decodeGameMoves, gameMoveStr
 from utils.const import MODES, Env, EXPIRY_TIME
 from utils.logger import mylog
 
@@ -40,22 +40,11 @@ class AMyRedis(ABC):
     def gamePositionKey(self, gameId: int):
         return f"game_position_{gameId}"
 
-    def gameMoveStr(self, move: GameMove):
-        return move.uci + "|" + move.san
-
-    async def decodeList(self, l: list[bytes]):
+    async def decodeBList(self, l: list[bytes]):
         mylog.debug("decodeList")
         r: list[str] = []
         for i in range(len(l)):
             r.append(l[i].decode())
-        return r
-
-    async def decodeGameMoves(self, l: list[bytes]):
-        mylog.debug(f"decodeGameMoves")
-        r: list[GameMove] = []
-        for i in range(len(l)):
-            sp = l[i].decode().split("|")
-            r.append(GameMove(sp[0], sp[1]))
         return r
 
     async def newGameId(self, mode: MODES)-> int:
@@ -128,7 +117,7 @@ class MyRedis(AMyRedis):
         try:
             async with self.lockAddGame:
                 name = self.gameMoveKey(gameId)
-                await self.game.rpush(name, self.gameMoveStr(move))
+                await self.game.rpush(name, gameMoveStr(move))
                 await self.extendExpiry(name)
         except Exception as e:
             mylog.error(f"error adding game move {e}")
@@ -153,8 +142,8 @@ class MyRedis(AMyRedis):
             if map is None:
                 return None
             return Game(gameId,
-                await  self.decodeList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
-                await self.decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
+                await  self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
+                await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
                 map["winner"],
                 map["whiteUsername"],
                 map["blackUsername"],

@@ -1,6 +1,7 @@
 import random
-from typing import Optional
+from typing import Literal, Optional
 import chess
+from fastapi import WebSocket
 from databases.postgres import postgres
 from databases.game import Game
 from databases.redis import myred
@@ -15,12 +16,8 @@ class GameMan():
     @staticmethod
     async def newHotseatGame(username1: str, id1: int)-> Game:
         mylog.debug(f"new hotseat game: {username1}, {id1}")
-        color: bool = random.choice([True, False])
         id = await myred.newGameId("hotseat")
-        if color:
-            game = Game(id, [chess.STARTING_FEN], [], "", "white", "black", id1, id1)
-        else:
-            game = Game(id, [chess.STARTING_FEN], [], "", "black", "white", id1, id1)
+        game = Game(id, [chess.STARTING_FEN], [], "", "white", "black", id1, id1)
         await myred.addGame(game, "hotseat", username1)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "hotseat")
         return game
@@ -30,9 +27,18 @@ class GameMan():
         color: bool = random.choice([True, False])
         id = await myred.newGameId("online")
         if color:
-            game = Game(id, [chess.STARTING_FEN], [], "", username1, username2, id1, id2)
+            game = Game(id, [chess.STARTING_FEN], [], None, username1, username2, id1, id2)
         else:
-            game = Game(id, [chess.STARTING_FEN], [], "", username2, username1, id2, id1)
+            game = Game(id, [chess.STARTING_FEN], [], None, username2, username1, id2, id1)
         await myred.addGame(game, "online")
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "online")
         return id
+
+    @staticmethod
+    async def resignGame(ws: WebSocket, userId: int, mode: MODES, game: Game):
+        resignerColor = "w" if len(game.gameMoves) % 2 == 0 else "b"
+        winner: int = game.blackId if resignerColor == "w" else game.whiteId
+        game.winner = winner
+        await postgres.storeGameResult(mode, game)
+        return game
+

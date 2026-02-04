@@ -132,10 +132,6 @@ async def getActiveGame(ws: WebSocket, username: str, mode: MODES, gameId: int)-
         return None
     return game
 
-async def resignGame(ws: WebSocket, userId: int, mode: MODES, gameId: int, resignerColor: Literal["w", "b"]):
-    winner: Literal["w", "b"] = "b" if resignerColor == "w" else "w"
-    await postgres.storeGameResult(mode, gameId, winner)
-
 async def matchmakePoolAdd(ws: WebSocket, userId: int):
     matchmakePool.append(userId)
     mylog.info(f"matchmake pool user ids: {matchmakePool}")
@@ -210,10 +206,13 @@ async def websocketEndpoint(ws: WebSocket):
                     else:
                         await sendGameExpired(ws, msg["gameId"])
                 case "resignGame":
-                    await resignGame(ws, userId, msg["mode"], msg["gameId"], msg["playerColor"])
-                    res = await getFinishedGame(ws, userId, msg["mode"], msg["gameId"])
-                    assert res is not None
-                    await updateGame(ws, userId, msg["mode"], res[0], res[1])
+                    game = await myred.getCurrGameState(msg["gameId"], msg["mode"], username)
+                    assert game is not None
+                    if game is None:
+                        continue
+                    game = await GameMan.resignGame(ws, userId, msg["mode"], game)
+                    mylog.debug(f"should be a resigned game: {game.winner}\n{game}")
+                    await updateGame(ws, userId, msg["mode"], game, game.id, await GameMan.opponentName(game, username))
                 case "startMatchmaking":
                     await matchmakePoolAdd(ws, userId)
                     mylog.debug("startMatchmaking")

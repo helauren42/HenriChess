@@ -1,33 +1,36 @@
 from dataclasses import dataclass
-from typing import Literal, TypedDict
+from typing import Literal, Optional, TypedDict
+
+from utils.logger import mylog
 
 @dataclass
 class GameMove():
     uci: str
     san: str
 
-# @dataclass
-# class GameCurr:
-#     id: int
-#     fen: str
-#     last_move: GameMove
-#     whiteUsername: str
-#     blackUsername: str
-#     whiteTime: int
-#     blackTime: int
-#     winner: Literal["w", "b", "d", ""]
-#     def toDict(self) -> dict[str, Any]:
-#         """Convert this GameCurr to a dict with nested last_move."""
-#         data = asdict(self)
-#         data["last_move"] = asdict(self.last_move)
-#         return data
+def gameMoveStr(move: GameMove):
+    return move.uci + "|" + move.san
+
+async def decodeGameMoves(l: list[bytes]):
+    r: list[GameMove] = []
+    for i in range(len(l)):
+        sp = l[i].decode().split("|")
+        r.append(GameMove(sp[0], sp[1]))
+    return r
+
+async def encodeGameMoves(l: list[GameMove]):
+    r: list[str] = []
+    for i in range(len(l)):
+        s = gameMoveStr(l[i])
+        r.append(s)
+    return r
 
 @dataclass
 class Game():
     id: int
     gameFens: list[str]
     gameMoves: list[GameMove]
-    winner: Literal["w", "b", "d", ""]
+    winner: int | None
     whiteUsername: str
     blackUsername: str
     whiteId: int
