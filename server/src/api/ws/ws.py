@@ -17,7 +17,7 @@ from manageGames.manageGames import GameMan
 wsRouter = APIRouter(prefix="/ws")
 
 def newGame(gameId: int, whiteId: int, blackId: int)-> Game:
-    return Game(id=gameId, gameFens=[chess.STARTING_FEN], gameMoves=[], winner="", whiteUsername="white", blackUsername="black", whiteId=whiteId, blackId=blackId)
+    return Game(id=gameId, gameFens=[chess.STARTING_FEN], gameMoves=[], winner=None, whiteUsername="white", blackUsername="black", whiteId=whiteId, blackId=blackId)
 
 async def sendError(ws: WebSocket, msg: str):
     await ws.send_json({

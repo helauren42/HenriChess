@@ -17,7 +17,7 @@ class GameMan():
     async def newHotseatGame(username1: str, id1: int)-> Game:
         mylog.debug(f"new hotseat game: {username1}, {id1}")
         id = await myred.newGameId("hotseat")
-        game = Game(id, [chess.STARTING_FEN], [], "", "white", "black", id1, id1)
+        game = Game(id, [chess.STARTING_FEN], [], None, "white", "black", id1, id1)
         await myred.addGame(game, "hotseat", username1)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "hotseat")
         return game
