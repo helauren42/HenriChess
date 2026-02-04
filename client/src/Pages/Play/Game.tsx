@@ -37,14 +37,16 @@ export const Game = () => {
 }
 
 export const GameAndPlayers = () => {
-  const { whiteUsername, blackUsername } = useContext(GameContext)
+  const { whiteUsername, blackUsername, mode, playerTurn } = useContext(GameContext)
+  const topName = mode == "online" || (mode == "hotseat" && playerTurn == "b") ? whiteUsername : blackUsername
+  const botName = topName == whiteUsername ? blackUsername : whiteUsername
   return (
     <div className="flex flex-col">
-      <PlayerDisplay playerName={whiteUsername} />
+      <PlayerDisplay playerName={topName} />
       <div id="play-board">
         <Game />
       </div>
-      <PlayerDisplay playerName={blackUsername} />
+      <PlayerDisplay playerName={botName} />
     </div>
   )
 }
