@@ -3,7 +3,7 @@ import { GameMovesHistory } from "../../componants/Play"
 import { GameAndPlayers } from "./Game"
 import { Panel } from "./Panel"
 import { GameContext } from "../../Contexts/Game"
-import { GameResult } from "./Result"
+import { ChangeFen, FinishedSubpanel, GameResult } from "./finishedSubpanel"
 
 const Buttons = () => {
   const { winner, restartGame, startGameHotseat, resignGame
@@ -31,11 +31,11 @@ export const HotseatGame = () => {
         <GameMovesHistory />
         {
           winner ?
-            <GameResult winner={winner} />
+            <FinishedSubpanel />
             : null
         }
         <Buttons />
       </Panel>
-    </div>
+    </div >
   )
 }
