@@ -6,7 +6,7 @@ from databases.game import Game, GameMap
 async def getWinnerName(game: Optional[Game], map: Optional[GameMap])-> str | None:
     assert not (game is None and map is None)
     if game:
-        if game.winner == -1:
+        if game.winner is None:
             return None
         if game.whiteId == game.winner:
             return game.whiteUsername
@@ -20,3 +20,9 @@ async def getWinnerName(game: Optional[Game], map: Optional[GameMap])-> str | No
         if map["blackId"] == map["winner"]:
             return map["blackUsername"]
 
+async def getWinnerNameId(winnerId: int | None, blackId: int, whiteId: int, blackUsername: str, whiteUsername: str)-> str | None:
+    if winnerId is None:
+        return None
+    if winnerId == blackId:
+        return blackUsername
+    return whiteUsername

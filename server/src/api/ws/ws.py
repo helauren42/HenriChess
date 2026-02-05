@@ -198,7 +198,7 @@ async def websocketEndpoint(ws: WebSocket):
                 case "getGameUpdate":
                     # res = await getFinishedGame(ws, userId, msg["mode"], msg["gameId"])
                     # await updateGame(ws, userId, msg["mode"], res[0], res[1])
-                    game = await myred.getCurrGameState(msg["gameId"], msg["mode"], username)
+                    game = await GameMan.getGame(msg["gameId"], msg["mode"], username, userId)
                     if game:
                         await updateGame(ws, userId, msg["mode"], game, game.id)
                     else:

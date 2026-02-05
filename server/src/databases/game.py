@@ -12,10 +12,11 @@ class GameMove():
 def gameMoveStr(move: GameMove):
     return move.uci + "|" + move.san
 
-async def decodeGameMoves(l: list[bytes]):
+async def decodeGameMoves(l: list[str]):
     r: list[GameMove] = []
     for i in range(len(l)):
-        sp = l[i].decode().split("|")
+        mylog.debug(f"l[{i}]: {l[i]}")
+        sp = l[i].split("|")
         r.append(GameMove(sp[0], sp[1]))
     return r
 
