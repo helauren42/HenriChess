@@ -14,12 +14,12 @@ class GameMan():
         return game.blackUsername if username == game.blackUsername else game.whiteUsername
 
     @staticmethod
-    async def newHotseatGame(username1: str, id1: int)-> Game:
-        mylog.debug(f"new hotseat game: {username1}, {id1}")
+    async def newHotseatGame(username: str, userId: int)-> Game:
+        mylog.debug(f"new hotseat game: {username}, {userId}")
         id = await myred.newGameId("hotseat")
-        game = Game(id, [chess.STARTING_FEN], [], None, "white", "black", id1, id1)
-        await myred.addGame(game, "hotseat", username1)
-        await myred.addGamePosition(chess.STARTING_FEN, game.id, "hotseat")
+        game = Game(id, [chess.STARTING_FEN], [], None, "white", "black", userId, userId)
+        await myred.addGame(game, "hotseat", username)
+        await myred.addGamePosition(chess.STARTING_FEN, game.id, "hotseat", username)
         return game
 
     @staticmethod
@@ -30,8 +30,8 @@ class GameMan():
             game = Game(id, [chess.STARTING_FEN], [], None, username1, username2, id1, id2)
         else:
             game = Game(id, [chess.STARTING_FEN], [], None, username2, username1, id2, id1)
-        await myred.addGame(game, "online")
-        await myred.addGamePosition(chess.STARTING_FEN, game.id, "online")
+        await myred.addGame(game, "online", None)
+        await myred.addGamePosition(chess.STARTING_FEN, game.id, "online", None)
         return id
 
     @staticmethod

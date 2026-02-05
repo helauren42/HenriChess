@@ -19,26 +19,29 @@ class AMyRedis(ABC):
         self.gamePool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=20)
         self.game = redis.Redis(connection_pool=self.gamePool)
 
-    async def extendExpiry(self, name: str):
-        await self.game.expire(name, EXPIRY_TIME)
+    async def extendGameExpiry(self, gameId: int, mode: MODES, username: Optional[str]):
+        assert not (mode == "hotseat" and username is None)
+        await self.game.expire(self.gameKey(gameId, mode, username), EXPIRY_TIME)
+        await self.game.expire(self.gameMoveKey(gameId), EXPIRY_TIME)
+        await self.game.expire(self.gamePositionKey(gameId), EXPIRY_TIME)
 
     def gameKey(self, gameId: int, mode: MODES, username: Optional[str] = None):
         if mode == "online":
              return str(gameId)
         return str(username) + ":" + str(gameId)
 
-    async def findActiveHotseatGameId(self, username: str)-> None | int:
-        asyncKeys = self.game.scan_iter(f"{username}:*", 1)
-        async for k in asyncKeys:
-            await self.extendExpiry(k)
-            return int(k[len(username)+1:])
-        return None
-
     def gameMoveKey(self, gameId: int):
         return f"game_move_{gameId}"
 
     def gamePositionKey(self, gameId: int):
         return f"game_position_{gameId}"
+
+    async def findActiveHotseatGameId(self, username: str)-> None | int:
+        asyncKeys = self.game.scan_iter(f"{username}:*", 1)
+        async for k in asyncKeys:
+            await self.extendGameExpiry(k, "hotseat", username)
+            return int(k[len(username)+1:])
+        return None
 
     async def decodeBList(self, l: list[bytes]):
         mylog.debug("decodeList")
@@ -99,7 +102,7 @@ class MyRedis(AMyRedis):
         super().__init__()
         self.lockAddGame = asyncio.Lock()
 
-    async def addGame(self, game: Game, mode: MODES, username: Optional[str] = None):
+    async def addGame(self, game: Game, mode: MODES, username: Optional[str]):
         if mode == "hotseat" and username is None:
             raise ValueError("misuse of addGame function if mode is hotseat username must be defined")
         try:
@@ -108,26 +111,25 @@ class MyRedis(AMyRedis):
                 name = self.gameKey(gameId=game.id, mode=mode, username=username)
                 mylog.debug(f"got key: {name}")
                 await self.game.hset(name, mapping=await self.gameMapping(game, mode))
-                await self.extendExpiry(name)
+                await self.extendGameExpiry(game.id, mode, username)
                 mylog.debug(f"added game: {name}")
         except Exception as e:
             mylog.error(f"error adding game {e}")
 
-    async def addGameMove(self, move: GameMove, gameId: int):
+    async def addGameMove(self, move: GameMove, gameId: int, mode: MODES, username: str):
         try:
             async with self.lockAddGame:
                 name = self.gameMoveKey(gameId)
                 await self.game.rpush(name, gameMoveStr(move))
-                await self.extendExpiry(name)
+                await self.extendGameExpiry(gameId, mode, username)
         except Exception as e:
             mylog.error(f"error adding game move {e}")
 
-    async def addGamePosition(self, fen: str, gameId: int, mode: MODES):
+    async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username):
+        mylog.debug(f"addGamePosition fen: {fen}")
         try:
-            if mode == "online":
-                await self.game.rpush(self.gamePositionKey(gameId), fen)
-            else:
-                await self.game.rpush(self.gamePositionKey(gameId), fen)
+            await self.game.rpush(self.gamePositionKey(gameId), fen)
+            await self.extendGameExpiry(gameId, mode, username)
         except Exception as e:
             mylog.error(f"error adding game position {e}")
 

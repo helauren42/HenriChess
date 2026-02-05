@@ -43,7 +43,7 @@ async def sendGameExpired(ws: WebSocket, gameId: int):
     })
     # TODO HANDLE CLIENT SIDE
 
-async def handleGameMove(ws: WebSocket, mode: MODES, userId: int, uciMove: str, gameData: Game, gameId: int)-> None | Game:
+async def handleGameMove(ws: WebSocket, mode: MODES, uciMove: str, gameData: Game, gameId: int, username: str)-> None | Game:
     try:
         mylog.debug(f"handleGameMove: {uciMove}")
         currFen = gameData.gameFens[len(gameData.gameFens) -1]
@@ -62,8 +62,8 @@ async def handleGameMove(ws: WebSocket, mode: MODES, userId: int, uciMove: str, 
             board.push(move)
             mylog.debug("adding new position and move")
             # await postgres.addNewPositionAndMove(gameId, mode, board.fen(), uciMove, san)
-            await myred.addGamePosition(board.fen(), gameId, mode)
-            await myred.addGameMove(GameMove(uciMove, san), gameId)
+            await myred.addGamePosition(board.fen(), gameId, mode, username)
+            await myred.addGameMove(GameMove(uciMove, san), gameId, mode, username)
             mylog.debug("added")
             gameData.gameFens.append(board.fen())
             gameData.gameMoves.append(GameMove(uci=uciMove, san=san))
@@ -71,12 +71,11 @@ async def handleGameMove(ws: WebSocket, mode: MODES, userId: int, uciMove: str, 
             if outcome:
                 match outcome.winner:
                     case False:
-                        gameData.winner = "b"
+                        gameData.winner = gameData.blackId
                     case True:
-                        gameData.winner = "w"
+                        gameData.winner = gameData.whiteId
                     case None:
-                        gameData.winner = "d"
-                await postgres.storeGameResult("hotseat", gameId, gameData.winner)
+                        gameData.winner = 0
             return gameData
         else:
             mylog.debug("move is illegal")
@@ -189,7 +188,7 @@ async def websocketEndpoint(ws: WebSocket):
                     gameId = msg["gameId"]
                     gameData = await getActiveGame(ws, username, msg["mode"], gameId)
                     assert gameData is not None
-                    updatedGame = await handleGameMove(ws, msg["mode"], userId, msg["uciMove"], gameData, gameId) # update game object is returned if move was valid otherwise it returns None
+                    updatedGame = await handleGameMove(ws, msg["mode"], msg["uciMove"], gameData, gameId, username) # update game object is returned if move was valid otherwise it returns None
                     if updatedGame:
                         await updateGame(ws, userId, msg["mode"], updatedGame, gameId)
                 case "startGameHotseat":
