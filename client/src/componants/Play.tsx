@@ -2,13 +2,13 @@ import { memo, useContext, useEffect } from "react"
 import { GameContext } from "../Contexts/Game"
 import "./Play.css"
 
-const GameMoveHistoryLine = memo(({ whiteSan, index, blackSan }: { whiteSan: string, index: number, blackSan: string | undefined }) => {
+const GameMoveHistoryLine = memo(({ whiteUci, index, blackUci }: { whiteUci: string, index: number, blackUci: string | undefined }) => {
   const moveNumber = Math.floor(index / 2) + 1
   return (
     <div key={`move-pair-${index}`} className="flex w-full justify-between">
       <p className="w-8 text-left flex-1">{moveNumber}.</p>
-      <p className="w-20 text-left flex-1">{whiteSan}</p>
-      <p className="w-20 text-right flex-1">{blackSan ?? ""}</p>
+      <p className="w-20 text-left flex-1">{whiteUci}</p>
+      <p className="w-20 text-right flex-1">{blackUci ?? ""}</p>
     </div>
   )
 })
@@ -28,7 +28,7 @@ export const GameMovesHistory = () => {
           const whiteMove = move
           const blackMove = gameMoves[index + 1]
           return (
-            <GameMoveHistoryLine key={"move-history-line" + index} whiteSan={whiteMove.san} blackSan={blackMove != undefined ? blackMove.san : undefined} index={index} />
+            <GameMoveHistoryLine key={"move-history-line" + index} whiteUci={whiteMove.uci} blackUci={blackMove != undefined ? blackMove.uci : undefined} index={index} />
           )
         }
         return null

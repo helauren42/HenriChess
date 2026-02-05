@@ -6,3 +6,5 @@ Dockerfile
 docker-compose.yaml
 README.md
 todo.txt
+*.log
+vector-chess-pieces/

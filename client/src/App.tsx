@@ -12,6 +12,7 @@ import { HotseatGame } from './Pages/Play/HotseatGame'
 import { OnlineGame } from './Pages/Play/OnlineGame'
 import { MatchmakeOnline } from './Pages/Play/MatchmakeOnline'
 import { WatchPage } from './Pages/Watch/Watch'
+import { GameExpired } from './componants/GameExpired'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
@@ -62,6 +63,7 @@ function App() {
           <Route path='/user/*' element={<UserPage />} />
         </Route>
       </Routes>
+      <GameExpired />
     </>
   )
 }

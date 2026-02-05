@@ -27,12 +27,16 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
   const [whiteUsername, setWhiteUsername] = useState<string>("")
   const [blackUsername, setBlackUsername] = useState<string>("")
-  const [winner, setWinner] = useState<"w" | "b" | "d" | null>(null)
+  const [whiteId, setWhiteId] = useState<number>(0)
+  const [blackId, setBlackId] = useState<number>(0)
+  const [winner, setWinner] = useState<null | number>(null)
+  const [winnerName, setWinnerName] = useState<null | string>(null)
   const [selected, setSelected] = useState<SelectedFace>({
     id: "",
     rank: 0,
     file: "",
   })
+  const [gameExpired, setGameExpired] = useState<boolean>(false)
   useEffect(() => {
     console.log("!!! user INSIDE game provider: ", user)
   }, [user])
@@ -79,7 +83,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   }
   // ws messages
   const squareClick = (id: string, piece: string) => {
-    if (winner != null)
+    if (winner)
       return
     // TODO add check that player clicks piece of appropriate color and type on first and second clicks
     const newRank = parseInt(id[0])
@@ -111,52 +115,31 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   }
   const parseGame = (data: DataGame) => {
     const game: GameUpdateFace = data.game
+    const lastIndex = game.gameFens.length - 1
     setGameFens(game.gameFens)
     setGameMoves(game.gameMoves)
     setWinner(game.winner)
-    console.log("game Id from parse Game: ", game.id)
+    setWinnerName(game.winnerName)
     setGameId(game.id)
-    const gameGensLen = game.gameFens.length
     setWhiteUsername(game.whiteUsername)
     setBlackUsername(game.blackUsername)
+    setWhiteId(game.whiteId)
+    setWhiteId(game.blackId)
     setMode(data.mode)
-    console.log(user.username)
-    console.log(game.blackUsername)
-    console.log(game.whiteUsername)
-    if (gameGensLen % 2 == 0) {
-      setPlayerTurn("b")
-      if (data.mode == "hotseat") {
-        setPlayerColor("b")
-      }
-      else {
-        console.log("not hotseat!!!")
-        if (user.username == game.blackUsername)
-          setPlayerColor("b")
-        else if (user.username == game.whiteUsername)
-          setPlayerColor("w")
-        else
-          setPlayerColor("v")
-      }
-    }
+    const turnColor: "w" | "b" = game.gameFens[lastIndex].split(" ")[1] as "w" | "b"
+    setPlayerTurn(turnColor)
+    if (data.mode == "hotseat")
+      setPlayerColor(turnColor)
     else {
-      setPlayerTurn("w")
-      if (data.mode == "hotseat") {
+      if (user.username == game.blackUsername)
+        setPlayerColor("b")
+      else if (user.username == game.whiteUsername)
         setPlayerColor("w")
-      }
-      else {
-        console.log("not hotseat!!!: ", user.username)
-        console.log("not hotseat!!! white: ", game.whiteUsername)
-        console.log("not hotseat!!! black: ", game.blackUsername)
-        if (user.username == game.whiteUsername)
-          setPlayerColor("w")
-        else if (user.username == game.blackUsername)
-          setPlayerColor("b")
-        else
-          setPlayerColor("v")
-      }
+      else
+        setPlayerColor("v")
     }
     console.log("game: ", game)
-    const currBoard = game.gameFens[gameGensLen - 1].split(" ")[0]
+    const currBoard = game.gameFens[lastIndex].split(" ")[0]
     console.log("currBoard: ", currBoard)
     setBoard(currBoard)
     const gamePath = "/play/" + data.mode + "/" + data.id
@@ -249,6 +232,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         case "game":
           parseGame(data as DataGame)
           break
+        case "gameExpired":
+          setGameExpired(true)
+          break
         case "gameMessage":
           break
         case "activeGames":
@@ -268,7 +254,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )

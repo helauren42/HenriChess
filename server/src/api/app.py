@@ -9,7 +9,7 @@ from databases.postgres import postgres
 
 @asynccontextmanager
 async def lifeIsTooShort(app: FastAPI):
-    app.async_pool = await postgres.init_pool()
+    await postgres.init_pool()
     yield
     await postgres.close_pool()
 

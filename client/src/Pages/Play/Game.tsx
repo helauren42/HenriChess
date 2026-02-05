@@ -24,7 +24,6 @@ export const Game = () => {
     if (mode != "hotseat" && mode != "online")
       return
     const tempId = parseInt(pathSplit[3])
-    console.log("!!! MODE: ", mode)
     setMode(mode)
     setGameId(tempId)
     getGameUpdate(tempId)
@@ -38,14 +37,16 @@ export const Game = () => {
 }
 
 export const GameAndPlayers = () => {
-  const { whiteUsername, blackUsername } = useContext(GameContext)
+  const { whiteUsername, blackUsername, playerColor } = useContext(GameContext)
+  const topName = playerColor == "b" ? whiteUsername : blackUsername
+  const botName = topName == whiteUsername ? blackUsername : whiteUsername
   return (
     <div className="flex flex-col">
-      <PlayerDisplay playerName={whiteUsername} />
+      <PlayerDisplay playerName={topName} />
       <div id="play-board">
         <Game />
       </div>
-      <PlayerDisplay playerName={blackUsername} />
+      <PlayerDisplay playerName={botName} />
     </div>
   )
 }

@@ -1,20 +1,13 @@
-export const GameResult = ({ winner }: { winner: "w" | "b" | "d" }) => {
-  let winnerString = ""
-  switch (winner) {
-    case "w":
-      winnerString = "White"
-      break
-    case "b":
-      winnerString = "Black"
-      break
-    default:
-      break
-  }
+import { useContext } from "react"
+import { GameContext } from "../../Contexts/Game"
+
+export const GameResult = ({ winner }: { winner: number }) => {
+  const { winnerName } = useContext(GameContext)
   return (
     <div>
       {
-        winner != "d" ?
-          <h3>Winner is {winnerString}</h3>
+        winner != 0 ?
+          <h3>Winner is {winnerName}</h3>
           :
           <h3>Game resulted in a Draw</h3>
       }

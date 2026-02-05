@@ -1,4 +1,4 @@
-import { createContext, type Dispatch, type RefObject, type SetStateAction } from "react"
+import { createContext, type Dispatch, type SetStateAction } from "react"
 import { INITIAL_BOARD } from "../utils/const"
 
 export const WsContext = createContext({
@@ -16,21 +16,26 @@ export interface Pos {
 }
 
 export interface GameMoveFace {
-  moveFrom: string
-  moveTo: string
-  piece: string
-  capturedPiece: string | null
-  promotionTo: string | null
+  // moveFrom: string
+  // moveTo: string
+  // piece: string
+  // capturedPiece: string | null
+  // promotionTo: string | null
+  uci: string
   san: string
 }
 
 export interface GameUpdateFace {
+  id: number
   gameFens: string[]
   gameMoves: GameMoveFace[]
-  winner: "w" | "b" | "d" | null
+  winner: number | null
+  winnerName: string | null
   whiteUsername: string
   blackUsername: string
-  id: number
+  whiteId: number
+  blackId: number
+  // TODO add time
 }
 
 export interface GameFace {
@@ -40,12 +45,18 @@ export interface GameFace {
   setPlayerColor: Dispatch<SetStateAction<"w" | "b" | "v">>
   playerTurn: "w" | "b"
   setPlayerTurn: Dispatch<SetStateAction<"w" | "b">>
-  winner: "w" | "b" | "d" | null
-  setWinner: Dispatch<SetStateAction<"w" | "b" | "d" | null>>
+  winner: null | number
+  setWinner: Dispatch<SetStateAction<null | string>>
+  winnerName: null | number
+  setWinnerName: Dispatch<SetStateAction<null | string>>
   whiteUsername: string
   setWhiteUsername: Dispatch<SetStateAction<string>>
   blackUsername: string
   setBlackUsername: Dispatch<SetStateAction<string>>
+  whiteId: number
+  setWhiteId: Dispatch<SetStateAction<number>>
+  blackId: number
+  setBlackId: Dispatch<SetStateAction<number>>
   // board game
   mode: "hotseat" | "online"
   setMode: Dispatch<SetStateAction<"hotseat" | "online">>
@@ -69,6 +80,8 @@ export interface GameFace {
   restartGame: () => void
   startGameHotseat: () => void
   resignGame: () => void
+  gameExpired: boolean
+  setGameExpired: Dispatch<SetStateAction<boolean>>
   // Online Game
   startMatchmaking: () => void
   endMatchmaking: () => void
@@ -83,10 +96,16 @@ export const GameContext = createContext<GameFace>({
   setPlayerTurn: () => console.error("used outside of context"),
   winner: null,
   setWinner: () => console.error("used outside of context"),
+  winnerName: null,
+  setWinnerName: () => console.error("used outside of context"),
   whiteUsername: "",
   setWhiteUsername: () => console.error("used outside of context"),
   blackUsername: "",
   setBlackUsername: () => console.error("used outside of context"),
+  whiteId: 0,
+  setWhiteId: () => console.error("used outside of context"),
+  blackId: 0,
+  setBlackId: () => console.error("used outside of context"),
   // board game
   mode: "hotseat",
   setMode: () => console.error("used outside of context"),
@@ -119,6 +138,10 @@ export const GameContext = createContext<GameFace>({
     console.error("used outside of context")
   },
   resignGame() {
+    console.error("used outside of context")
+  },
+  gameExpired: false,
+  setGameExpired() {
     console.error("used outside of context")
   },
   // Online Game
