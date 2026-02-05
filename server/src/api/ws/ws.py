@@ -208,7 +208,7 @@ async def websocketEndpoint(ws: WebSocket):
                     assert game is not None
                     if game is None:
                         continue
-                    game = await GameMan.resignGame(ws, userId, msg["mode"], game)
+                    game = await GameMan.resignGame(ws, userId, msg["mode"], game, username)
                     mylog.debug(f"should be a resigned game: {game.winner}\n{game}")
                     await updateGame(ws, userId, msg["mode"], game, game.id)
                 case "startMatchmaking":

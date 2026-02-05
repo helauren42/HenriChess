@@ -4,6 +4,8 @@ from typing import Optional
 import redis.asyncio as redis
 import asyncio
 
+from redis.commands.helpers import delist
+
 from databases.game import Game, GameMap, GameMove, decodeGameMoves, gameMoveStr
 from utils.const import MODES, Env, EXPIRY_TIME
 from utils.game import getWinnerName
@@ -102,6 +104,11 @@ class MyRedis(AMyRedis):
     def __init__(self):
         super().__init__()
         self.lockAddGame = asyncio.Lock()
+
+    async def removeGame(self, gameId: int, mode: MODES, username: Optional[str]):
+        async with self.lockAddGame:
+            gameKey = self.gameKey(gameId, mode, username)
+            await self.game.delete(self.gameMoveKey(gameId), self.gamePositionKey(gameId), gameKey)
 
     async def addGame(self, game: Game, mode: MODES, username: Optional[str]):
         if mode == "hotseat" and username is None:

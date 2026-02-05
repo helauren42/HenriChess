@@ -36,11 +36,15 @@ class GameMan():
         return id
 
     @staticmethod
-    async def resignGame(ws: WebSocket, userId: int, mode: MODES, game: Game):
-        resignerColor = "w" if len(game.gameMoves) % 2 == 0 else "b"
+    async def resignGame(ws: WebSocket, userId: int, mode: MODES, game: Game, username: str):
+        if mode == "hotseat":
+            resignerColor = "w" if len(game.gameMoves) % 2 == 0 else "b"
+        else:
+            resignerColor = "b" if userId == game.blackId else "w"
         winner: int = game.blackId if resignerColor == "w" else game.whiteId
         game.winner = winner
         game.winnerName = game.blackUsername if resignerColor == "w" else game.whiteUsername
         await postgres.storeGameResult(mode, game)
+        await myred.removeGame(game.id, mode, username)
         return game
 
