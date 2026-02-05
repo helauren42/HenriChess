@@ -73,7 +73,7 @@ class AMyRedis(ABC):
             "blackId": game.blackId,
             "whiteTime": game.whiteTime,
             "blackTime": game.blackTime,
-            "winner": game.winner
+            "winner": game.winner if game.winner is not None else -1
         }
 
     async def getGameMap(self, gameId: int, mode: MODES, username: Optional[str]) -> GameMap | None:
@@ -111,7 +111,7 @@ class MyRedis(AMyRedis):
                 await self.extendExpiry(name)
                 mylog.debug(f"added game: {name}")
         except Exception as e:
-            mylog.error(f"error adding online game {e}")
+            mylog.error(f"error adding game {e}")
 
     async def addGameMove(self, move: GameMove, gameId: int):
         try:
@@ -141,10 +141,14 @@ class MyRedis(AMyRedis):
             map: GameMap | None = await self.getGameMap(gameId, mode, username)
             if map is None:
                 return None
+            winner = map["winner"]
+            if winner == "-1":
+                winner = None
+            mylog.debug(f"winner: {winner}")
             return Game(gameId,
                 await  self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
                 await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
-                map["winner"],
+                winner,
                 map["whiteUsername"],
                 map["blackUsername"],
                 map["whiteId"],

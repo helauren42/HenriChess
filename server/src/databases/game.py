@@ -30,7 +30,7 @@ class Game():
     id: int
     gameFens: list[str]
     gameMoves: list[GameMove]
-    winner: int | None
+    winner: int | None # none is stored as -1 inside redis
     whiteUsername: str
     blackUsername: str
     whiteId: int
@@ -40,7 +40,7 @@ class Game():
 
 
 class GameMap(TypedDict):
-    winner: Literal["w", "b", "d", ""]
+    winner: int
     whiteUsername: str
     blackUsername: str
     whiteId: int
