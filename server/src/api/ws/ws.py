@@ -111,13 +111,13 @@ async def startGameHotseat(ws: WebSocket, userId: int, username: str, re: bool =
         mylog.error(f"failed to startGameHotseat: {e}")
         await sendError(ws, "a servor error occured failed to start game")
 
-async def updateGame(ws: WebSocket, userId: int, mode: MODES, game: Game, gameId: int, opponentName: str | None = None):
+async def updateGame(ws: WebSocket, userId: int, mode: MODES, game: Game, gameId: int):
     mylog.debug("updateGame")
     try:
         await sendGame(ws, mode, "update", gameId, game)
         mylog.debug(f"sent update for game {gameId}")
-        if mode == "online" and opponentName:
-            opponentId = await postgres.fetchUserId(opponentName)
+        if mode == "online":
+            opponentId = game.whiteId if userId == game.blackId else game.blackId
             assert opponentId is not None
             await sendGame(onlinePlayers[opponentId], mode, "update", gameId, game)
             mylog.debug(f"sent update for game {gameId} to opponent")
@@ -191,7 +191,7 @@ async def websocketEndpoint(ws: WebSocket):
                     assert gameData is not None
                     updatedGame = await handleGameMove(ws, msg["mode"], userId, msg["uciMove"], gameData, gameId) # update game object is returned if move was valid otherwise it returns None
                     if updatedGame:
-                        await updateGame(ws, userId, msg["mode"], updatedGame, gameId, msg["opponentName"])
+                        await updateGame(ws, userId, msg["mode"], updatedGame, gameId)
                 case "startGameHotseat":
                     await startGameHotseat(ws, userId, username)
                 case "restartGameHotseat":
@@ -201,7 +201,7 @@ async def websocketEndpoint(ws: WebSocket):
                     # await updateGame(ws, userId, msg["mode"], res[0], res[1])
                     game = await myred.getCurrGameState(msg["gameId"], msg["mode"], username)
                     if game:
-                        await updateGame(ws, userId, msg["mode"], game, game.id, await GameMan.opponentName(game, username))
+                        await updateGame(ws, userId, msg["mode"], game, game.id)
                     else:
                         await sendGameExpired(ws, msg["gameId"])
                 case "resignGame":
@@ -211,7 +211,7 @@ async def websocketEndpoint(ws: WebSocket):
                         continue
                     game = await GameMan.resignGame(ws, userId, msg["mode"], game)
                     mylog.debug(f"should be a resigned game: {game.winner}\n{game}")
-                    await updateGame(ws, userId, msg["mode"], game, game.id, await GameMan.opponentName(game, username))
+                    await updateGame(ws, userId, msg["mode"], game, game.id)
                 case "startMatchmaking":
                     await matchmakePoolAdd(ws, userId)
                     mylog.debug("startMatchmaking")
