@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import string
 from typing import Literal, Optional, TypedDict
 
 from utils.logger import mylog
@@ -31,6 +32,7 @@ class Game():
     gameFens: list[str]
     gameMoves: list[GameMove]
     winner: int | None # none is stored as -1 inside redis
+    winnerName: str | None
     whiteUsername: str
     blackUsername: str
     whiteId: int

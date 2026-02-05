@@ -30,6 +30,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [whiteId, setWhiteId] = useState<number>(0)
   const [blackId, setBlackId] = useState<number>(0)
   const [winner, setWinner] = useState<null | number>(null)
+  const [winnerName, setWinnerName] = useState<null | string>(null)
   const [selected, setSelected] = useState<SelectedFace>({
     id: "",
     rank: 0,
@@ -118,6 +119,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setGameFens(game.gameFens)
     setGameMoves(game.gameMoves)
     setWinner(game.winner)
+    setWinnerName(game.winnerName)
     setGameId(game.id)
     setWhiteUsername(game.whiteUsername)
     setBlackUsername(game.blackUsername)
@@ -252,7 +254,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )

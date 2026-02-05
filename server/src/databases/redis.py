@@ -6,6 +6,7 @@ import asyncio
 
 from databases.game import Game, GameMap, GameMove, decodeGameMoves, gameMoveStr
 from utils.const import MODES, Env, EXPIRY_TIME
+from utils.game import getWinnerName
 from utils.logger import mylog
 
 # TODO
@@ -151,6 +152,7 @@ class MyRedis(AMyRedis):
                 await  self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
                 await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
                 winner,
+                await getWinnerName(None, map),
                 map["whiteUsername"],
                 map["blackUsername"],
                 map["whiteId"],
