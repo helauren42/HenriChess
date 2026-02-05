@@ -151,16 +151,15 @@ async def findOpponent(userId: int)-> int:
             return playerId
     return 0
 
-async def startOnlineMatch(userId: int, opponentId: int):
+async def startOnlineMatch(userId: int, username1: str, opponentId: int):
     mylog.debug(f"starting game: {userId} vs {opponentId}")
         # gameId = await postgres.newOnlineGame(userId, opponentId)
         # gameId = await postgres.newOnlineGame(opponentId, userId)
-    username1 = await postgres.fetchUsername(userId)
     username2 = await postgres.fetchUsername(opponentId)
     assert username1 is not None
     assert username2 is not None
-    gameId = await myred.newOnlineGame(username1, username2, userId, opponentId)
-    game = await myred.getCurrGameState(gameId)
+    gameId = await GameMan.newOnlineGame(username1, username2, userId, opponentId)
+    game = await myred.getCurrGameState(gameId, "online", None)
     assert game is not None
     # mylog.debug(f"!!! Found online game: {game}")
     # if game:
@@ -219,7 +218,7 @@ async def websocketEndpoint(ws: WebSocket):
                     opponentId = await findOpponent(userId)
                     mylog.debug(f"found opponent? {opponentId}")
                     if opponentId:
-                        await startOnlineMatch(userId, opponentId)
+                        await startOnlineMatch(userId, username, opponentId)
                 case "endMatchmaking":
                     await matchmakePoolRemove(userId)
                     mylog.debug("endMatchmaking")
