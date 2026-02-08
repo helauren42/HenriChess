@@ -1,6 +1,7 @@
 import { memo, useContext, useEffect } from "react"
 import { GameContext } from "../Contexts/Game"
 import "./Play.css"
+import { SvgLastPosition, SvgNextPosition, SvgFirstPosition, SvgPreviousPosition } from "../svgs/svgs"
 
 const GameMoveHistoryLine = memo(({ whiteUci, index, blackUci }: { whiteUci: string, index: number, blackUci: string | undefined }) => {
   const moveNumber = Math.floor(index / 2) + 1
@@ -33,6 +34,18 @@ export const GameMovesHistory = () => {
         }
         return null
       })}
+    </div>
+  )
+}
+
+export const ViewMoves = () => {
+  const { setFenIndex, gameFens } = useContext(GameContext)
+  return (
+    <div id="view-moves" className="flex flex-row h-8 justify-between">
+      <SvgFirstPosition onClick={() => setFenIndex(0)} />
+      <SvgPreviousPosition onClick={() => setFenIndex((prev) => Math.max(prev - 1, 0))} />
+      <SvgNextPosition onClick={() => setFenIndex((prev) => Math.min(prev + 1, gameFens.length - 1))} />
+      <SvgLastPosition onClick={() => setFenIndex(gameFens.length - 1)} />
     </div>
   )
 }

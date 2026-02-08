@@ -1,5 +1,6 @@
 import { useContext } from "react"
 import { GameContext } from "../../Contexts/Game"
+import { ViewMoves } from "../../componants/Play"
 
 const GameResult = ({ winner }: { winner: number }) => {
   const { winnerName } = useContext(GameContext)
@@ -29,6 +30,7 @@ export const FinishedSubpanel = () => {
       {
         winner != null ?
           <>
+            <ViewMoves />
             <GameResult winner={winner} />
             <ChangeFen />
           </>

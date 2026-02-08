@@ -8,6 +8,7 @@ import "./UserPage.css"
 import { HotseatHistory, type HotseatHistoryFace } from "../componants/HotseatHistory"
 import { OnlineHistory, type OnlineHistoryFace } from "../componants/OnlineHistory"
 import { addWaitCursor } from "../utils/utils"
+import { SvgAccount } from "../svgs/svgs"
 
 interface UserData {
   username: ""
@@ -31,7 +32,7 @@ const UserDataDisplay = ({ userData }: { userData: UserData }) => {
     <div id="user-data-display" className="flex flex-col gap-5">
       <div className="row-block">
         <div id="profile-pic" className="flex flex-col gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" className="fill-(--button-color)" width="100px" height="100px" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" /></svg>
+          <SvgAccount />
         </div>
         <div className="flex flex-col pt-3">
           <h3>{userData.username}</h3>
