@@ -34,7 +34,7 @@ export const HotseatHistory = ({ hotseatHistory }: { hotseatHistory: HotseatHist
           <tbody>
             {hotseatHistory.map((game) => {
               console.log("date: ", game.date)
-              return (
+              const ret = (
                 <tr key={game.id} id={`${game.id}`} className="game-history-row" onClick={() => viewGame(game.id)}>
                   <td>
                     {game.winnerName === "black" ? (
@@ -47,6 +47,8 @@ export const HotseatHistory = ({ hotseatHistory }: { hotseatHistory: HotseatHist
                   <td className="">{new Date(game.date * 1000).toLocaleDateString()}</td>
                 </tr>
               );
+              document.getElementById("root")!.style.cursor = "auto"
+              return ret
             })}
           </tbody>
         </table>

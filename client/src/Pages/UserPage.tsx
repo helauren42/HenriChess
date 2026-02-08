@@ -5,7 +5,7 @@ import { AuthCompContext } from "../Contexts/AuthComp"
 import { ToastCustomError } from "../utils/toastify"
 
 import "./UserPage.css"
-import { HotseatHistory, type hotseatHistoryFace } from "../componants/HotseatHistory"
+import { HotseatHistory, type HotseatHistoryFace } from "../componants/HotseatHistory"
 
 interface UserData {
   username: ""
@@ -49,7 +49,7 @@ export const UserPage = () => {
     email: "",
     creation: ""
   })
-  const [hotseatHistory, setHotseatHistory] = useState<hotseatHistoryFace[]>([])
+  const [hotseatHistory, setHotseatHistory] = useState<HotseatHistoryFace[]>([])
   const addr = useLocation()
   const splits = addr.pathname.split("/")
   const username = splits[splits.length - 1]
@@ -65,7 +65,7 @@ export const UserPage = () => {
   const fetchHotseatHistory = async () => {
     const resp: MyResp = await readFetch(`/user/hotseat-history/${username}`)
     if (resp.status == 200 && resp.data) {
-      const data = resp.data as hotseatHistoryFace[]
+      const data = resp.data as HotseatHistoryFace[]
       console.log("fetchHotseatHistory data: ", data)
       setHotseatHistory(data)
     }
@@ -74,6 +74,7 @@ export const UserPage = () => {
     // if (localStorage.getItem("username") == null)
     //   openAuth("unauthorized")
     if (username) {
+      document.getElementById("root")!.style.cursor = "wait"
       fetchUser()
       fetchHotseatHistory()
     }

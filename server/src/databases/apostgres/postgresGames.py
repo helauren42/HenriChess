@@ -29,7 +29,7 @@ class PostgresGames(PostgresUser):
         )
 
     async def getGameSnip(self, gameId: int) -> GameSnip | None:
-        row = await self.execFetchone( "SELECT winner_name, black_username, white_username, ARRAY_LENGTH(game_moves, 1), creation FROM games WHERE id=%s", (gameId,))
+        row = await self.execFetchone( "SELECT winner_name, black_username, white_username, ARRAY_LENGTH(game_moves, 1), creation FROM games WHERE id=%s order by creation", (gameId,))
         if row is None:
             return None
         winnerName = row[0]
@@ -41,7 +41,7 @@ class PostgresGames(PostgresUser):
         assert userId is not None or username is not None
         if userId is None and username:
             userId = await self.fetchUserId(username)
-        rows = await self.execFetchall("select id from games where game_mode=%s and (white_id=%s or black_id=%s) order by creation", (mode, userId, userId))
+        rows = await self.execFetchall("select id from games where game_mode=%s and (white_id=%s or black_id=%s) order by creation desc limit 10", (mode, userId, userId))
         ret: list[GameSnip] = []
         if rows is None:
             return ret

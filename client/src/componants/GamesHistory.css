@@ -5,6 +5,7 @@
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
   border-bottom: none;
+  background-color: var(--nav-color);
 }
 
 table {
@@ -13,6 +14,7 @@ table {
   border-bottom-left-radius: 1rem;
   border-bottom-right-radius: 1rem;
   border-spacing: 0;
+  background-color: var(--nav-color);
 }
 
 th {
