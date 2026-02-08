@@ -5,3 +5,11 @@
   padding: 1.5rem;
   margin-top: 1rem;
 }
+
+.row-block {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  text-overflow: ellipsis;
+}
