@@ -13,6 +13,7 @@ import { OnlineGame } from './Pages/Play/OnlineGame'
 import { MatchmakeOnline } from './Pages/Play/MatchmakeOnline'
 import { WatchPage } from './Pages/Watch/Watch'
 import { GameExpired } from './componants/GameExpired'
+import { SocialPage } from './Pages/SocialPage'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
@@ -61,6 +62,7 @@ function App() {
           <Route path='/play/matchmake-online' element={<MatchmakeOnline />} />
           <Route path='/watch/*' element={<WatchPage />} />
           <Route path='/user/*' element={<UserPage />} />
+          <Route path='/social' element={<SocialPage />} />
         </Route>
       </Routes>
       <GameExpired />

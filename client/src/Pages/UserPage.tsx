@@ -7,6 +7,7 @@ import { ToastCustomError, ToastFeatureNotImplemented } from "../utils/toastify"
 import "./UserPage.css"
 import { HotseatHistory, type HotseatHistoryFace } from "../componants/HotseatHistory"
 import { OnlineHistory, type OnlineHistoryFace } from "../componants/OnlineHistory"
+import { addWaitCursor } from "../utils/utils"
 
 interface UserData {
   username: ""
@@ -52,6 +53,7 @@ const UserDataDisplay = ({ userData }: { userData: UserData }) => {
 
 export const UserPage = () => {
   const { openAuth, authComp } = useContext(AuthCompContext)
+  const [dataFetched, setDataFetched] = useState<boolean>(false)
   const [userData, setUserData] = useState<UserData>({
     username: "",
     email: "",
@@ -88,12 +90,13 @@ export const UserPage = () => {
       console.log("fetchHotseatHistory data: ", data)
       setHotseatHistory(data)
     }
+    setDataFetched(true)
   }
   useEffect(() => {
     // if (localStorage.getItem("username") == null)
     //   openAuth("unauthorized")
     if (username) {
-      document.getElementById("root")!.style.cursor = "wait"
+      addWaitCursor()
       fetchUser()
       fetchOnlineHistory()
       fetchHotseatHistory()
@@ -108,7 +111,7 @@ export const UserPage = () => {
               <UserDataDisplay userData={userData} />
             </div >
             <OnlineHistory onlineHistory={onlineHistory} />
-            <HotseatHistory hotseatHistory={hotseatHistory} />
+            <HotseatHistory hotseatHistory={hotseatHistory} dataFetched={dataFetched} />
           </div>
       }
     </>

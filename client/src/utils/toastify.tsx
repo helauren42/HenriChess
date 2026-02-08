@@ -4,7 +4,7 @@ export const ToastFeatureNotImplemented = () => {
   toast.error("This feature has not yet been implemented", {
     toastId: "feature-not-imlemented",
     position: "top-right",
-    autoClose: 5000
+    autoClose: 3000
   })
 }
 
