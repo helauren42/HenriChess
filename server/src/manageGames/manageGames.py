@@ -55,3 +55,4 @@ class GameMan():
         if game is None:
             game = await postgres.getGameResult(gameId, userId)
         return game
+
