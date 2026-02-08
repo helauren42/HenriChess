@@ -16,7 +16,6 @@ const GameMoveHistoryLine = memo(({ whiteUci, index, blackUci }: { whiteUci: str
 
 export const GameMovesHistory = () => {
   const { gameMoves } = useContext(GameContext)
-
   useEffect(() => {
     console.log("change here")
     const elem = document.getElementById("game-moves-history")
@@ -39,7 +38,31 @@ export const GameMovesHistory = () => {
 }
 
 export const ViewMoves = () => {
-  const { setFenIndex, gameFens } = useContext(GameContext)
+  const { fenIndex, setFenIndex, gameFens } = useContext(GameContext)
+  const makeUnclickable = (elementId: string) => {
+    document.getElementById(elementId)?.classList.remove("fill-(--text-color-dark)")
+    document.getElementById(elementId)?.classList.remove("cursor-pointer")
+    document.getElementById(elementId)?.classList.add("fill-(--disabled)")
+  }
+  const makeClickable = (elementId: string) => {
+    document.getElementById(elementId)?.classList.remove("fill-(--disabled)")
+    document.getElementById(elementId)?.classList.add("fill-(--text-color-dark)")
+    document.getElementById(elementId)?.classList.add("cursor-pointer")
+  }
+  useEffect(() => {
+    makeClickable("first-position")
+    makeClickable("previous-position")
+    makeClickable("next-position")
+    makeClickable("last-position")
+    if (fenIndex == 0) {
+      makeUnclickable("first-position")
+      makeUnclickable("previous-position")
+    }
+    if (fenIndex == gameFens.length - 1) {
+      makeUnclickable("next-position")
+      makeUnclickable("last-position")
+    }
+  }, [fenIndex, gameFens])
   return (
     <div id="view-moves" className="flex flex-row h-8 justify-between">
       <SvgFirstPosition onClick={() => setFenIndex(0)} />

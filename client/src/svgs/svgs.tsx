@@ -3,7 +3,7 @@ export const SvgAccount = () => {
 }
 
 export const SvgFirstPosition = ({ onClick }: { onClick: () => void }) => {
-  return <svg className="cursor-pointer fill-(--text-color-dark)" onClick={() => onClick()} fill="#000000" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
+  return <svg id="first-position" className="cursor-pointer fill-(--text-color-dark)" onClick={() => onClick()} fill="#000000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 512 512" xmlSpace="preserve">
     <title>First Position</title>
     <g>
@@ -24,7 +24,7 @@ export const SvgFirstPosition = ({ onClick }: { onClick: () => void }) => {
 }
 
 export const SvgPreviousPosition = ({ onClick }: { onClick: () => void }) => {
-  return <svg className="cursor-pointer fill-(--text-color-dark)" onClick={() => onClick()} fill="#000000" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
+  return <svg id="previous-position" className="cursor-pointer fill-(--text-color-dark)" onClick={() => onClick()} fill="#000000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 512 512" xmlSpace="preserve">
     <title>Previous Position</title>
     <g>
@@ -44,7 +44,7 @@ export const SvgPreviousPosition = ({ onClick }: { onClick: () => void }) => {
 }
 
 export const SvgNextPosition = ({ onClick }: { onClick: () => void }) => {
-  return <svg className="cursor-pointer fill-(--text-color-dark)" onClick={() => onClick()} fill="#000000" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
+  return <svg id="next-position" className="cursor-pointer fill-(--text-color-dark)" onClick={() => onClick()} fill="#000000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 512 512" xmlSpace="preserve">
     <title>Next Position</title>
     <g>
@@ -64,7 +64,7 @@ export const SvgNextPosition = ({ onClick }: { onClick: () => void }) => {
 }
 
 export const SvgLastPosition = ({ onClick }: { onClick: () => void }) => {
-  return <svg className="cursor-pointer fill-(--text-color-dark)" onClick={() => onClick()} fill="#000000" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
+  return <svg id="last-position" className="cursor-pointer fill-(--text-color-dark)" onClick={() => onClick()} fill="#000000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 512 512" xmlSpace="preserve">
     <title>Last Position</title>
     <g>
