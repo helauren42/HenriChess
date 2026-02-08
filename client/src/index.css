@@ -138,24 +138,3 @@ input:focus {
   border: 4px solid var(--border-color);
   padding: 1.5rem;
 }
-
-.base-layer {
-  position: relative;
-}
-
-.base-layer::before {
-  position: absolute;
-  top: 0%;
-  left: 0%;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  z-index: 1;
-  content: "";
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.1), rgba(255, 200, 200, 0.1));
-}
-
-.base-layer * {
-  position: relative;
-  z-index: 2;
-}

@@ -15,7 +15,6 @@ export const HotseatHistory = ({ hotseatHistory }: { hotseatHistory: HotseatHist
     nav(`/play/hotseat/${gameId}`)
   }
   const historyReactArray = () => {
-    console.log("!!!!!! historyReactArray")
     const ret = hotseatHistory.map((game) => {
       console.log("date: ", game.date)
       const arr = (
@@ -41,7 +40,7 @@ export const HotseatHistory = ({ hotseatHistory }: { hotseatHistory: HotseatHist
     return (<p >No games yet</p>)
   }
   return (
-    <div className="w-[80%] max-w-[900px]">
+    <div className="w-[80%] max-w-[900px] pb-15">
       <h4 className="game-history-title">
         Hotseat History
       </h4>
