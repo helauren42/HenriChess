@@ -3,6 +3,7 @@ from typing import Optional
 from databases.apostgres.postgresUser import PostgresUser
 from databases.game import Game, GameSnip, decodeGameMoves, encodeGameMoves
 from utils.const import MODES
+from utils.logger import mylog
 
 class PostgresGames(PostgresUser):
     def __init__(self) -> None:

@@ -46,8 +46,8 @@ export interface GameFace {
   playerTurn: "w" | "b"
   setPlayerTurn: Dispatch<SetStateAction<"w" | "b">>
   winner: null | number
-  setWinner: Dispatch<SetStateAction<null | string>>
-  winnerName: null | number
+  setWinner: Dispatch<SetStateAction<null | number>>
+  winnerName: null | string
   setWinnerName: Dispatch<SetStateAction<null | string>>
   whiteUsername: string
   setWhiteUsername: Dispatch<SetStateAction<string>>

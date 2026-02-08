@@ -110,7 +110,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }, 100)
     }
     else {
-      ws?.send(JSON.stringify({ type: "getGameUpdate", mode, gameId }))
+      ws?.send(JSON.stringify({ type: "getGameUpdate", mode, "gameId": tempId ? tempId : gameId }))
     }
   }
   const parseGame = (data: DataGame) => {

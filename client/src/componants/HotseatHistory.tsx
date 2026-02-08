@@ -11,7 +11,9 @@ export interface HotseatHistoryFace {
 export const HotseatHistory = ({ hotseatHistory }: { hotseatHistory: HotseatHistoryFace[] }) => {
   const nav = useNavigate()
   const viewGame = (gameId: number) => {
+    console.log("viewGame gameId: ", gameId)
     nav(`/play/hotseat/${gameId}`)
+    // location.reload()
   }
   return (
     <div className="w-[80%] max-w-[900px]">
