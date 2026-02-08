@@ -2,6 +2,8 @@ import { useContext, type ReactNode } from "react"
 import "./Panel.css"
 import { GameContext } from "../../Contexts/Game"
 import { useNavigate } from "react-router-dom"
+import { GameMovesHistory } from "../../componants/Play"
+import { FinishedSubpanel } from "./finishedSubpanel"
 
 interface GameModeBlockFace {
   title: string
@@ -44,9 +46,12 @@ export const ChooseGame = () => {
   )
 }
 
-export const Panel = ({ children }: { children: ReactNode }) => {
+export const Panel = ({ title, children }: { title: string, children: ReactNode }) => {
   return (
     <div id="play-panel">
+      <h3>{title}</h3>
+      <GameMovesHistory />
+      <FinishedSubpanel />
       {children}
     </div>
   )

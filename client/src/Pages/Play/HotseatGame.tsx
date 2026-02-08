@@ -1,9 +1,7 @@
 import { useContext } from "react"
-import { GameMovesHistory } from "../../componants/Play"
 import { GameAndPlayers } from "./Game"
 import { Panel } from "./Panel"
 import { GameContext } from "../../Contexts/Game"
-import { FinishedSubpanel } from "./finishedSubpanel"
 
 const Buttons = () => {
   const { winner, restartGame, startGameHotseat, resignGame
@@ -22,18 +20,10 @@ const Buttons = () => {
 }
 
 export const HotseatGame = () => {
-  const { winner } = useContext(GameContext)
   return (
     <div className="w-full flex items-center gap-2 justify-evenly">
       <GameAndPlayers />
-      <Panel>
-        <h3>Hotseat Game</h3>
-        <GameMovesHistory />
-        {
-          winner ?
-            <FinishedSubpanel />
-            : null
-        }
+      <Panel title="Hotseat">
         <Buttons />
       </Panel>
     </div >

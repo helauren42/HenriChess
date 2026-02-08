@@ -16,13 +16,6 @@ const GameResult = ({ winner }: { winner: number }) => {
   )
 }
 
-const ChangeFen = () => {
-  return (
-    <>
-    </>
-  )
-}
-
 export const FinishedSubpanel = () => {
   const { winner } = useContext(GameContext)
   return (
@@ -32,7 +25,6 @@ export const FinishedSubpanel = () => {
           <>
             <ViewMoves />
             <GameResult winner={winner} />
-            <ChangeFen />
           </>
           : null
       }
