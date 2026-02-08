@@ -13,16 +13,39 @@ export const HotseatHistory = ({ hotseatHistory }: { hotseatHistory: HotseatHist
   const viewGame = (gameId: number) => {
     console.log("viewGame gameId: ", gameId)
     nav(`/play/hotseat/${gameId}`)
-    // location.reload()
+  }
+  const historyReactArray = () => {
+    console.log("!!!!!! historyReactArray")
+    const ret = hotseatHistory.map((game) => {
+      console.log("date: ", game.date)
+      const arr = (
+        <tr key={game.id} id={`${game.id}`} className="game-history-row" onClick={() => viewGame(game.id)}>
+          <td>
+            {game.winnerName === "black" ? (
+              <p className="text-(--text-color-dark)">BLACK</p>
+            ) : (
+              <p className="text-(--text-color-light)">WHITE</p>
+            )}
+          </td>
+          <td className="">{game.moveCount}</td>
+          <td className="">{new Date(game.date * 1000).toLocaleDateString()}</td>
+        </tr>
+      );
+      return arr
+    })
+    document.getElementById("root")!.style.cursor = "auto"
+    return ret
+  }
+  const noGamesYet = () => {
+    document.getElementById("root")!.style.cursor = "auto"
+    return (<p >No games yet</p>)
   }
   return (
     <div className="w-[80%] max-w-[900px]">
       <h4 className="game-history-title">
         Hotseat History
       </h4>
-      {hotseatHistory.length === 0 ? (
-        <p >No games yet</p>
-      ) : (
+      {hotseatHistory.length === 0 ? noGamesYet() : (
         <table className="w-full border-separate">
           <thead className="">
             <tr className="history-header">
@@ -32,24 +55,7 @@ export const HotseatHistory = ({ hotseatHistory }: { hotseatHistory: HotseatHist
             </tr>
           </thead>
           <tbody>
-            {hotseatHistory.map((game) => {
-              console.log("date: ", game.date)
-              const ret = (
-                <tr key={game.id} id={`${game.id}`} className="game-history-row" onClick={() => viewGame(game.id)}>
-                  <td>
-                    {game.winnerName === "black" ? (
-                      <p className="text-(--text-color-dark)">BLACK</p>
-                    ) : (
-                      <p className="text-(--text-color-light)">WHITE</p>
-                    )}
-                  </td>
-                  <td className="">{game.moveCount}</td>
-                  <td className="">{new Date(game.date * 1000).toLocaleDateString()}</td>
-                </tr>
-              );
-              document.getElementById("root")!.style.cursor = "auto"
-              return ret
-            })}
+            {historyReactArray()}
           </tbody>
         </table>
       )

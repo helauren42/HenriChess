@@ -48,6 +48,7 @@ class PostgresGames(PostgresUser):
         for (gameId,) in rows:
             assert isinstance(gameId, int)
             game = await self.getGameSnip(gameId)
+            mylog.debug(f"game: {game}")
             if game:
                 ret.append(game)
         return ret

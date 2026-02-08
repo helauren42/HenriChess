@@ -17,6 +17,11 @@ async def getUserPageData(clireq: Request, username: str, userId: int = Depends(
 async def deleteAccount(clireq: Request, username: str):
     return resp204()
 
+@accountRouter.get("/online-history/{username}")
+async def getOnlineHistory(clireq: Request, username: str, userId: int = Depends(getUserIdReq)):
+    gameSnips: list[GameSnip] = await postgres.getFinishedGames(userId, username, "online")
+    return miniResp(200, "success", gameSnips)
+
 @accountRouter.get("/hotseat-history/{username}")
 async def getHotseatHistory(clireq: Request, username: str, userId: int = Depends(getUserIdReq)):
     gameSnips: list[GameSnip] = await postgres.getFinishedGames(userId, username, "hotseat")

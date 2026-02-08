@@ -6,6 +6,7 @@ import { ToastCustomError } from "../utils/toastify"
 
 import "./UserPage.css"
 import { HotseatHistory, type HotseatHistoryFace } from "../componants/HotseatHistory"
+import { OnlineHistory, type OnlineHistoryFace } from "../componants/OnlineHistory"
 
 interface UserData {
   username: ""
@@ -50,6 +51,7 @@ export const UserPage = () => {
     creation: ""
   })
   const [hotseatHistory, setHotseatHistory] = useState<HotseatHistoryFace[]>([])
+  const [onlineHistory, setOnlineHistory] = useState<OnlineHistoryFace[]>([])
   const addr = useLocation()
   const splits = addr.pathname.split("/")
   const username = splits[splits.length - 1]
@@ -60,6 +62,14 @@ export const UserPage = () => {
     }
     if (resp.status == 401) {
       openAuth("unauthorized")
+    }
+  }
+  const fetchOnlineHistory = async () => {
+    const resp: MyResp = await readFetch(`/user/online-history/${username}`)
+    if (resp.status == 200 && resp.data) {
+      const data = resp.data as OnlineHistoryFace[]
+      console.log("fetchHotseatHistory data: ", data)
+      setOnlineHistory(data)
     }
   }
   const fetchHotseatHistory = async () => {
@@ -76,6 +86,7 @@ export const UserPage = () => {
     if (username) {
       document.getElementById("root")!.style.cursor = "wait"
       fetchUser()
+      fetchOnlineHistory()
       fetchHotseatHistory()
     }
   }, [username])
@@ -87,6 +98,7 @@ export const UserPage = () => {
             <div className="w-full flex justify-around" >
               <UserDataDisplay userData={userData} />
             </div >
+            <OnlineHistory onlineHistory={onlineHistory} />
             <HotseatHistory hotseatHistory={hotseatHistory} />
           </div>
       }

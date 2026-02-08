@@ -37,12 +37,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     file: "",
   })
   const [gameExpired, setGameExpired] = useState<boolean>(false)
-  useEffect(() => {
-    console.log("!!! user INSIDE game provider: ", user)
-  }, [user])
-  // not for context
   const nav = useNavigate()
-  // functions
   const getFileNum = (file: string) => {
     return file.charCodeAt(0) - 'a'.charCodeAt(0) + 1
   }
