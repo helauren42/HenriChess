@@ -1,0 +1,51 @@
+.game-history-title {
+  text-align: center;
+  padding: 0.8rem;
+  border: 1px solid var(--border-color);
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  border-bottom: none;
+  background-color: var(--nav-color);
+}
+
+table {
+  margin: 0;
+  border: 1px solid var(--border-color);
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  border-spacing: 0;
+  background-color: var(--nav-color);
+}
+
+th {
+  font-size: 19px;
+  height: 2rem;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-right: 1px solid var(--border-color);
+}
+
+td {
+  font-size: 16px;
+  height: 2rem;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-right: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+}
+
+td:last-child,
+th:last-child {
+  border-right: none;
+}
+
+.game-history-row:hover {
+  background-color: rgb(190, 140, 120);
+  border: inherit;
+}
+
+.game-history-row {
+  cursor: pointer;
+}

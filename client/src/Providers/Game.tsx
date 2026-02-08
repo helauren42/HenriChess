@@ -5,6 +5,7 @@ import { INITIAL_BOARD, SERVER_URL_WS } from "../utils/const.tsx";
 import { ToastCustomError } from "../utils/toastify.tsx";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../Contexts/User.tsx";
+import { getMaxListeners } from "events";
 
 export interface DataGame {
   "type": "game",
@@ -22,6 +23,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [board, setBoard] = useState<string>(INITIAL_BOARD)
   const [mode, setMode] = useState<"hotseat" | "online">("hotseat")
   const [gameFens, setGameFens] = useState<string[]>([])
+  const [fenIndex, setFenIndex] = useState<number>(0)
   const [gameMoves, setGameMoves] = useState<GameMoveFace[]>([])
   const [playerColor, setPlayerColor] = useState<"w" | "b" | "v">("w")
   const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
@@ -37,12 +39,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     file: "",
   })
   const [gameExpired, setGameExpired] = useState<boolean>(false)
-  useEffect(() => {
-    console.log("!!! user INSIDE game provider: ", user)
-  }, [user])
-  // not for context
   const nav = useNavigate()
-  // functions
   const getFileNum = (file: string) => {
     return file.charCodeAt(0) - 'a'.charCodeAt(0) + 1
   }
@@ -110,13 +107,14 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }, 100)
     }
     else {
-      ws?.send(JSON.stringify({ type: "getGameUpdate", mode, gameId }))
+      ws?.send(JSON.stringify({ type: "getGameUpdate", mode, "gameId": tempId ? tempId : gameId }))
     }
   }
   const parseGame = (data: DataGame) => {
     const game: GameUpdateFace = data.game
     const lastIndex = game.gameFens.length - 1
     setGameFens(game.gameFens)
+    setFenIndex(game.gameFens.length - 1)
     setGameMoves(game.gameMoves)
     setWinner(game.winner)
     setWinnerName(game.winnerName)
@@ -139,9 +137,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         setPlayerColor("v")
     }
     console.log("game: ", game)
-    const currBoard = game.gameFens[lastIndex].split(" ")[0]
-    console.log("currBoard: ", currBoard)
-    setBoard(currBoard)
     const gamePath = "/play/" + data.mode + "/" + data.id
     const pathname = window.location.pathname
     if (pathname != gamePath)
@@ -187,6 +182,13 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       type: "endMatchmaking"
     }))
   }
+  useEffect(() => {
+    if (gameFens == undefined || gameFens.length == 0)
+      return
+    const currBoard = gameFens[fenIndex].split(" ")[0]
+    console.log("currBoard: ", currBoard)
+    setBoard(currBoard)
+  }, [gameFens, fenIndex])
   useEffect(() => {
     console.log("board: ", board)
   }, [board])
@@ -254,7 +256,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   return (
-    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, fenIndex, setFenIndex, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )

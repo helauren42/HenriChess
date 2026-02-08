@@ -48,3 +48,11 @@ class GameMan():
         await myred.removeGame(game.id, mode, username)
         return game
 
+
+    @staticmethod
+    async def getGame(gameId: int, mode: MODES, username: str, userId: int):
+        game = await myred.getCurrGameState(gameId, mode, username)
+        if game is None:
+            game = await postgres.getGameResult(gameId, userId)
+        return game
+

@@ -1,5 +1,13 @@
 import { toast } from "react-toastify";
 
+export const ToastFeatureNotImplemented = () => {
+  toast.error("This feature has not yet been implemented", {
+    toastId: "feature-not-imlemented",
+    position: "top-right",
+    autoClose: 3000
+  })
+}
+
 export const ToastSessionExpired = () => {
   toast.error("Your session has expired, please reconnect", {
     toastId: "custom",
@@ -23,7 +31,6 @@ export const ToastServerError = (errorLog: string) => {
   })
 }
 
-
 export const Toast422 = (msg: string) => {
   toast.error("Invalid Input: " + msg, {
     toastId: "error422",
@@ -31,7 +38,6 @@ export const Toast422 = (msg: string) => {
     autoClose: 2000
   })
 }
-
 
 export const Toast409 = (msg: string) => {
   toast.error("Could not create account: " + msg, {

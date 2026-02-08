@@ -7,8 +7,10 @@
   --nav-color: rgb(170, 120, 100);
   --border-color: rgb(120, 60, 50);
   --text-color-dark: rgb(90, 50, 40);
-  --text-color-light: rgb(210, 175, 170);
+  --text-color-light: rgb(230, 215, 200);
   --button-color: rgb(60, 30, 10);
+  --square-black: rgb(222, 146, 90);
+  --square-white: rgb(255, 242, 212);
 
   color: var(--text-color-dark);
   background-color: var(--bg-color);
@@ -137,23 +139,6 @@ input:focus {
   padding: 1.5rem;
 }
 
-.base-layer {
-  position: relative;
-}
-
-.base-layer::before {
-  position: absolute;
-  top: 0%;
-  left: 0%;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  z-index: 1;
-  content: "";
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.1), rgba(255, 200, 200, 0.1));
-}
-
-.base-layer * {
-  position: relative;
-  z-index: 2;
+.wait-cursor * {
+  cursor: wait !important;
 }

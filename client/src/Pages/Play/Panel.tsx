@@ -46,7 +46,7 @@ export const ChooseGame = () => {
 
 export const Panel = ({ children }: { children: ReactNode }) => {
   return (
-    <div id="play-panel" className="base-layer" >
+    <div id="play-panel">
       {children}
     </div>
   )

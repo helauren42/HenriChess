@@ -46,8 +46,8 @@ export interface GameFace {
   playerTurn: "w" | "b"
   setPlayerTurn: Dispatch<SetStateAction<"w" | "b">>
   winner: null | number
-  setWinner: Dispatch<SetStateAction<null | string>>
-  winnerName: null | number
+  setWinner: Dispatch<SetStateAction<null | number>>
+  winnerName: null | string
   setWinnerName: Dispatch<SetStateAction<null | string>>
   whiteUsername: string
   setWhiteUsername: Dispatch<SetStateAction<string>>
@@ -64,6 +64,8 @@ export interface GameFace {
   setBoard: Dispatch<SetStateAction<string>>
   gameFens: string[]
   setGameFens: Dispatch<SetStateAction<string[]>>
+  fenIndex: number
+  setFenIndex: Dispatch<SetStateAction<number>>
   gameMoves: GameMoveFace[]
   setGameMoves: Dispatch<SetStateAction<GameMoveFace[]>>
   getGameUpdate: (tempId: number | null) => void
@@ -113,6 +115,8 @@ export const GameContext = createContext<GameFace>({
   setBoard: () => console.error("used outside of context"),
   gameFens: [],
   setGameFens: () => console.error("used outside of context"),
+  fenIndex: 0,
+  setFenIndex: () => console.error("used outside of context"),
   gameMoves: [],
   setGameMoves: () => console.error("used outside of context"),
   getGameUpdate: (tempId: number | null) => console.error("used outside of context"),

@@ -152,8 +152,6 @@ async def findOpponent(userId: int)-> int:
 
 async def startOnlineMatch(userId: int, username1: str, opponentId: int):
     mylog.debug(f"starting game: {userId} vs {opponentId}")
-        # gameId = await postgres.newOnlineGame(userId, opponentId)
-        # gameId = await postgres.newOnlineGame(opponentId, userId)
     username2 = await postgres.fetchUsername(opponentId)
     assert username1 is not None
     assert username2 is not None
@@ -162,9 +160,7 @@ async def startOnlineMatch(userId: int, username1: str, opponentId: int):
     assert game is not None
     # mylog.debug(f"!!! Found online game: {game}")
     # if game:
-    #     mylog.debug("sending first online game")
     await sendGame(onlinePlayers[userId], "online", "new", gameId, game)
-    #     mylog.debug("sending second online game")
     await sendGame(onlinePlayers[opponentId], "online", "new", gameId, game)
 
 @wsRouter.websocket("")
@@ -198,7 +194,7 @@ async def websocketEndpoint(ws: WebSocket):
                 case "getGameUpdate":
                     # res = await getFinishedGame(ws, userId, msg["mode"], msg["gameId"])
                     # await updateGame(ws, userId, msg["mode"], res[0], res[1])
-                    game = await myred.getCurrGameState(msg["gameId"], msg["mode"], username)
+                    game = await GameMan.getGame(msg["gameId"], msg["mode"], username, userId)
                     if game:
                         await updateGame(ws, userId, msg["mode"], game, game.id)
                     else:

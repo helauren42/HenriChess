@@ -1,4 +1,9 @@
+#nav-wrapper {
+  width: 170px;
+}
+
 nav {
+  position: fixed;
   margin: 0;
   padding: 1rem;
   height: 100%;
@@ -10,8 +15,7 @@ nav {
   align-items: flex-start;
   gap: 2rem;
   font-weight: 600;
-  /* border-right: 1px solid var(--border-color); */
-  /* box-shadow: 0px 0px 10px 5px var(--border-color); */
+  border-right: 1px solid var(--border-color);
 }
 
 nav>* {

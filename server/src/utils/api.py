@@ -6,7 +6,7 @@ from databases.postgres import postgres
 def resp204():
     return Response(status_code=204)
 
-def miniResp(status: int, message:str="", data:dict={}):
+def miniResp(status: int, message: str= "", data: dict | list = {}):
     return JSONResponse({
             "message": message,
             "data": data

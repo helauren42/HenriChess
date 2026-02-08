@@ -27,22 +27,24 @@ export const Navbar = () => {
   const { openAuth } = useContext(AuthCompContext)
   const nav = useNavigate()
   return (
-    <nav className="base-layer">
-      <div onClick={() => nav("/")} className="cursor-pointer">
-        <h3 className="text-center">Henri</h3>
-        <h3 className="text-center">Chess</h3>
-      </div>
-      <ul className="flex flex-col gap-5">
-        <Navlink name="Play" to="/play" imgsrc="/images/nav/pawn.svg" />
-        <Navlink name="Watch" to="/watch" imgsrc="/images/nav/eyes.svg" />
-        <Navlink name="Social" to="/social" imgsrc="/images/nav/people.svg" />
-      </ul>
-      {
-        user.username ?
-          <button className="mt-4" onClick={() => nav(`/user/${user.username}`)}>Account</button>
-          :
-          <button className="mt-4" onClick={() => openAuth("login")}>Sign in</button>
-      }
-    </nav >
+    <div id="nav-wrapper">
+      <nav>
+        <div onClick={() => nav("/")} className="cursor-pointer">
+          <h3 className="text-center">Henri</h3>
+          <h3 className="text-center">Chess</h3>
+        </div>
+        <ul className="flex flex-col gap-5">
+          <Navlink name="Play" to="/play" imgsrc="/images/nav/pawn.svg" />
+          <Navlink name="Watch" to="/watch" imgsrc="/images/nav/eyes.svg" />
+          <Navlink name="Social" to="/social" imgsrc="/images/nav/people.svg" />
+        </ul>
+        {
+          user.username ?
+            <button className="mt-4" onClick={() => nav(`/user/${user.username}`)}>Account</button>
+            :
+            <button className="mt-4" onClick={() => openAuth("login")}>Sign in</button>
+        }
+      </nav >
+    </div>
   )
 }
