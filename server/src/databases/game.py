@@ -46,7 +46,6 @@ class Game():
     whiteTime: int = 30000 # 0.01 secs
     blackTime: int = 30000
 
-
 class GameMap(TypedDict):
     winner: int
     whiteUsername: str
@@ -55,4 +54,12 @@ class GameMap(TypedDict):
     blackId: int
     whiteTime: int
     blackTime: int
+
+class GameSnip(TypedDict):
+    id: int
+    winnerName: str
+    whiteUsername: str
+    blackUsername: str
+    moveCount: int
+    date: int
 

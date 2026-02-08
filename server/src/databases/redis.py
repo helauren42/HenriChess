@@ -156,7 +156,7 @@ class MyRedis(AMyRedis):
                 winner = None
             mylog.debug(f"winner: {winner}")
             return Game(gameId,
-                await  self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
+                await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
                 await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
                 winner,
                 await getWinnerName(None, map),

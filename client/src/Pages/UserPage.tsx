@@ -5,6 +5,7 @@ import { AuthCompContext } from "../Contexts/AuthComp"
 import { ToastCustomError } from "../utils/toastify"
 
 import "./UserPage.css"
+import { HotseatHistory, type hotseatHistoryFace } from "../componants/HotseatHistory"
 
 interface UserData {
   username: ""
@@ -48,31 +49,45 @@ export const UserPage = () => {
     email: "",
     creation: ""
   })
+  const [hotseatHistory, setHotseatHistory] = useState<hotseatHistoryFace[]>([])
   const addr = useLocation()
   const splits = addr.pathname.split("/")
   const username = splits[splits.length - 1]
   const fetchUser = async () => {
     const resp: MyResp = await readFetch(`/user/${username}`)
     if (resp.status == 200 && resp.data) {
-      setUserData(resp.data)
+      setUserData(resp.data as UserData)
     }
     if (resp.status == 401) {
       openAuth("unauthorized")
     }
   }
+  const fetchHotseatHistory = async () => {
+    const resp: MyResp = await readFetch(`/user/hotseat-history/${username}`)
+    if (resp.status == 200 && resp.data) {
+      const data = resp.data as hotseatHistoryFace[]
+      console.log("fetchHotseatHistory data: ", data)
+      setHotseatHistory(data)
+    }
+  }
   useEffect(() => {
     // if (localStorage.getItem("username") == null)
     //   openAuth("unauthorized")
-    if (username)
+    if (username) {
       fetchUser()
+      fetchHotseatHistory()
+    }
   }, [username])
   return (
     <>
       {
         authComp.on ? null :
-          < div className="w-full h-full flex flex-col items-center" >
-            <UserDataDisplay userData={userData} />
-          </div >
+          <div className="flex flex-col items-center w-full gap-10 mt-15">
+            <div className="w-full flex justify-around" >
+              <UserDataDisplay userData={userData} />
+            </div >
+            <HotseatHistory hotseatHistory={hotseatHistory} />
+          </div>
       }
     </>
   )

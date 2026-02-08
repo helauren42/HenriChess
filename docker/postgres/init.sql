@@ -26,12 +26,14 @@ CREATE TABLE IF NOT EXISTS games (
   black_username TEXT NOT NULL,
   fens TEXT[] NOT NULL,
   game_moves TEXT[] NOT NULL,
-  winner INTEGER REFERENCES users(id)
+  winner INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  winner_name TEXT NOT NULL
 );
 
 CREATE INDEX idx_games_id on games(id);
 CREATE INDEX idx_games_creation on games(creation);
 CREATE INDEX idx_games_winner on games(winner);
+CREATE INDEX idx_games_winner_name on games(winner_name);
 
 CREATE TABLE IF NOT EXISTS onlinegamesmessages (
   id SERIAL PRIMARY KEY,

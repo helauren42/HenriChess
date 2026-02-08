@@ -19,10 +19,3 @@ async def getWinnerName(game: Optional[Game], map: Optional[GameMap])-> str | No
             return map["whiteUsername"]
         if map["blackId"] == map["winner"]:
             return map["blackUsername"]
-
-async def getWinnerNameId(winnerId: int | None, blackId: int, whiteId: int, blackUsername: str, whiteUsername: str)-> str | None:
-    if winnerId is None:
-        return None
-    if winnerId == blackId:
-        return blackUsername
-    return whiteUsername
