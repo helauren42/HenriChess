@@ -26,12 +26,12 @@ export const OnlineHistory = ({ onlineHistory }: { onlineHistory: OnlineHistoryF
       {onlineHistory.length === 0 ? (
         <p>No games yet</p>
       ) : (
-        <table className="w-full border-separate">
+        <table className="w-full border-separate text-ellipsis">
           <thead>
             <tr className="history-header">
               <th>Players</th>
               <th>Winner</th>
-              <th>Moves</th>
+              <th className="w-[18%]">Moves</th>
               <th>Date</th>
             </tr>
           </thead>

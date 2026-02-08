@@ -16,7 +16,6 @@ export const HotseatHistory = ({ hotseatHistory }: { hotseatHistory: HotseatHist
   }
   const historyReactArray = () => {
     const ret = hotseatHistory.map((game) => {
-      console.log("date: ", game.date)
       const arr = (
         <tr key={game.id} id={`${game.id}`} className="game-history-row" onClick={() => viewGame(game.id)}>
           <td>

@@ -2,8 +2,8 @@
   text-align: center;
   padding: 0.8rem;
   border: 1px solid var(--border-color);
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
   border-bottom: none;
   background-color: var(--nav-color);
 }
