@@ -1,13 +1,14 @@
 import { PassiveBoard } from "./Board"
-import { ChooseGame, Panel } from "./Panel"
+import { ChooseGame } from "./Panel"
 
 export const PlayPage = () => {
   return (
     <div className="w-full h-full flex items-center justify-evenly">
       <PassiveBoard />
-      <Panel>
+      <div id="play-page" className="play-panel">
+        <h3>Choose Mode</h3>
         <ChooseGame />
-      </Panel>
+      </div>
     </div>
   )
 }

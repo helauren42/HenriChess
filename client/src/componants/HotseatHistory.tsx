@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import "./GamesHistory.css"
 import { removeWaitCursor } from "../utils/utils"
-import { useEffect } from "react"
 
 export interface HotseatHistoryFace {
   id: number

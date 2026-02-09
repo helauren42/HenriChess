@@ -111,7 +111,7 @@ export const UserPage = () => {
             <div className="w-full flex justify-around" >
               <UserDataDisplay userData={userData} />
             </div >
-            <OnlineHistory onlineHistory={onlineHistory} />
+            <OnlineHistory onlineHistory={onlineHistory} dataFetched={dataFetched} />
             <HotseatHistory hotseatHistory={hotseatHistory} dataFetched={dataFetched} />
           </div>
       }

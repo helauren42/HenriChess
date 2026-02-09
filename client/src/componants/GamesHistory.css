@@ -11,10 +11,9 @@
 table {
   margin: 0;
   border: 1px solid var(--border-color);
-  border-bottom-left-radius: 1rem;
-  border-bottom-right-radius: 1rem;
   border-spacing: 0;
-  background-color: var(--nav-color);
+  border-bottom-right-radius: 1rem;
+  border-bottom-left-radius: 1rem;
 }
 
 th {
@@ -24,6 +23,7 @@ th {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   border-right: 1px solid var(--border-color);
+  background-color: var(--nav-color);
 }
 
 td {
@@ -41,11 +41,19 @@ th:last-child {
   border-right: none;
 }
 
-.game-history-row:hover {
-  background-color: rgb(190, 140, 120);
-  border: inherit;
+tr:last-child td:last-child {
+  border-bottom-right-radius: 1rem;
+}
+
+tr:last-child td:first-child {
+  border-bottom-left-radius: 1rem;
 }
 
 .game-history-row {
   cursor: pointer;
+  background-color: var(--nav-color);
+}
+
+.game-history-row:hover {
+  background-color: rgb(190, 140, 120);
 }

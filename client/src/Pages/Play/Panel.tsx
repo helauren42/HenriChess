@@ -40,18 +40,23 @@ const GameModes = () => {
 export const ChooseGame = () => {
   return (
     <>
-      <h3>Choose Game</h3>
       <GameModes />
     </>
   )
 }
 
-export const Panel = ({ title, children }: { title: string, children: ReactNode }) => {
+export const Panel = ({ title, game, children }: { title: string, game: boolean, children: ReactNode }) => {
   return (
-    <div id="play-panel">
+    <div className="game-panel">
       <h3>{title}</h3>
-      <GameMovesHistory />
-      <FinishedSubpanel />
+      {
+        game ?
+          <>
+            <GameMovesHistory />
+            <FinishedSubpanel />
+          </>
+          : null
+      }
       {children}
     </div>
   )
