@@ -1,10 +1,8 @@
-from os import stat
 import random
-from typing import Literal, Optional
 import chess
 from fastapi import WebSocket
 from databases.postgres import postgres
-from databases.game import Game, GameMap, GameSnip, GameWatch
+from databases.game import Game, GameWatch
 from databases.redis import myred
 from utils.const import MODES
 from utils.logger import mylog
@@ -17,7 +15,8 @@ class GameMan():
     @staticmethod
     async def newHotseatGame(username: str, userId: int)-> Game:
         mylog.debug(f"new hotseat game: {username}, {userId}")
-        id = await myred.newGameId("hotseat")
+        id = await myred.newGameId("hotseat", username)
+        mylog.debug(f"new game id: {id}")
         game = Game(id, [chess.STARTING_FEN], [], None, None, "white", "black", userId, userId)
         await myred.addGame(game, "hotseat", username)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "hotseat", username)
@@ -26,7 +25,7 @@ class GameMan():
     @staticmethod
     async def newOnlineGame(username1: str, username2: str, id1: int, id2: int)-> int:
         color: bool = random.choice([True, False])
-        id = await myred.newGameId("online")
+        id = await myred.newGameId("online", None)
         if color:
             game = Game(id, [chess.STARTING_FEN], [], None, None, username1, username2, id1, id2)
         else:
@@ -47,7 +46,6 @@ class GameMan():
         await postgres.storeGameResult(mode, game)
         await myred.removeGame(game.id, mode, username)
         return game
-
 
     @staticmethod
     async def getGame(gameId: int, mode: MODES, username: str, userId: int):

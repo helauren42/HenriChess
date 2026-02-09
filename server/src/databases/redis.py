@@ -68,10 +68,14 @@ class AMyRedis(ABC):
             r.append(l[i].decode())
         return r
 
-    async def newGameId(self, mode: MODES)-> int:
+    async def newGameId(self, mode: MODES, username: Optional[str])-> int:
+        mylog.debug("1")
         cursor, keys = await self.game.scan()
+        mylog.debug("2")
         newId = randint(21489392, 82489392)
-        while self.gameKey(newId, mode) in keys:
+        mylog.debug("3")
+        while self.gameKey(newId, mode, username) in keys:
+            mylog.debug("4")
             # TODO also check that it is not inside postgres as finished games get stored in there
             newId = randint(123774, 823678)
         return newId
@@ -85,8 +89,8 @@ class AMyRedis(ABC):
             return playerTurn
         return "white" if playerTurn == "w" else "black"
 
-    async def gameMapping(self, game: Game, mode: MODES)-> GameMap:
-        await self.game.get(self.gameKey(game.id, mode))
+    async def gameMapping(self, game: Game, mode: MODES, username: Optional[str])-> GameMap:
+        await self.game.get(self.gameKey(game.id, mode, username))
         return {
             "whiteUsername": game.whiteUsername,
             "blackUsername": game.blackUsername,
@@ -133,7 +137,7 @@ class MyRedis(AMyRedis):
                 mylog.debug(f"!!! lockAddGame")
                 name = self.gameKey(gameId=game.id, mode=mode, username=username)
                 mylog.debug(f"got key: {name}")
-                await self.game.hset(name, mapping=await self.gameMapping(game, mode))
+                await self.game.hset(name, mapping=await self.gameMapping(game, mode, username))
                 await self.extendGameExpiry(game.id, mode, username)
                 mylog.debug(f"added game: {name}")
         except Exception as e:
@@ -185,10 +189,10 @@ class MyRedis(AMyRedis):
         except Exception as e:
             mylog.error(f"failed to retrieve curr game state {e}")
 
-    async def updateTime(self, gameId: int, time: int):
+    async def updateTime(self, gameId: int, mode: MODES, username: Optional[str], time: int):
         try:
             playerTurn = await self.getPlayerTurn(gameId, True)
-            await self.game.hset(self.gameKey(gameId), playerTurn+"Time", str(time))
+            await self.game.hset(self.gameKey(gameId, mode, username), playerTurn+"Time", str(time))
         except Exception as e:
             mylog.debug(f"Redis failed to update time: {e}")
 

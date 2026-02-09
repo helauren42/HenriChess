@@ -92,7 +92,6 @@ async def startGameHotseat(ws: WebSocket, userId: int, username: str, re: bool =
     try:
         # res = await postgres.fetchHotseatGame(userId, None, True)
         gameId = await myred.findActiveHotseatGameId(username)
-        mylog.debug(gameId)
         if gameId:
             game = await myred.getCurrGameState(gameId, "hotseat", username)
             assert game is not None
