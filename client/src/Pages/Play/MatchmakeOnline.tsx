@@ -16,7 +16,6 @@ export const MatchmakeOnline = () => {
     return null
   }
   useEffect(() => {
-    console.log("here")
     if (ws) {
       sendStartMessage()
     }

@@ -154,9 +154,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const startGameHotseat = () => {
     if (!ws)
       return wsErrorNotOpen("start game hotseat")
-    const fullType = "startGame" + mode[0].toUpperCase() + mode.slice(1)
-    console.log(fullType)
-    ws.send(JSON.stringify({ type: fullType }))
+    ws.send(JSON.stringify({ type: "startGameHotseat" }))
   }
   const resignGame = () => {
     if (!ws)

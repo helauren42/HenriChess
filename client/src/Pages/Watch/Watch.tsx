@@ -7,6 +7,7 @@ export const WatchPage = () => {
   useEffect(() => {
     ws?.send(JSON.stringify({ type: "getActiveGames" }))
     const id = setInterval(() => {
+      console.log("WatchPage loop")
       ws?.send(JSON.stringify({ type: "getActiveGames" }))
     }, 5000)
     return () => clearInterval(id)

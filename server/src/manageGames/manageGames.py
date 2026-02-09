@@ -4,7 +4,7 @@ from typing import Literal, Optional
 import chess
 from fastapi import WebSocket
 from databases.postgres import postgres
-from databases.game import Game, GameMap
+from databases.game import Game, GameMap, GameSnip
 from databases.redis import myred
 from utils.const import MODES
 from utils.logger import mylog
@@ -55,4 +55,8 @@ class GameMan():
         if game is None:
             game = await postgres.getGameResult(gameId, userId)
         return game
+
+    @staticmethod
+    async def getActiveOnlineGames():
+        await myred.getActiveOnlineGames()
 

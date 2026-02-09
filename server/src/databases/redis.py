@@ -4,8 +4,6 @@ from typing import Optional
 import redis.asyncio as redis
 import asyncio
 
-from redis.commands.helpers import delist
-
 from databases.game import Game, GameMap, GameMove, decodeGameMoves, gameMoveStr
 from utils.const import MODES, Env, EXPIRY_TIME
 from utils.game import getWinnerName
@@ -30,7 +28,7 @@ class AMyRedis(ABC):
 
     def gameKey(self, gameId: int, mode: MODES, username: Optional[str] = None):
         if mode == "online":
-             return str(gameId)
+            return str("online") + ":" + str(gameId)
         return str(username) + ":" + str(gameId)
 
     def gameMoveKey(self, gameId: int):
@@ -176,5 +174,9 @@ class MyRedis(AMyRedis):
             await self.game.hset(self.gameKey(gameId), playerTurn+"Time", str(time))
         except Exception as e:
             mylog.debug(f"Redis failed to update time: {e}")
+
+    async def getActiveOnlineGames(self):
+        hkeys = self.game.hkeys("online:*")
+        mylog.debug(f"!!!! hkeys: {hkeys}")
 
 myred = MyRedis()
