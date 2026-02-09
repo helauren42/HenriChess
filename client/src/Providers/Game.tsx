@@ -5,7 +5,6 @@ import { INITIAL_BOARD, SERVER_URL_WS } from "../utils/const.tsx";
 import { ToastCustomError } from "../utils/toastify.tsx";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../Contexts/User.tsx";
-import { getMaxListeners } from "events";
 
 export interface DataGame {
   "type": "game",
@@ -237,7 +236,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           break
         case "gameMessage":
           break
-        case "activeGames":
+        case "activeOnlineGames":
           break
       }
     }

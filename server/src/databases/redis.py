@@ -1,10 +1,11 @@
 from abc import ABC
+import datetime
 from random import randint
 from typing import Optional
 import redis.asyncio as redis
 import asyncio
 
-from databases.game import Game, GameMap, GameMove, decodeGameMoves, gameMoveStr
+from databases.game import Game, GameMap, GameMove, GameWatch, decodeGameMoves, gameMoveStr
 from utils.const import MODES, Env, EXPIRY_TIME
 from utils.game import getWinnerName
 from utils.logger import mylog
@@ -25,8 +26,21 @@ class AMyRedis(ABC):
         await self.game.expire(self.gameKey(gameId, mode, username), EXPIRY_TIME)
         await self.game.expire(self.gameMoveKey(gameId), EXPIRY_TIME)
         await self.game.expire(self.gamePositionKey(gameId), EXPIRY_TIME)
+        time = int(datetime.datetime.now().timestamp()) + EXPIRY_TIME
+        if mode == "online":
+            await self.game.zadd("online_expiries", {str(gameId): str(time)})
+
+    async def getActiveOnlineGamesKeys(self)->list[str]:
+        keys = await self.game.zrevrange("online_expiries", 0, 9)
+        mylog.debug(f"KEYS: {keys}")
+        ret: list[str] = []
+        for k in keys:
+            assert isinstance(k, bytes)
+            ret.append(k.decode())
+        return ret
 
     def gameKey(self, gameId: int, mode: MODES, username: Optional[str] = None):
+        assert not (mode == "hotseat" and username is None)
         if mode == "online":
             return str("online") + ":" + str(gameId)
         return str(username) + ":" + str(gameId)
@@ -36,6 +50,9 @@ class AMyRedis(ABC):
 
     def gamePositionKey(self, gameId: int):
         return f"game_position_{gameId}"
+
+    def gameExpiryKey(self, gameId: int):
+        return f""
 
     async def findActiveHotseatGameId(self, username: str)-> None | int:
         asyncKeys = self.game.scan_iter(f"{username}:*", 1)
@@ -175,8 +192,24 @@ class MyRedis(AMyRedis):
         except Exception as e:
             mylog.debug(f"Redis failed to update time: {e}")
 
-    async def getActiveOnlineGames(self):
-        hkeys = self.game.hkeys("online:*")
-        mylog.debug(f"!!!! hkeys: {hkeys}")
+    async def getGameWatch(self, gameId: int):
+        try:
+            map: GameMap | None = await self.getGameMap(gameId, "online", None)
+            if map is None:
+                return None
+            winner = map["winner"]
+            if winner == "-1":
+                winner = None
+            mylog.debug(f"winner: {winner}")
+            return GameWatch(id=gameId,
+                whiteUsername=map["whiteUsername"],
+                blackUsername=map["blackUsername"],
+                whiteId=map["whiteId"],
+                blackId=map["blackId"],
+                fen=await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), -1, -1))[0],
+            )
+        except Exception as e:
+            mylog.error(f"failed to retrieve curr game state {e}")
+
 
 myred = MyRedis()

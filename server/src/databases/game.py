@@ -63,3 +63,10 @@ class GameSnip(TypedDict):
     moveCount: int
     date: int
 
+class GameWatch(TypedDict):
+    id: int
+    whiteUsername: str
+    blackUsername: str
+    whiteId: int
+    blackId: int
+    fen: str

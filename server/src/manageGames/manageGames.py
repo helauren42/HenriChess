@@ -4,7 +4,7 @@ from typing import Literal, Optional
 import chess
 from fastapi import WebSocket
 from databases.postgres import postgres
-from databases.game import Game, GameMap, GameSnip
+from databases.game import Game, GameMap, GameSnip, GameWatch
 from databases.redis import myred
 from utils.const import MODES
 from utils.logger import mylog
@@ -57,6 +57,13 @@ class GameMan():
         return game
 
     @staticmethod
-    async def getActiveOnlineGames():
-        await myred.getActiveOnlineGames()
+    async def getActiveOnlineGames()-> list[GameWatch] :
+        keys = await myred.getActiveOnlineGamesKeys()
+        games: list[GameWatch] = []
+        for k in keys:
+            game = await myred.getGameWatch(int(k))
+            if game:
+                games.append(game)
+        return games
+
 

@@ -6,7 +6,7 @@ from fastapi import APIRouter
 import chess
 import random
 
-from databases.game import GameMove, Game
+from databases.game import GameMove, Game, GameWatch
 from databases.postgres import postgres
 from databases.redis import myred
 from utils.api import getUserId
@@ -220,6 +220,8 @@ async def websocketEndpoint(ws: WebSocket):
                 # WATCH
                 case "getActiveGames":
                     mylog.debug("getActiveGames")
+                    games: list[GameWatch] = await GameMan.getActiveOnlineGames()
+                    await ws.send_json({"type": "activeOnlineGames", "games": games})
     except WebSocketDisconnect:
         mylog.debug(f"websocket disconnected normally")
     except Exception as e:
