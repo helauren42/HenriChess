@@ -2,6 +2,24 @@ import { useContext, useEffect } from "react"
 import "./Watch.css"
 import { GameContext } from "../../Contexts/Game"
 
+const MiniBoard = () => {
+  return (<></>)
+}
+
+const MiniGameTitle = ({ blackUsername, whiteUsername }: { blackUsername: string, whiteUsername: string }) => {
+  return (
+    <div className="flex flex-col">
+    </div>
+  )
+}
+
+const MiniGame = ({ blackUsername, whiteUsername, fen }: { blackUsername: string, whiteUsername: string, fen: string }) => {
+  return (
+    <div className="mini-game">
+    </div>
+  )
+}
+
 export const WatchPage = () => {
   const { ws } = useContext(GameContext)
   useEffect(() => {
@@ -14,7 +32,7 @@ export const WatchPage = () => {
   }, [ws])
   return (
     <div>
-      <h1>Watch Motherfuckeeeeeer !!!</h1>
+      <h1>Watch</h1>
     </div>
   )
 }

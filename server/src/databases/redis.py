@@ -37,6 +37,7 @@ class AMyRedis(ABC):
         for k in keys:
             assert isinstance(k, bytes)
             ret.append(k.decode())
+        mylog.debug(ret)
         return ret
 
     def gameKey(self, gameId: int, mode: MODES, username: Optional[str] = None):
@@ -198,6 +199,7 @@ class MyRedis(AMyRedis):
 
     async def getGameWatch(self, gameId: int):
         try:
+            mylog.debug(f"getGameWatch")
             map: GameMap | None = await self.getGameMap(gameId, "online", None)
             if map is None:
                 return None
@@ -205,12 +207,14 @@ class MyRedis(AMyRedis):
             if winner == "-1":
                 winner = None
             mylog.debug(f"winner: {winner}")
+            fens = await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), -1, -1))
+            mylog.debug(f"fens: {fens}")
             return GameWatch(id=gameId,
                 whiteUsername=map["whiteUsername"],
                 blackUsername=map["blackUsername"],
                 whiteId=map["whiteId"],
                 blackId=map["blackId"],
-                fen=await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), -1, -1))[0],
+                fen=fens[0],
             )
         except Exception as e:
             mylog.error(f"failed to retrieve curr game state {e}")

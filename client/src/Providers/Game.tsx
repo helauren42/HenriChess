@@ -237,7 +237,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         case "gameMessage":
           break
         case "activeOnlineGames":
-          break
+
       }
     }
   };

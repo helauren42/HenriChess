@@ -8,5 +8,4 @@ export const GameWatchProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </GameWatchContext.Provider>
   )
-
 }
