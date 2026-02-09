@@ -5,6 +5,7 @@ import { INITIAL_BOARD, SERVER_URL_WS } from "../utils/const.tsx";
 import { ToastCustomError } from "../utils/toastify.tsx";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../Contexts/User.tsx";
+import { WsContext } from "../Contexts/Ws.tsx";
 
 export interface DataGame {
   "type": "game",
@@ -17,8 +18,6 @@ export interface DataGame {
 export const GameProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useContext(UserContext)
   const [gameId, setGameId] = useState<number | null>(null)
-  const [ws, setWs] = useState<WebSocket | null>(null)
-  // const ws = useRef<WebSocket | null>(null)
   const [board, setBoard] = useState<string>(INITIAL_BOARD)
   const [mode, setMode] = useState<"hotseat" | "online">("hotseat")
   const [gameFens, setGameFens] = useState<string[]>([])
@@ -38,6 +37,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     file: "",
   })
   const [gameExpired, setGameExpired] = useState<boolean>(false)
+  const { ws, lastMessage } = useContext(WsContext)
   const nav = useNavigate()
   const getFileNum = (file: string) => {
     return file.charCodeAt(0) - 'a'.charCodeAt(0) + 1
@@ -196,64 +196,21 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [selected])
   useEffect(() => {
-    console.log("ws has updated: ", ws)
-  }, [ws])
-  const makeSocket = () => {
-    const sock = new WebSocket(SERVER_URL_WS)
-    const timeout = setTimeout(() => {
-      if (sock.readyState != sock.OPEN)
-        sock.close()
-    }, 4000)
-
-    sock.onopen = (e) => {
-      clearTimeout(timeout)
-      console.log("websocket on open: ", e)
-      setWs(sock)
-    }
-
-    sock.onerror = (e) => {
-      clearTimeout(timeout)
-      console.error("websocket on error: ", e)
-    }
-
-    sock.onclose = (e) => {
-      clearTimeout(timeout)
-      console.log("websocket on close: ", e)
-      ws?.close()
-      setWs(null)
-    };
-
-    sock.onmessage = (event) => {
-      const data: Record<string, any> = JSON.parse(event.data)
-      ws?.send(JSON.stringify({ type: "getActiveGames" }))
-      console.log('Message from server: ', data)
-      switch (data.type) {
+    console.log("new gameId value: ", gameId)
+  }, [gameId])
+  useEffect(() => {
+    if (lastMessage && lastMessage.type)
+      switch (lastMessage.type) {
         case "game":
-          parseGame(data as DataGame)
+          parseGame(lastMessage as DataGame)
           break
         case "gameExpired":
           setGameExpired(true)
           break
-        case "gameMessage":
-          break
-        case "activeOnlineGames":
-
       }
-    }
-  };
-  useEffect(() => {
-    if (ws == null || ws?.readyState == ws?.CLOSED || ws?.readyState == ws.CLOSING) {
-      const id = setTimeout(() => {
-        makeSocket()
-      }, 1000)
-      return () => clearTimeout(id)
-    }
-  }, [ws, user])
-  useEffect(() => {
-    console.log("new gameId value: ", gameId)
-  }, [gameId])
+  }, [lastMessage])
   return (
-    <GameContext.Provider value={{ ws, setWs, gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, fenIndex, setFenIndex, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, fenIndex, setFenIndex, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )

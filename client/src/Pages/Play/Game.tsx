@@ -4,6 +4,7 @@ import { GameContext } from "../../Contexts/Game.tsx"
 import "./Game.css"
 import { Board } from "./Board.tsx"
 import { useLocation } from "react-router-dom"
+import { WsContext } from "../../Contexts/Ws.tsx"
 
 export const PlayerDisplay = ({ playerName }: { playerName: string }) => {
   return (
@@ -14,7 +15,8 @@ export const PlayerDisplay = ({ playerName }: { playerName: string }) => {
 }
 
 export const Game = () => {
-  const { ws, playerColor, getGameUpdate, setGameId, setMode } = useContext(GameContext)
+  const { playerColor, getGameUpdate, setGameId, setMode } = useContext(GameContext)
+  const { ws } = useContext(WsContext)
   const location = useLocation()
   useEffect(() => {
     const pathSplit = location.pathname.split("/")
