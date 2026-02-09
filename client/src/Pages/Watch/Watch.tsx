@@ -1,6 +1,7 @@
 import { useContext, useEffect } from "react"
 import "./Watch.css"
 import { GameContext } from "../../Contexts/Game"
+import { WsContext } from "../../Contexts/Ws"
 
 const MiniBoard = () => {
   return (<></>)
@@ -21,7 +22,7 @@ const MiniGame = ({ blackUsername, whiteUsername, fen }: { blackUsername: string
 }
 
 export const WatchPage = () => {
-  const { ws } = useContext(GameContext)
+  const { ws } = useContext(WsContext)
   useEffect(() => {
     ws?.send(JSON.stringify({ type: "getActiveGames" }))
     const id = setInterval(() => {

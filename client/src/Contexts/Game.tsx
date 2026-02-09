@@ -1,9 +1,6 @@
 import { createContext, type Dispatch, type SetStateAction } from "react"
 import { INITIAL_BOARD } from "../utils/const"
 
-export const WsContext = createContext({
-})
-
 export interface SelectedFace {
   id: string
   rank: number
@@ -76,8 +73,6 @@ export interface GameFace {
   squareClick: (id: string, piece: string) => void
   getFileNum: (file: string) => number
   // WS
-  ws: WebSocket | null
-  setWs: Dispatch<SetStateAction<WebSocket | null>>
   clientMove: (uciMove: string) => void
   restartGame: () => void
   startGameHotseat: () => void
@@ -130,8 +125,6 @@ export const GameContext = createContext<GameFace>({
     return 0
   },
   // WS
-  ws: null,
-  setWs: () => console.error("used outside of context"),
   clientMove(uciMove: string) {
     console.error("used outside of context")
   },

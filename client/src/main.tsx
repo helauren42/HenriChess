@@ -6,17 +6,20 @@ import { UserProvider } from './Providers/User'
 import { AuthCompProvider } from './Providers/AuthComp.tsx'
 import { GameProvider } from './Providers/Game.tsx'
 import { GameWatchProvider } from './Providers/ActiveOnlineGames.tsx'
+import { WsProvider } from './Providers/Ws.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
-    <UserProvider>
-      <AuthCompProvider>
-        <GameProvider>
-          <GameWatchProvider>
-            <App />
-          </GameWatchProvider>
-        </GameProvider>
-      </AuthCompProvider>
-    </UserProvider>
+    <WsProvider>
+      <UserProvider>
+        <AuthCompProvider>
+          <GameProvider>
+            <GameWatchProvider>
+              <App />
+            </GameWatchProvider>
+          </GameProvider>
+        </AuthCompProvider>
+      </UserProvider>
+    </WsProvider>
   </BrowserRouter>
 )
