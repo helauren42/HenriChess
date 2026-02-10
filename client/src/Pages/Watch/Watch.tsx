@@ -23,7 +23,7 @@ export const MiniBoard = ({ fen, index }: { fen: string, index: number }) => {
     i -= 1
   }
   return (
-    <div className={`mini-board-${index}`} >
+    <div className="mini-board" key={`mini-board-${index}`} >
       {ranks}
     </div >
   )

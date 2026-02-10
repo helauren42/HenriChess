@@ -60,7 +60,7 @@ export const Square = memo(({ piece, rank, file, viewer = false }: { piece: stri
     squareClick(id, piece)
   }
   return (
-    <span onClick={(e) => handleClick(e.currentTarget.id)} id={`${rank}-${file}`} className={`square ${squareColor == "white" ? "square-white" : "square-black"}`}>
+    <span onClick={viewer ? undefined : (e) => handleClick(e.currentTarget.id)} id={`${rank}-${file}`} className={`square ${squareColor == "white" ? "square-white" : "square-black"}`}>
       {/* <svg><use ></use></svg> */}
       <img src={piece == "" ? undefined : fileName()} />
     </span>)

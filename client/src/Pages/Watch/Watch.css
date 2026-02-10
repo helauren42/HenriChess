@@ -1,10 +1,15 @@
 #games-list {
   display: flex;
   flex-wrap: wrap;
-  border: 1px solid black;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-#games-list>* {
-  width: 350px;
+.mini-board {
+  height: 250px;
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
 }
