@@ -1,0 +1,10 @@
+#games-list {
+  display: flex;
+  flex-wrap: wrap;
+  border: 1px solid black;
+  gap: 0.5rem;
+}
+
+#games-list>* {
+  width: 350px;
+}

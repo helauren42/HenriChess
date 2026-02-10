@@ -2,7 +2,8 @@ import { memo, useContext } from "react";
 import { GameContext } from "../../Contexts/Game";
 import { INITIAL_BOARD } from "../../utils/const";
 
-export const Square = memo(({ piece, rank, file }: { piece: string, rank: number, file: string }) => {
+export const Square = memo(({ piece, rank, file, viewer = false }: { piece: string, rank: number, file: string, viewer: boolean }) => {
+  console.log("SQUARE PIECE: ", piece)
   const { squareClick, getFileNum } = useContext(GameContext)
   const squareColor: "white" | "black" = (rank + getFileNum(file)) % 2 == 0 ? "white" : "black"
   // console.log("square ", rank, "-", file, ": ", piece)
@@ -53,6 +54,8 @@ export const Square = memo(({ piece, rank, file }: { piece: string, rank: number
     return path
   }
   const handleClick = (id: string) => {
+    if (viewer)
+      return
     // TODO pass game id
     squareClick(id, piece)
   }
@@ -76,7 +79,7 @@ export const Rank = memo(({ playerColor, rank, pieces }: { playerColor: "w" | "b
       for (let j = 48; j < emptySquares; j++) {
         const file = files[fileIndex]
         squares.push(
-          <Square key={`square-${rank}-${file}`} piece={""} rank={rank} file={file} />
+          <Square key={`square-${rank}-${file}`} piece={""} rank={rank} file={file} viewer={playerColor == "v" ? true : false} />
         )
         fileIndex += incr
       }
@@ -84,7 +87,7 @@ export const Rank = memo(({ playerColor, rank, pieces }: { playerColor: "w" | "b
     else {
       const file = files[fileIndex]
       squares.push(
-        <Square key={`square-${rank}-${file}`} piece={pieces[i]} rank={rank} file={file} />
+        <Square key={`square-${rank}-${file}`} piece={pieces[i]} rank={rank} file={file} viewer={playerColor == "v" ? true : false} />
       )
       fileIndex += incr
     }
