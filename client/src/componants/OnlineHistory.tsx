@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import "./GamesHistory.css";
+import { NoGamesYet } from "./GameHistory";
 
 export interface OnlineHistoryFace {
   id: number;
@@ -26,7 +27,7 @@ export const OnlineHistory = ({ onlineHistory, dataFetched }: { onlineHistory: O
       {
         dataFetched == false ? "loading..." :
           onlineHistory.length === 0 ? (
-            <p>No games yet</p>
+            <NoGamesYet />
           ) : (
             <table className="w-full border-separate text-ellipsis">
               <thead>

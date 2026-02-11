@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import "./GamesHistory.css"
 import { removeWaitCursor } from "../utils/utils"
+import { NoGamesYet } from "./GameHistory"
 
 export interface HotseatHistoryFace {
   id: number
@@ -40,7 +41,7 @@ export const HotseatHistory = ({ hotseatHistory, dataFetched }: { hotseatHistory
   const noGamesYet = () => {
     if (dataFetched)
       removeWaitCursor()
-    return (<p >No games yet</p>)
+    return (<NoGamesYet />)
   }
   return (
     <div className="w-[80%] max-w-[900px] pb-15">
