@@ -219,7 +219,7 @@ async def websocketEndpoint(ws: WebSocket):
                 # WATCH
                 case "getActiveGames":
                     mylog.debug("getActiveGames")
-                    games: list[GameWatch] = await GameMan.getActiveOnlineGames()
+                    games: list[GameWatch] = await GameMan.getActiveOnlineGames(username)
                     await ws.send_json({"type": "activeOnlineGames", "games": games})
     except WebSocketDisconnect:
         mylog.debug(f"websocket disconnected normally")

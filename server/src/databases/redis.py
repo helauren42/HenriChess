@@ -30,13 +30,18 @@ class AMyRedis(ABC):
         if mode == "online":
             await self.game.zadd("online_expiries", {str(gameId): str(time)})
 
-    async def getActiveOnlineGamesKeys(self)->list[str]:
-        keys = await self.game.zrevrange("online_expiries", 0, 9)
-        mylog.debug(f"KEYS: {keys}")
+    async def getActiveOnlineGamesKeys(self, username: bytes)->list[str]:
+        keys = await self.game.zrevrange("online_expiries", 0, 15)
+        mylog.debug(f"getActiveOnlineGamesKeys KEYS: {keys}")
         ret: list[str] = []
         for k in keys:
-            assert isinstance(k, bytes)
-            ret.append(k.decode())
+            key = k.decode()
+            whiteUsername = await self.game.hget(self.gameKey(key, "online"), "whiteUsername")
+            blackUsername = await self.game.hget(self.gameKey(key, "online"), "blackUsername")
+            mylog.debug(f"whiteUsername: {whiteUsername}")
+            mylog.debug(f"blackUsername: {blackUsername}")
+            if username != whiteUsername and username != blackUsername:
+                ret.append(key)
         mylog.debug(ret)
         return ret
 

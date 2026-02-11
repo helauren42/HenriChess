@@ -83,7 +83,7 @@ export const WatchPage = () => {
   return (
     <div className="w-full flex flex-col text-center gap-10 mt-10">
       <h1>Watch Live Games</h1>
-      <div className="w-full grid place-content-center">
+      <div className="w-full flex-row">
         <GamesList games={games} />
       </div>
     </div>

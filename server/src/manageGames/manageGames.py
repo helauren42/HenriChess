@@ -55,8 +55,8 @@ class GameMan():
         return game
 
     @staticmethod
-    async def getActiveOnlineGames()-> list[GameWatch] :
-        keys = await myred.getActiveOnlineGamesKeys()
+    async def getActiveOnlineGames(username: str)-> list[GameWatch] :
+        keys = await myred.getActiveOnlineGamesKeys(username.encode())
         games: list[GameWatch] = []
         for k in keys:
             game = await myred.getGameWatch(int(k))
