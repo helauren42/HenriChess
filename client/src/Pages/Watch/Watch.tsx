@@ -2,6 +2,8 @@ import { useContext, useEffect, useState } from "react"
 import "./Watch.css"
 import { WsContext } from "../../Contexts/Ws"
 import { Rank } from "../Play/Board"
+import { addWaitCursor, removeWaitCursor } from "../../utils/utils"
+import { clear } from "console"
 
 interface GameWatchFace {
   id: number
@@ -62,13 +64,16 @@ export const GamesList = ({ games }: { games: GameWatchFace[] }) => {
 
 export const WatchPage = () => {
   const { ws, lastMessage } = useContext(WsContext)
-  const [games, setGames] = useState<GameWatchFace[]>([])
+  const [games, setGames] = useState<GameWatchFace[] | null>(null)
+  const [loadingDots, setLoadingDots] = useState<"." | ".." | "...">(".")
+  const [initialized, setInitialized] = useState<boolean>(false)
   useEffect(() => {
     ws?.send(JSON.stringify({ type: "getActiveGames" }))
     const id = setInterval(() => {
+      addWaitCursor()
       console.log("WatchPage loop")
       ws?.send(JSON.stringify({ type: "getActiveGames" }))
-    }, 8000)
+    }, 5000)
     return () => clearInterval(id)
   }, [ws])
   useEffect(() => {
@@ -76,16 +81,39 @@ export const WatchPage = () => {
       switch (lastMessage.type) {
         case "activeOnlineGames":
           setGames(lastMessage.games)
+          removeWaitCursor()
           break
       }
     }
   }, [lastMessage])
+  useEffect(() => {
+    addWaitCursor()
+  }, [])
+  useEffect(() => {
+    if (games == null) {
+      const interval = setInterval(() => {
+        setLoadingDots((prev) => prev == "..." ? "." : prev + "." as ".")
+      }, 200)
+      return () => clearInterval(interval)
+    }
+  }, [games])
+  useEffect(() => {
+    console.log("initialized: ", initialized)
+  }, [initialized])
   return (
     <div className="w-full flex flex-col text-center gap-10 mt-10">
       <h1>Watch Live Games</h1>
       <div className="w-full flex-row">
-        <GamesList games={games} />
+        {
+          games ?
+            games.length == 0 ?
+              <h4> There are no active games currently</h4>
+              : <GamesList games={games} />
+            : <div className="flex text-left ml-[45%]">
+              <h4>Loading{loadingDots}</h4>
+            </div>
+        }
       </div>
-    </div>
+    </div >
   )
 }
