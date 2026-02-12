@@ -110,7 +110,9 @@ class AMyRedis(ABC):
 
     async def getGameMap(self, gameId: int, mode: MODES, username: Optional[str]) -> GameMap | None:
         try:
+            mylog.debug(f"gameId: {gameId}, mode: {mode}, username: {username}")
             data = await self.game.hgetall(self.gameKey(gameId, mode, username))
+            mylog.debug(f"!!!!!!! found game data in getGameMap: {data}")
             if not data:
                 return None
             return GameMap(
@@ -186,6 +188,7 @@ class MyRedis(AMyRedis):
             raise ValueError("misuse of getCurrGameState() if mode is hotseat, the username must be defined")
         try:
             map: GameMap | None = await self.getGameMap(gameId, mode, username)
+            mylog.debug(f"game map: {map}")
             if map is None:
                 return None
             winner = map["winner"]

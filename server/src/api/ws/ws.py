@@ -27,7 +27,7 @@ async def sendError(ws: WebSocket, msg: str):
     })
 
 async def sendGame(ws: WebSocket, mode: MODES, subtype: Literal["new", "continue", "update"], id: int, game: Game):
-    mylog.debug(f"send game called: {asdict(game)}")
+    # mylog.debug(f"send game called: {asdict(game)}")
     try:
         await ws.send_json({
             "type": "game",
@@ -197,8 +197,7 @@ async def websocketEndpoint(ws: WebSocket):
                 case "restartGameHotseat":
                     await startGameHotseat(ws, userId, username, True)
                 case "getGameUpdate":
-                    # res = await getFinishedGame(ws, userId, msg["mode"], msg["gameId"])
-                    # await updateGame(ws, userId, msg["mode"], res[0], res[1])
+                    mylog.debug(f"getGameUpdate username: {username}")
                     game = await GameMan.getGame(msg["gameId"], msg["mode"], username, userId)
                     if game:
                         await updateGame(ws, userId, msg["mode"], game, game.id)

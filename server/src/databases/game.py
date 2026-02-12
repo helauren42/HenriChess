@@ -15,11 +15,9 @@ def gameMoveStr(move: GameMove):
 async def decodeGameMoves(l: list[str | bytes]):
     r: list[GameMove] = []
     for i in range(len(l)):
-        mylog.debug(f"l[{i}]: {l[i]}")
         s = l[i]
         if isinstance(s, bytes):
             s = s.decode()
-        mylog.debug(f"type s: {type(s)}")
         assert isinstance(s, str)
         sp = s.split("|")
         r.append(GameMove(sp[0], sp[1]))

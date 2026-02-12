@@ -40,11 +40,7 @@ export const WsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   useEffect(() => {
-    console.log("ws has updated: ", ws)
-    const temp = user.username.length
-    console.log("first length: ", temp)
     if (user.username.length > 0 && (ws == null || ws?.readyState == ws?.CLOSED || ws?.readyState == ws.CLOSING)) {
-      console.log("current username: ", user.username)
       const id = setInterval(() => {
         makeSocket()
       }, 1000)

@@ -3,7 +3,6 @@ import { GameContext } from "../../Contexts/Game";
 import { INITIAL_BOARD } from "../../utils/const";
 
 export const Square = memo(({ piece, rank, file, viewer = false }: { piece: string, rank: number, file: string, viewer: boolean }) => {
-  console.log("SQUARE PIECE: ", piece)
   const { squareClick, getFileNum } = useContext(GameContext)
   const squareColor: "white" | "black" = (rank + getFileNum(file)) % 2 == 0 ? "white" : "black"
   // console.log("square ", rank, "-", file, ": ", piece)
@@ -50,13 +49,11 @@ export const Square = memo(({ piece, rank, file, viewer = false }: { piece: stri
         return undefined
     }
     path += "_wood_outline.svg"
-    // console.log(path)
     return path
   }
   const handleClick = (id: string) => {
     if (viewer)
       return
-    // TODO pass game id
     squareClick(id, piece)
   }
   return (

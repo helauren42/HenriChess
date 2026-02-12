@@ -14,7 +14,7 @@ const HistoryReactArray = ({ hotseatHistory, dataFetched }: { hotseatHistory: Ho
   const nav = useNavigate()
   const viewGame = (gameId: number) => {
     console.log("viewGame gameId: ", gameId)
-    nav(`/play/hotseat/${gameId}`)
+    nav(`/game/hotseat/${gameId}`)
   }
   const ret = hotseatHistory.map((game) => {
     const arr = (

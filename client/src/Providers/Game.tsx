@@ -136,7 +136,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         setPlayerColor("v")
     }
     console.log("game: ", game)
-    const gamePath = "/play/" + data.mode + "/" + data.id
+    const gamePath = "/game/" + data.mode + "/" + data.id
     const pathname = window.location.pathname
     if (pathname != gamePath)
       nav(gamePath)

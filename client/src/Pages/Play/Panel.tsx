@@ -27,7 +27,7 @@ const GameModes = () => {
     <div className="h-full pt-10 flex flex-col gap-10">
       <GameModeBlock title="Play Online" subtitle="Random Matchmaking" handleClick={() => {
         console.log("clicked play online")
-        nav("/play/matchmake-online")
+        nav("/game/matchmake-online")
       }} />
       <GameModeBlock title="Play Hotseat" subtitle="Play on your computer" handleClick={() => {
         console.log("clicked play hotseat")

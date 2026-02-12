@@ -3,7 +3,7 @@ import "./Watch.css"
 import { WsContext } from "../../Contexts/Ws"
 import { Rank } from "../Play/Board"
 import { addWaitCursor, removeWaitCursor } from "../../utils/utils"
-import { clear } from "console"
+import { useNavigate } from "react-router-dom"
 
 interface GameWatchFace {
   id: number
@@ -14,7 +14,8 @@ interface GameWatchFace {
   fen: string
 }
 
-export const MiniBoard = ({ fen, index }: { fen: string, index: number }) => {
+export const WatchBoard = ({ fen, index }: { fen: string, index: number }) => {
+  const nav = useNavigate()
   const boardFen = fen.split(" ")[0]
   const rankPieces = boardFen.split("/").reverse()
   console.log("RANK PIECES: ", rankPieces)
@@ -24,8 +25,12 @@ export const MiniBoard = ({ fen, index }: { fen: string, index: number }) => {
     ranks.push(<Rank key={`key-rank-${i + 1}`} playerColor={"v"} rank={i + 1} pieces={rankPieces[i]} />)
     i -= 1
   }
+  const navToGame = () => {
+    nav(`/game/online/${index}`)
+    location.reload()
+  }
   return (
-    <div className="mini-board" key={`mini-board-${index}`} >
+    <div className="mini-board" key={`mini-board-${index}`} onClick={() => navToGame()} >
       {ranks}
     </div >
   )
@@ -41,11 +46,11 @@ const MiniGameTitle = ({ blackUsername, whiteUsername }: { blackUsername: string
   )
 }
 
-const MiniGame = ({ blackUsername, whiteUsername, fen, index }: { blackUsername: string, whiteUsername: string, fen: string, index: number }) => {
+const WatchGame = ({ blackUsername, whiteUsername, fen, id }: { blackUsername: string, whiteUsername: string, fen: string, id: number }) => {
   return (
-    <div key={`mini-game-${index}`} className="mini-game">
+    <div key={`mini-game-${id}`} className="mini-game">
       <MiniGameTitle blackUsername={blackUsername} whiteUsername={whiteUsername} ></MiniGameTitle>
-      <MiniBoard fen={fen} index={index} />
+      <WatchBoard fen={fen} index={id} />
     </div>
   )
 }
@@ -55,7 +60,7 @@ export const GamesList = ({ games }: { games: GameWatchFace[] }) => {
     <div id="games-list">
       {
         games.map((game, index) => {
-          return <MiniGame blackUsername={game.blackUsername} whiteUsername={game.whiteUsername} fen={game.fen} index={index} />
+          return <WatchGame blackUsername={game.blackUsername} whiteUsername={game.whiteUsername} fen={game.fen} id={game.id} />
         })
       }
     </div>
@@ -66,7 +71,6 @@ export const WatchPage = () => {
   const { ws, lastMessage } = useContext(WsContext)
   const [games, setGames] = useState<GameWatchFace[] | null>(null)
   const [loadingDots, setLoadingDots] = useState<"." | ".." | "...">(".")
-  const [initialized, setInitialized] = useState<boolean>(false)
   useEffect(() => {
     ws?.send(JSON.stringify({ type: "getActiveGames" }))
     const id = setInterval(() => {
@@ -97,9 +101,6 @@ export const WatchPage = () => {
       return () => clearInterval(interval)
     }
   }, [games])
-  useEffect(() => {
-    console.log("initialized: ", initialized)
-  }, [initialized])
   return (
     <div className="w-full flex flex-col text-center gap-10 mt-10">
       <h1>Watch Live Games</h1>

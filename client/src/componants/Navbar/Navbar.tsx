@@ -34,7 +34,7 @@ export const Navbar = () => {
           <h3 className="text-center">Chess</h3>
         </div>
         <ul className="flex flex-col gap-5">
-          <Navlink name="Play" to="/play" imgsrc="/images/nav/pawn.svg" />
+          <Navlink name="Play" to="/game" imgsrc="/images/nav/pawn.svg" />
           <Navlink name="Watch" to="/watch" imgsrc="/images/nav/eyes.svg" />
           <Navlink name="Social" to="/social" imgsrc="/images/nav/people.svg" />
         </ul>

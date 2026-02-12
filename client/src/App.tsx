@@ -56,10 +56,10 @@ function App() {
       <ToastContainer />
       <Routes>
         <Route path='/' element={<HomePage />}>
-          <Route path='/play/' element={<PlayPage />} />
-          <Route path='/play/hotseat/*' element={<HotseatGame />} />
-          <Route path='/play/online/*' element={<OnlineGame />} />
-          <Route path='/play/matchmake-online' element={<MatchmakeOnline />} />
+          <Route path='/game/' element={<PlayPage />} />
+          <Route path='/game/hotseat/*' element={<HotseatGame />} />
+          <Route path='/game/online/*' element={<OnlineGame />} />
+          <Route path='/game/matchmake-online' element={<MatchmakeOnline />} />
           <Route path='/watch/*' element={<WatchPage />} />
           <Route path='/user/*' element={<UserPage />} />
           <Route path='/social' element={<SocialPage />} />
