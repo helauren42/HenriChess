@@ -170,11 +170,20 @@ class MyRedis(AMyRedis):
 
     async def addGameViewer(self, gameId: int, userId: int):
         try:
-            await self.game.rpush(self.gameViewersKeys(gameId))
+            viewers = await  self.getGameViewers(gameId)
+            if userId in viewers:
+                return
+            await self.game.rpush(self.gameViewersKeys(gameId), str(userId))
         except Exception as e:
             mylog.debug(f"error adding game viewer {e}")
 
-    async def getGameViwers(self, gameId: int)->list[int]:
+    async def removeGameViewer(self, gameId: int, userId: int):
+        try:
+            await self.game.lrem(self.gameViewersKeys(gameId), 0, str(userId))
+        except Exception as e:
+            mylog.debug(f"error removing game viewer {e}")
+
+    async def getGameViewers(self, gameId: int)->list[int]:
         keys: list[bytes] = await self.game.lrange(self.gameViewersKeys(gameId), 0, -1)
         ret: list[int] = []
         for i in range(len(keys)):

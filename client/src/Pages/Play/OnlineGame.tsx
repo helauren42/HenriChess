@@ -28,8 +28,13 @@ export const OnlineGame = () => {
   const { ws } = useContext(WsContext)
   useEffect(() => {
     // set player as viewer
-    ws
-  }, [])
+    if (playerColor != "v")
+      return
+    const splitted = location.pathname.split("/")
+    const gameId = splitted[splitted.length - 1]
+    ws?.send(JSON.stringify({ type: "addViewer", gameId: gameId }))
+    return () => ws?.send(JSON.stringify({ type: "removeViewer", gameId: gameId }))
+  }, [playerColor, ws])
   return (
     <div className="w-full flex items-center gap-2 justify-evenly">
       <GameAndPlayers />
