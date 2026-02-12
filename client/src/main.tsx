@@ -10,8 +10,8 @@ import { WsProvider } from './Providers/Ws.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
-    <WsProvider>
-      <UserProvider>
+    <UserProvider>
+      <WsProvider>
         <AuthCompProvider>
           <GameProvider>
             <GameWatchProvider>
@@ -19,7 +19,7 @@ createRoot(document.getElementById('root')!).render(
             </GameWatchProvider>
           </GameProvider>
         </AuthCompProvider>
-      </UserProvider>
-    </WsProvider>
-  </BrowserRouter>
+      </WsProvider>
+    </UserProvider>
+  </BrowserRouter >
 )

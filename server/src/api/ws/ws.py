@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import AbstractAsyncContextManager
 from dataclasses import asdict
 from typing import Literal
@@ -25,15 +26,18 @@ async def sendError(ws: WebSocket, msg: str):
         "error": msg
     })
 
-async def sendGame(ws: WebSocket, mode: MODES, subtype: Literal["new", "continue", "update", "finish"], id: int, game: Game):
+async def sendGame(ws: WebSocket, mode: MODES, subtype: Literal["new", "continue", "update"], id: int, game: Game):
     mylog.debug(f"send game called: {asdict(game)}")
-    await ws.send_json({
-        "type": "game",
-        "mode": mode,
-        "subtype": subtype,
-        "id": id,
-        "game": asdict(game),
-    })
+    try:
+        await ws.send_json({
+            "type": "game",
+            "mode": mode,
+            "subtype": subtype,
+            "id": id,
+            "game": asdict(game),
+        })
+    except Exception as e:
+        mylog.error(f"sendGame {subtype} failed for game: {id}")
 
 async def sendGameExpired(ws: WebSocket, gameId: int):
     mylog.debug(f"sending game expired for gameId: {gameId}")
@@ -168,8 +172,10 @@ async def websocketEndpoint(ws: WebSocket):
         userId = await getUserId(ws.cookies)
         username = await postgres.fetchUsername(userId)
         assert username is not None
-    except:
-        mylog.debug("refusing ws connection")
+    except Exception as e:
+        await asyncio.sleep(3)
+        mylog.debug(f"refusing ws connection {e}")
+        ws.close(1008, reason="User not authentified")
         return
     try:
         await ws.accept()

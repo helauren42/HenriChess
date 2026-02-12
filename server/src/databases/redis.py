@@ -26,6 +26,7 @@ class AMyRedis(ABC):
         await self.game.expire(self.gameKey(gameId, mode, username), EXPIRY_TIME)
         await self.game.expire(self.gameMoveKey(gameId), EXPIRY_TIME)
         await self.game.expire(self.gamePositionKey(gameId), EXPIRY_TIME)
+        await self.game.expire(self.gameViewersKeys(gameId), EXPIRY_TIME)
         time = int(datetime.datetime.now().timestamp()) + EXPIRY_TIME
         if mode == "online":
             await self.game.zadd("online_expiries", {str(gameId): str(time)})
@@ -57,8 +58,8 @@ class AMyRedis(ABC):
     def gamePositionKey(self, gameId: int):
         return f"game_position_{gameId}"
 
-    def gameExpiryKey(self, gameId: int):
-        return f""
+    def gameViewersKeys(self, gameId: int):
+        return f"game_viewers_{gameId}"
 
     async def findActiveHotseatGameId(self, username: str)-> None | int:
         asyncKeys = self.game.scan_iter(f"{username}:*", 1)
@@ -151,10 +152,9 @@ class MyRedis(AMyRedis):
 
     async def addGameMove(self, move: GameMove, gameId: int, mode: MODES, username: str):
         try:
-            async with self.lockAddGame:
-                name = self.gameMoveKey(gameId)
-                await self.game.rpush(name, gameMoveStr(move))
-                await self.extendGameExpiry(gameId, mode, username)
+            name = self.gameMoveKey(gameId)
+            await self.game.rpush(name, gameMoveStr(move))
+            await self.extendGameExpiry(gameId, mode, username)
         except Exception as e:
             mylog.error(f"error adding game move {e}")
 
@@ -166,8 +166,20 @@ class MyRedis(AMyRedis):
         except Exception as e:
             mylog.error(f"error adding game position {e}")
 
-    async def getUserHotseatGame(self, username: Optional[str] = None)-> Game | None:
-        pass
+    async def addGameViewer(self, gameId: int, userId: int):
+        try:
+            await self.game.rpush(self.gameViewersKeys(gameId))
+        except Exception as e:
+            mylog.debug(f"error adding game viewer {e}")
+
+    async def getGameViwers(self, gameId: int)->list[int]:
+        keys: list[bytes] = await self.game.lrange(self.gameViewersKeys(gameId), 0, -1)
+        ret: list[int] = []
+        for i in range(len(keys)):
+            k = keys[i].decode()
+            isinstance(k, str)
+            ret.append(int(k))
+        return ret
 
     async def getCurrGameState(self, gameId: int, mode: MODES, username: Optional[str] = None)-> Game | None:
         if mode == "hotseat" and username is None:

@@ -8,6 +8,10 @@ export const UserProvider = ({ children }:
     username: "",
     email: ""
   })
+  useEffect(() => {
+    console.log(user.username)
+    console.log(user.email)
+  }, [user])
   return (
     <UserContext.Provider value={{ user, setUser }}> {children}
     </UserContext.Provider>
