@@ -6,6 +6,7 @@ import redis.asyncio as redis
 import asyncio
 
 from databases.game import Game, GameMap, GameMove, GameWatch, decodeGameMoves, gameMoveStr
+from utils import game
 from utils.const import MODES, Env, EXPIRY_TIME
 from utils.game import getWinnerName
 from utils.logger import mylog
@@ -112,7 +113,6 @@ class AMyRedis(ABC):
         try:
             mylog.debug(f"gameId: {gameId}, mode: {mode}, username: {username}")
             data = await self.game.hgetall(self.gameKey(gameId, mode, username))
-            mylog.debug(f"!!!!!!! found game data in getGameMap: {data}")
             if not data:
                 return None
             return GameMap(
@@ -248,5 +248,16 @@ class MyRedis(AMyRedis):
         except Exception as e:
             mylog.error(f"failed to retrieve curr game state {e}")
 
+    async def userOnlineActiveGame(self, userId: str)-> int | None:
+        allGames = self.game.scan_iter("online:*")
+        async for k in allGames:
+            assert isinstance(k, bytes)
+            gameName = k.decode()
+            whiteId = (await self.game.hget(gameName, "whiteId")).decode()
+            blackId = (await self.game.hget(gameName, "blackId")).decode()
+            gameId = gameName.split(":")[1]
+            if userId == whiteId or userId == blackId:
+                return int(gameId)
+        return None
 
 myred = MyRedis()

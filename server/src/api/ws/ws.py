@@ -240,6 +240,12 @@ async def websocketEndpoint(ws: WebSocket):
                 case "endMatchmaking":
                     await matchmakePoolRemove(userId)
                     mylog.debug("endMatchmaking")
+                case "joinActiveOnlineGame":
+                    gameId = await myred.userOnlineActiveGame(str(userId))
+                    if gameId:
+                        game = await GameMan.getGame(gameId, "online", username, userId)
+                        if game:
+                            await updateGameOne(ws, userId, "online", game, game.id)
                 # WATCH
                 case "getActiveGames":
                     mylog.debug("getActiveGames")
