@@ -27,7 +27,7 @@ export const MatchmakeOnline = () => {
     }
   }, [ws?.readyState])
   return (
-    <div className="w-full h-full -mt-[8%] flex flex-col justify-center items-center text-center">
+    <div className="w-full h-full mt-[12%] flex flex-col justify-center items-center text-center">
       <div className="w-full flex flex-col items-center gap-15">
         <h2>Searching for opponents</h2>
         <div className="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
