@@ -1,6 +1,5 @@
 .play-panel {
   position: relative;
-  height: 50vh;
   width: 380px;
   max-width: 30vw;
   background-color: var(--nav-color);
@@ -19,7 +18,6 @@
   position: relative;
   height: 90vh;
   width: 380px;
-  max-width: 30vw;
   background-color: var(--nav-color);
   display: flex;
   flex-direction: column;
@@ -51,8 +49,24 @@
   filter: brightness(0.9);
 }
 
-@media(max-width: 1400px) {
-  #play-panel {
-    max-width: 22vw;
+@media(max-width: 1350px) {
+  .play-panel {
+    width: 300px;
+  }
+
+  .game-panel {
+    width: 320px;
+  }
+}
+
+@media(max-width: 1200px) {
+  .play-panel {
+    min-width: 430px;
+  }
+
+  .game-panel {
+    min-height: 900px;
+    width: 80%;
+    max-width: 550px;
   }
 }

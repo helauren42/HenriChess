@@ -32,7 +32,7 @@ const UserDataDisplay = ({ userData }: { userData: UserData }) => {
     <div id="user-data-display" className="flex flex-col gap-5">
       <div className="row-block">
         <div id="profile-pic" className="flex flex-col gap-3">
-          <SvgAccount />
+          <SvgAccount className="fill-(--button-color)" />
         </div>
         <div className="flex flex-col pt-3">
           <h3>{userData.username}</h3>

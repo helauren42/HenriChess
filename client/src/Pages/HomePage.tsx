@@ -4,7 +4,7 @@ import { AuthPage } from "../componants/AuthComp"
 
 export const HomePage = () => {
   return (
-    <div className="relative w-full h-full flex">
+    <div className="relative w-full min-h-full flex flex-row">
       <Navbar />
       {<Outlet />}
       <AuthPage />

@@ -1,4 +1,4 @@
-import { memo, useContext } from "react";
+import { memo, useContext, useEffect, useState } from "react";
 import { GameContext } from "../../Contexts/Game";
 import { INITIAL_BOARD } from "../../utils/const";
 
@@ -207,6 +207,7 @@ export const PassiveRank = memo(({ rank, pieces }: { rank: number, pieces: strin
 })
 
 export const PassiveBoard = () => {
+  const [width, setWidth] = useState(window.innerWidth)
   const board = INITIAL_BOARD
   const rankPieces = board.split("/").reverse()
   const iIncr = -1
@@ -217,6 +218,20 @@ export const PassiveBoard = () => {
     ranks.push(<PassiveRank key={`key-rank-${i + 1}`} rank={i + 1} pieces={rankPieces[i]} />)
     i += iIncr
   }
+  useEffect(() => {
+    const elem = document.getElementById("play-board")
+    if (elem)
+      if (width < 1200)
+        elem.style.display = "none"
+      else
+        elem.style.display = "flex"
+  }, [width])
+  useEffect(() => {
+    const handleResize = () => {
+      setWidth(window.innerWidth)
+    }
+    window.addEventListener("resize", handleResize)
+  }, [])
   return (
     <div id="play-board">
       <div id="chessboard">

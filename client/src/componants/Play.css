@@ -9,3 +9,27 @@
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
 }
+
+#board-panel {
+  margin-left: 170px;
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+@media (max-width: 1200px) {
+  #board-panel {
+    flex-direction: column;
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 1300px) {
+  #board-panel {
+    margin-left: 80px;
+  }
+}

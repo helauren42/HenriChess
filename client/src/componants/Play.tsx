@@ -1,4 +1,4 @@
-import { memo, useContext, useEffect } from "react"
+import { memo, useContext, useEffect, type ReactNode } from "react"
 import { GameContext } from "../Contexts/Game"
 import "./Play.css"
 import { SvgLastPosition, SvgNextPosition, SvgFirstPosition, SvgPreviousPosition } from "../svgs/svgs"
@@ -72,3 +72,12 @@ export const ViewMoves = () => {
     </div>
   )
 }
+
+export const BoardPanel = ({ children }: { children: ReactNode }) => {
+  return (
+    <div id="board-panel" >
+      {children}
+    </div>
+  )
+}
+

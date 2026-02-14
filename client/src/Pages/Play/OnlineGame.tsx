@@ -4,6 +4,7 @@ import { Panel } from "./Panel"
 import { GameContext } from "../../Contexts/Game"
 import { useNavigate } from "react-router-dom"
 import { WsContext } from "../../Contexts/Ws"
+import { BoardPanel } from "../../componants/Play"
 
 const Buttons = () => {
   const { resignGame, winner } = useContext(GameContext)
@@ -36,7 +37,7 @@ export const OnlineGame = () => {
     return () => ws?.send(JSON.stringify({ type: "removeViewer", gameId: gameId }))
   }, [playerColor, ws])
   return (
-    <div className="w-full flex items-center gap-2 justify-evenly">
+    <BoardPanel>
       <GameAndPlayers />
       <Panel title="Online" game={true}>
         {
@@ -45,6 +46,6 @@ export const OnlineGame = () => {
             : null
         }
       </Panel>
-    </div>
+    </BoardPanel>
   )
 }

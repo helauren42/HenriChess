@@ -52,6 +52,12 @@ tr:last-child td:first-child {
 .game-history-row {
   cursor: pointer;
   background-color: var(--nav-color);
+  border-bottom-left-radius: 1rem;
+  overflow: hidden;
+}
+
+.game-history-row:last-of-type {
+  border-bottom-left-radius: 1rem;
 }
 
 .game-history-row:hover {

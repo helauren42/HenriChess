@@ -28,7 +28,7 @@ const Navlink = ({ name, to, imgsrc }: NavlinkProps) => {
         <img className="min-w-8" src={imgsrc} />
       </div>
       {
-        width > 1200 ?
+        width > 1300 ?
           <h4 className="h-full w-full flex flex-col justify-end">{name}</h4>
           : null
       }
@@ -52,7 +52,7 @@ const NavAuthBtn = () => {
   return (
     <>
       {
-        width > 1200 ? (
+        width > 1300 ? (
           <>
             <button className="flex justify-center items-center w-full max-h-15" onClick={user.username ? navAccount : () => openAuth("login")}>
               < SvgAccount className="fill-(--text-color-light) w-12" />
@@ -80,7 +80,7 @@ export const Navbar = () => {
     <nav>
       <div onClick={() => nav("/")} className="cursor-pointer">
         {
-          width > 1200 ?
+          width > 1300 ?
             <>
               <h3 className="text-center">Henri</h3>
               <h3 className="text-center">Chess</h3>

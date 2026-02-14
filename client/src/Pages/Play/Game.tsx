@@ -8,7 +8,7 @@ import { WsContext } from "../../Contexts/Ws.tsx"
 
 export const PlayerDisplay = ({ playerName }: { playerName: string }) => {
   return (
-    <div className="h-[3%] ml-5">
+    <div className="ml-3">
       <h4>{playerName}</h4>
     </div>
   )
@@ -43,7 +43,7 @@ export const GameAndPlayers = () => {
   const topName = playerColor == "b" ? whiteUsername : blackUsername
   const botName = topName == whiteUsername ? blackUsername : whiteUsername
   return (
-    <div className="flex flex-col">
+    <div id="game-players">
       <PlayerDisplay playerName={topName} />
       <div id="play-board">
         <Game />
