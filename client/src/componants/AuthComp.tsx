@@ -3,6 +3,8 @@ import { writeFetch, type MyResp } from "../utils/requests"
 import { Toast409, ToastCustomError, ToastServerError } from "../utils/toastify"
 import { UserContext, type UserContextFace } from "../Contexts/User"
 import { AuthCompContext } from "../Contexts/AuthComp"
+import { useNavigate } from "react-router-dom"
+import { removeWaitCursor } from "../utils/utils"
 
 const AuthTitle = ({ title }: { title: string }) => {
   return (
@@ -135,6 +137,14 @@ export const LoginPage = () => {
 
 export const Unauthorized = () => {
   const { openAuth } = useContext(AuthCompContext)
+  const nav = useNavigate()
+  useEffect(() => {
+    setTimeout(() => {
+      nav("/")
+      openAuth("login")
+      removeWaitCursor()
+    }, 2000)
+  }, [])
   return (
     <div className="flex flex-col justify-between gap-5 max-w-[350px]">
       <AuthTitle title="Unauthorized" />
