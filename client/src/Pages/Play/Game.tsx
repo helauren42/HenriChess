@@ -43,12 +43,14 @@ export const GameAndPlayers = () => {
   const topName = playerColor == "b" ? whiteUsername : blackUsername
   const botName = topName == whiteUsername ? blackUsername : whiteUsername
   return (
-    <div id="game-players">
-      <PlayerDisplay playerName={topName} />
-      <div id="play-board">
-        <Game />
+    <div className="game-players-wrapper">
+      <div id="game-players">
+        <PlayerDisplay playerName={topName} />
+        <div id="play-board">
+          <Game />
+        </div>
+        <PlayerDisplay playerName={botName} />
       </div>
-      <PlayerDisplay playerName={botName} />
     </div>
   )
 }

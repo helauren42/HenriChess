@@ -2,6 +2,7 @@
   height: 80vh;
   width: 80vh;
   max-height: 80vw;
+  max-width: 80vw;
   aspect-ratio: 1/1;
   display: flex;
   flex-direction: column;
@@ -11,7 +12,6 @@
 }
 
 #chessboard {
-  height: 100%;
   aspect-ratio: 1/1;
   display: flex;
   flex-direction: column;
@@ -19,12 +19,14 @@
 }
 
 /* #flex flex-col justify-around gap-0 h-full */
-#game-players {
+#game-players {}
+
+#game-players-wrapper {
+  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  height: 100%;
-  min-height: 100vh;
+  justify-content: end;
 }
 
 .rank {
@@ -50,10 +52,8 @@
   background-color: var(--square-black);
 }
 
-.piece {
-  will-change: transform;
-  /* GPU layer */
-  transform: translateZ(0);
-  /* Force hardware acceleration */
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+@media (max-width: 1200px) {
+  #game-players {
+    margin-top: 8%;
+  }
 }
