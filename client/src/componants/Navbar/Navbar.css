@@ -17,6 +17,7 @@ nav {
   gap: 2rem;
   font-weight: 600;
   border-right: 1px solid var(--border-color);
+  z-index: 10;
 }
 
 nav>* {
@@ -30,11 +31,5 @@ nav>* {
 
   #nav-wrapper {
     width: 80px;
-  }
-}
-
-@media (max-width: 600px) {
-  nav {
-    display: none;
   }
 }

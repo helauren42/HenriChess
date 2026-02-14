@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom"
 import "./Navbar.css"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState, type Dispatch, type SetStateAction } from "react"
 import { UserContext } from "../../Contexts/User"
 import { AuthCompContext } from "../../Contexts/AuthComp"
-import { SvgAccount } from "../../svgs/svgs.tsx"
+import { SvgAccount, SvgAlign } from "../../svgs/svgs.tsx"
 
 interface NavlinkProps {
   name: string,
@@ -15,9 +15,7 @@ const Navlink = ({ name, to, imgsrc }: NavlinkProps) => {
   const nav = useNavigate()
   const [width, setWidth] = useState(window.innerWidth)
   useEffect(() => {
-    console.log("nav link useEffect")
     const handleResize = () => {
-      console.log("nav link handleResize")
       setWidth(window.innerWidth)
     }
     window.addEventListener("resize", handleResize)
@@ -68,37 +66,74 @@ const NavAuthBtn = () => {
   )
 }
 
+const BarToggler = ({ setBarVisible }: { setBarVisible: Dispatch<SetStateAction<boolean>> }) => {
+  return (
+    <div id="bar-toggler" className="absolute flex flex-col bg-(--nav-color) rounded-br cursor-pointer border-b border-r z-10"
+      onClick={() => setBarVisible((prev) => !prev)}>
+      <SvgAlign />
+    </div>
+  )
+}
 
 export const Navbar = () => {
   const nav = useNavigate()
   const [width, setWidth] = useState(window.innerWidth)
+  const [barVisible, setBarVisible] = useState(false)
+  useEffect(() => {
+    if (width > 800)
+      setBarVisible(true)
+    else
+      setBarVisible(false)
+  }, [width])
+  useEffect(() => {
+    const barToggler = document.getElementById("bar-toggler")
+    const navElem = document.getElementById("nav") as HTMLElement
+    console.log("barVisible: ", barVisible)
+    if (barVisible) {
+      if (barToggler)
+        barToggler.style.marginLeft = "80px"
+      navElem.style.display = "inline"
+    }
+    else {
+      if (barToggler)
+        barToggler.style.marginLeft = ""
+      navElem.style.display = "none"
+    }
+  }, [barVisible])
   useEffect(() => {
     const handleResize = () => setWidth(window.innerWidth)
     window.addEventListener("resize", handleResize)
   }, [])
   return (
-    <nav>
-      <div onClick={() => nav("/")} className="cursor-pointer">
-        {
-          width > 1300 ?
-            <>
-              <h3 className="text-center">Henri</h3>
-              <h3 className="text-center">Chess</h3>
-            </>
-            :
-            <h3 className="text-center">HC</h3>
-        }
-      </div>
-      <ul className="flex flex-col gap-5">
-        <Navlink name="Play" to="/game" imgsrc="/images/nav/pawn.svg" />
-        <Navlink name="Watch" to="/watch" imgsrc="/images/nav/eyes.svg" />
-        <Navlink name="Social" to="/social" imgsrc="/images/nav/people.svg" />
-      </ul>
-      {
-        <div id="centerer" className="flex justify-center">
-          <NavAuthBtn />
+    <div className="relative">
+      <nav id="nav">
+        <div onClick={() => nav("/")} className="cursor-pointer">
+          {
+            width > 1300 ?
+              <>
+                <h3 className="text-center">Henri</h3>
+                <h3 className="text-center">Chess</h3>
+              </>
+              :
+              <h3 className="text-center">HC</h3>
+          }
         </div>
+        <ul className="flex flex-col gap-5 mt-10 mb-13">
+          <Navlink name="Play" to="/game" imgsrc="/images/nav/pawn.svg" />
+          <Navlink name="Watch" to="/watch" imgsrc="/images/nav/eyes.svg" />
+          <Navlink name="Social" to="/social" imgsrc="/images/nav/people.svg" />
+        </ul>
+        {
+          <div id="centerer" className="flex justify-center">
+            <NavAuthBtn />
+          </div>
+        }
+      </nav >
+      {
+        width <= 800 ?
+          <BarToggler setBarVisible={setBarVisible} />
+          : null
       }
-    </nav >
+    </div>
   )
 }

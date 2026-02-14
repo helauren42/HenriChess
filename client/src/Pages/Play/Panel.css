@@ -49,9 +49,9 @@
   filter: brightness(0.9);
 }
 
-@media(max-width: 1350px) {
+@media(max-width: 1400px) {
   .play-panel {
-    width: 300px;
+    min-width: 430px;
   }
 
   .game-panel {
@@ -60,9 +60,6 @@
 }
 
 @media(max-width: 1200px) {
-  .play-panel {
-    min-width: 430px;
-  }
 
   .game-panel {
     min-height: 900px;

@@ -221,7 +221,7 @@ export const PassiveBoard = () => {
   useEffect(() => {
     const elem = document.getElementById("play-board")
     if (elem)
-      if (width < 1200)
+      if (width < 1400)
         elem.style.display = "none"
       else
         elem.style.display = "flex"
