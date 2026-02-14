@@ -32,3 +32,9 @@ nav>* {
     width: 80px;
   }
 }
+
+@media (max-width: 600px) {
+  nav {
+    display: none;
+  }
+}

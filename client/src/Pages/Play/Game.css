@@ -57,3 +57,21 @@
     margin-top: 8%;
   }
 }
+
+@media (max-width: 600px) {
+  #play-board {
+    height: 90vw;
+    width: 90vw;
+    max-height: 90vw;
+    max-width: 90vw;
+  }
+}
+
+@media (max-width: 500px) {
+  #play-board {
+    height: 95vw;
+    width: 95vw;
+    max-height: 95vw;
+    max-width: 95vw;
+  }
+}
