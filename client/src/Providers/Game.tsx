@@ -6,6 +6,7 @@ import { ToastCustomError } from "../utils/toastify.tsx";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../Contexts/User.tsx";
 import { WsContext } from "../Contexts/Ws.tsx";
+import { removeWaitCursor } from "../utils/utils.tsx";
 
 export interface DataGame {
   "type": "game",
@@ -203,9 +204,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       switch (lastMessage.type) {
         case "game":
           parseGame(lastMessage as DataGame)
+          removeWaitCursor()
           break
         case "gameExpired":
           setGameExpired(true)
+          removeWaitCursor()
           break
       }
   }, [lastMessage])

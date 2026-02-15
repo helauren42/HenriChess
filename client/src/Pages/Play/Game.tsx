@@ -5,6 +5,7 @@ import "./Game.css"
 import { Board } from "./Board.tsx"
 import { useLocation } from "react-router-dom"
 import { WsContext } from "../../Contexts/Ws.tsx"
+import { addWaitCursor } from "../../utils/utils.tsx"
 
 export const PlayerDisplay = ({ playerName }: { playerName: string }) => {
   return (
@@ -26,6 +27,7 @@ export const Game = () => {
     if (mode != "hotseat" && mode != "online")
       return
     const tempId = parseInt(pathSplit[3])
+    addWaitCursor()
     setMode(mode)
     setGameId(tempId)
     getGameUpdate(tempId)
