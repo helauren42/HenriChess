@@ -136,7 +136,8 @@ export const LoginPage = () => {
 }
 
 export const Unauthorized = () => {
-  const { openAuth } = useContext(AuthCompContext)
+  const { openAuth, closeAuth } = useContext(AuthCompContext)
+  const { user } = useContext(UserContext)
   const nav = useNavigate()
   useEffect(() => {
     console.log("!!!!! PRE TIMEOUT")
@@ -146,6 +147,13 @@ export const Unauthorized = () => {
       openAuth("login")
       removeWaitCursor()
     }, 2000)
+    const intervalId = setInterval(() => {
+      if (user.username.length > 0) {
+        clearTimeout(id)
+        clearInterval(intervalId)
+        closeAuth()
+      }
+    }, 100)
     return () => clearTimeout(id)
   }, [])
   return (
