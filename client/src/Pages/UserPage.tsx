@@ -32,8 +32,8 @@ const UserDataDisplay = ({ userData }: { userData: UserData }) => {
   return (
     <div id="user-data-display" className="flex flex-col gap-5">
       <div className="row-block">
-        <div id="profile-pic" className="flex flex-col gap-3">
-          <SvgAccount className="fill-(--button-color)" />
+        <div id="profile-pic" className="flex flex-col justify-center gap-3">
+          <SvgAccount className="fill-(--button-color) w-20 h-20" />
         </div>
         <div className="flex flex-col pt-3">
           <h3>{userData.username}</h3>
