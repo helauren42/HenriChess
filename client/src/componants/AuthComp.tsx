@@ -139,11 +139,14 @@ export const Unauthorized = () => {
   const { openAuth } = useContext(AuthCompContext)
   const nav = useNavigate()
   useEffect(() => {
-    setTimeout(() => {
+    console.log("!!!!! PRE TIMEOUT")
+    const id = setTimeout(() => {
+      console.log("!!!!! IN TIMEOUT")
       nav("/")
       openAuth("login")
       removeWaitCursor()
     }, 2000)
+    return () => clearTimeout(id)
   }, [])
   return (
     <div className="flex flex-col justify-between gap-5 max-w-[350px]">

@@ -37,7 +37,7 @@ const Navlink = ({ name, to, imgsrc }: NavlinkProps) => {
 
 const NavAuthBtn = () => {
   const [width, setWidth] = useState(window.innerWidth)
-  const { openAuth } = useContext(AuthCompContext)
+  const { openAuth, closeAuth, authComp } = useContext(AuthCompContext)
   const { user } = useContext(UserContext)
   const nav = useNavigate()
   useEffect(() => {
@@ -47,12 +47,21 @@ const NavAuthBtn = () => {
   const navAccount = () => {
     nav(`/user/${user.username}`)
   }
+  const handleClick = () => {
+    console.log("handleClick")
+    if (user.username.length > 0)
+      return navAccount()
+    if (authComp.on == false)
+      openAuth("login")
+    else
+      closeAuth()
+  }
   return (
     <>
       {
         width > 1300 ? (
           <>
-            <button className="flex justify-center items-center w-full max-h-15" onClick={user.username ? navAccount : () => openAuth("login")}>
+            <button className="flex justify-center items-center w-full max-h-15" onClick={handleClick}>
               < SvgAccount className="fill-(--text-color-light) w-12" />
             </button>
           </>

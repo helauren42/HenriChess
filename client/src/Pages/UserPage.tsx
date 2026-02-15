@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { readFetch, writeFetch, type MyResp } from "../utils/requests"
 import { AuthCompContext } from "../Contexts/AuthComp"
 import { ToastCustomError, ToastFeatureNotImplemented } from "../utils/toastify"
@@ -18,16 +18,17 @@ interface UserData {
 }
 
 const UserDataDisplay = ({ userData }: { userData: UserData }) => {
+  const nav = useNavigate()
   const logout = async () => {
     const resp: MyResp | null = await writeFetch("/auth/logout", "DELETE", {})
     if (!resp || !resp.ok) {
       ToastCustomError("Failed to logout")
     }
     else {
+      nav("/")
       location.reload()
     }
   }
-  console.log("user data: ", userData)
   return (
     <div id="user-data-display" className="flex flex-col gap-5">
       <div className="row-block">

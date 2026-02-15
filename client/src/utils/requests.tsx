@@ -1,5 +1,7 @@
+import { useContext, type Dispatch, type SetStateAction } from "react"
 import { SERVER_URL } from "./const"
 import { ToastNetworkError } from "./toastify"
+import { AuthCompContext } from "../Contexts/AuthComp"
 
 export interface MyResp {
   status: number

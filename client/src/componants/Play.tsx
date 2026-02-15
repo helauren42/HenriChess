@@ -2,6 +2,8 @@ import { memo, useContext, useEffect, type ReactNode } from "react"
 import { GameContext } from "../Contexts/Game"
 import "./Play.css"
 import { SvgLastPosition, SvgNextPosition, SvgFirstPosition, SvgPreviousPosition } from "../svgs/svgs"
+import { AuthCompContext } from "../Contexts/AuthComp"
+import { UserContext } from "../Contexts/User"
 
 const GameMoveHistoryLine = memo(({ whiteUci, index, blackUci }: { whiteUci: string, index: number, blackUci: string | undefined }) => {
   const moveNumber = Math.floor(index / 2) + 1
@@ -74,6 +76,14 @@ export const ViewMoves = () => {
 }
 
 export const BoardPanel = ({ children }: { children: ReactNode }) => {
+  const { openAuth, closeAuth } = useContext(AuthCompContext)
+  const { user } = useContext(UserContext)
+  useEffect(() => {
+    if (user.username.length > 0)
+      closeAuth()
+    else
+      openAuth("unauthorized")
+  }, [user])
   return (
     <div id="board-panel" >
       {children}

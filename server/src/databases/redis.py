@@ -111,7 +111,6 @@ class AMyRedis(ABC):
 
     async def getGameMap(self, gameId: int, mode: MODES, username: Optional[str]) -> GameMap | None:
         try:
-            mylog.debug(f"gameId: {gameId}, mode: {mode}, username: {username}")
             data = await self.game.hgetall(self.gameKey(gameId, mode, username))
             if not data:
                 return None
@@ -228,16 +227,14 @@ class MyRedis(AMyRedis):
 
     async def getGameWatch(self, gameId: int):
         try:
-            mylog.debug(f"getGameWatch")
             map: GameMap | None = await self.getGameMap(gameId, "online", None)
             if map is None:
                 return None
             winner = map["winner"]
             if winner == "-1":
                 winner = None
-            mylog.debug(f"winner: {winner}")
             fens = await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), -1, -1))
-            mylog.debug(f"fens: {fens}")
+            mylog.debug(f"get game watch fens: {fens}")
             return GameWatch(id=gameId,
                 whiteUsername=map["whiteUsername"],
                 blackUsername=map["blackUsername"],

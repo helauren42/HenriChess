@@ -4,6 +4,8 @@ import { WsContext } from "../../Contexts/Ws"
 import { Rank } from "../Play/Board"
 import { addWaitCursor, removeWaitCursor } from "../../utils/utils"
 import { useNavigate } from "react-router-dom"
+import { UserContext } from "../../Contexts/User"
+import { AuthCompContext } from "../../Contexts/AuthComp"
 
 interface GameWatchFace {
   id: number
@@ -71,6 +73,8 @@ export const WatchPage = () => {
   const { ws, lastMessage } = useContext(WsContext)
   const [games, setGames] = useState<GameWatchFace[] | null>(null)
   const [loadingDots, setLoadingDots] = useState<"." | ".." | "...">(".")
+  const { user } = useContext(UserContext)
+  const { openAuth } = useContext(AuthCompContext)
   useEffect(() => {
     ws?.send(JSON.stringify({ type: "getActiveGames" }))
     const id = setInterval(() => {
@@ -90,6 +94,11 @@ export const WatchPage = () => {
       }
     }
   }, [lastMessage])
+  useEffect(() => {
+    if (user.username == null || user.username.length == 0) {
+      openAuth("unauthorized")
+    }
+  }, [user.username])
   useEffect(() => {
     addWaitCursor()
   }, [])
