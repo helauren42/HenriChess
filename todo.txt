@@ -1,6 +1,0 @@
-- startGameHosteat!!!
-- start game server side on play hotseat, store game in db, and localStorage
-
-- make sure that the websocket is connected and auth tokens have been received before setting user as logged in or make cursor/page display loading status until this is done
-- handle not logged in properly
-- center the pieces properly on the board
