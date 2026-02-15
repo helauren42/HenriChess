@@ -1,153 +1,16 @@
 import asyncio
-from contextlib import AbstractAsyncContextManager
-from dataclasses import asdict
-from typing import Literal
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 from fastapi import APIRouter
-import chess
-import random
 
-from databases.game import GameMove, Game, GameWatch
+from databases.game import GameWatch
 from databases.postgres import postgres
 from databases.redis import myred
 from utils.api import getUserId
-from utils.const import MODES, matchmakePool, onlinePlayers
+from utils.const import matchmakePool, onlinePlayers
 from utils.logger import mylog
 from manageGames.manageGames import GameMan
 
 wsRouter = APIRouter(prefix="/ws")
-
-def newGame(gameId: int, whiteId: int, blackId: int)-> Game:
-    return Game(id=gameId, gameFens=[chess.STARTING_FEN], gameMoves=[], winner=None, winnerName=None, whiteUsername="white", blackUsername="black", whiteId=whiteId, blackId=blackId)
-
-async def sendError(ws: WebSocket, msg: str):
-    await ws.send_json({
-        "type": "error",
-        "error": msg
-    })
-
-async def sendGame(ws: WebSocket, mode: MODES, subtype: Literal["new", "continue", "update"], id: int, game: Game):
-    # mylog.debug(f"send game called: {asdict(game)}")
-    try:
-        await ws.send_json({
-            "type": "game",
-            "mode": mode,
-            "subtype": subtype,
-            "id": id,
-            "game": asdict(game),
-        })
-    except Exception as e:
-        mylog.error(f"sendGame {subtype} failed for game: {id}")
-
-async def sendGameExpired(ws: WebSocket, gameId: int):
-    mylog.debug(f"sending game expired for gameId: {gameId}")
-    await ws.send_json({
-        "type": "gameExpired",
-        "id": gameId
-    })
-    # TODO HANDLE CLIENT SIDE
-
-async def handleGameMove(ws: WebSocket, mode: MODES, uciMove: str, gameData: Game, gameId: int, username: str)-> None | Game:
-    try:
-        mylog.debug(f"handleGameMove: {uciMove}")
-        currFen = gameData.gameFens[len(gameData.gameFens) -1]
-        # check validity
-        board = chess.Board(currFen)
-        move = chess.Move.from_uci(uciMove)
-        piece = board.piece_at(move.from_square)
-        if piece is None:
-            mylog.debug("move is not valid")
-            await sendError(ws, "invalid move")
-            return None
-        mylog.debug(piece.piece_type)
-        mylog.debug(piece.symbol())
-        if board.is_legal(move):
-            san = board.san(move)
-            board.push(move)
-            mylog.debug("adding new position and move")
-            # await postgres.addNewPositionAndMove(gameId, mode, board.fen(), uciMove, san)
-            await myred.addGamePosition(board.fen(), gameId, mode, username)
-            await myred.addGameMove(GameMove(uciMove, san), gameId, mode, username)
-            mylog.debug("added")
-            gameData.gameFens.append(board.fen())
-            gameData.gameMoves.append(GameMove(uci=uciMove, san=san))
-            outcome = board.outcome()
-            if outcome:
-                match outcome.winner:
-                    case False:
-                        gameData.winner = gameData.blackId
-                    case True:
-                        gameData.winner = gameData.whiteId
-                    case None:
-                        gameData.winner = 0
-            return gameData
-        else:
-            mylog.debug("move is illegal")
-            # temp make the return None
-            return None
-# if game ended store result and freeze row in db if valid message result
-    except Exception as e:
-        mylog.error(f"error at handleGameMove() {e}")
-        await sendError(ws, "Error failed to make move")
-        return None
-
-async def startGameHotseat(ws: WebSocket, userId: int, username: str, re: bool = False):
-    mylog.debug(f"startGameHotseat: {username}")
-    try:
-        # res = await postgres.fetchHotseatGame(userId, None, True)
-        gameId = await myred.findActiveHotseatGameId(username)
-        if gameId:
-            game = await myred.getCurrGameState(gameId, "hotseat", username)
-            assert game is not None
-            if re:
-                mylog.debug("deleteActiveGame")
-                game = await GameMan.newHotseatGame(username, userId)
-                # await postgres.deleteActiveGame("hotseat", gameId)
-                await sendGame(ws, "hotseat", "continue", game.id, game)
-            else:
-                await sendGame(ws, "hotseat", "new", game.id, game)
-        else:
-            game = await GameMan.newHotseatGame(username, userId)
-            await sendGame(ws, "hotseat", "new", game.id, game)
-    except Exception as e:
-        mylog.error(f"failed to startGameHotseat: {e}")
-        await sendError(ws, "a servor error occured failed to start game")
-
-async def updateGameAll(ws: WebSocket, userId: int, mode: MODES, game: Game, gameId: int):
-    mylog.debug("updateGame")
-    try:
-        await sendGame(ws, mode, "update", gameId, game)
-        mylog.debug(f"sent update for game {gameId}")
-        if mode == "online":
-            opponentId = game.whiteId if userId == game.blackId else game.blackId
-            assert opponentId is not None
-            await sendGame(onlinePlayers[opponentId], mode, "update", gameId, game)
-            mylog.debug(f"sent update for game {gameId} to opponent")
-        viewers = await myred.getGameViewers(gameId)
-        mylog.debug(f"found game viewers: {viewers}")
-        for id in viewers:
-            try:
-                await sendGame(onlinePlayers[id], mode, "update", gameId, game)
-            except Exception as e:
-                mylog.error(f"failed to send game to viewer {id}: {postgres.fetchUsername(id)}")
-    except Exception as e:
-        mylog.error(f"failed to provide update for {mode} game for userId {userId}: {e}")
-        await sendError(ws, f"a servor error occured failed to update Game: {gameId}")
-
-async def updateGameOne(ws: WebSocket, userId: int, mode: MODES, game: Game, gameId: int):
-    try:
-        await sendGame(ws, mode, "update", gameId, game)
-        mylog.debug(f"sent update for game {gameId} for userId: {userId}")
-    except Exception as e:
-        mylog.error(f"failed to provide update for {mode} game for userId {userId}: {e}")
-        await sendError(ws, f"a servor error occured failed to update Game: {gameId}")
-
-async def getActiveGame(ws: WebSocket, username: str, mode: MODES, gameId: int)-> Game | None:
-    game = await myred.getCurrGameState(gameId, mode, username)
-    if game is None:
-        await sendError(ws, "a servor error occured: failed to find game data")
-        return None
-    return game
 
 async def matchmakePoolAdd(ws: WebSocket, userId: int):
     matchmakePool.append(userId)
@@ -168,19 +31,6 @@ async def findOpponent(userId: int)-> int:
             return playerId
     return 0
 
-async def startOnlineMatch(userId: int, username1: str, opponentId: int):
-    mylog.debug(f"starting game: {userId} vs {opponentId}")
-    username2 = await postgres.fetchUsername(opponentId)
-    assert username1 is not None
-    assert username2 is not None
-    gameId = await GameMan.newOnlineGame(username1, username2, userId, opponentId)
-    game = await myred.getCurrGameState(gameId, "online", None)
-    assert game is not None
-    # mylog.debug(f"!!! Found online game: {game}")
-    # if game:
-    await sendGame(onlinePlayers[userId], "online", "new", gameId, game)
-    await sendGame(onlinePlayers[opponentId], "online", "new", gameId, game)
-
 @wsRouter.websocket("")
 async def websocketEndpoint(ws: WebSocket):
     try:
@@ -190,7 +40,7 @@ async def websocketEndpoint(ws: WebSocket):
     except Exception as e:
         await asyncio.sleep(3)
         mylog.debug(f"refusing ws connection {e}")
-        ws.close(1008, reason="User not authentified")
+        await ws.close(1008, reason="User not authentified")
         return
     try:
         await ws.accept()
@@ -202,22 +52,22 @@ async def websocketEndpoint(ws: WebSocket):
             match msg["type"]:
                 case "clientMove":
                     gameId = msg["gameId"]
-                    gameData = await getActiveGame(ws, username, msg["mode"], gameId)
+                    gameData = await GameMan.getActiveGame(ws, username, msg["mode"], gameId)
                     assert gameData is not None
-                    updatedGame = await handleGameMove(ws, msg["mode"], msg["uciMove"], gameData, gameId, username) # update game object is returned if move was valid otherwise it returns None
+                    updatedGame = await GameMan.handleGameMove(ws, msg["mode"], msg["uciMove"], gameData, gameId, username) # update game object is returned if move was valid otherwise it returns None
                     if updatedGame:
-                        await updateGameAll(ws, userId, msg["mode"], updatedGame, gameId)
+                        await GameMan.updateGameAll(ws, userId, msg["mode"], updatedGame, gameId)
                 case "startGameHotseat":
-                    await startGameHotseat(ws, userId, username)
+                    await GameMan.startGameHotseat(ws, userId, username)
                 case "restartGameHotseat":
-                    await startGameHotseat(ws, userId, username, True)
+                    await GameMan.startGameHotseat(ws, userId, username, True)
                 case "getGameUpdate":
                     mylog.debug(f"getGameUpdate username: {username}")
                     game = await GameMan.getGame(msg["gameId"], msg["mode"], username, userId)
                     if game:
-                        await updateGameAll(ws, userId, msg["mode"], game, game.id)
+                        await GameMan.updateGameAll(ws, userId, msg["mode"], game, game.id)
                     else:
-                        await sendGameExpired(ws, msg["gameId"])
+                        await GameMan.sendGameExpired(ws, msg["gameId"])
                 case "addViewer":
                     game = await myred.addGameViewer(msg["gameId"], userId)
                 case "removeViewer":
@@ -229,14 +79,14 @@ async def websocketEndpoint(ws: WebSocket):
                         continue
                     game = await GameMan.resignGame(ws, userId, msg["mode"], game, username)
                     mylog.debug(f"should be a resigned game: {game.winner}\n{game}")
-                    await updateGameAll(ws, userId, msg["mode"], game, game.id)
+                    await GameMan.updateGameAll(ws, userId, msg["mode"], game, game.id)
                 case "startMatchmaking":
                     await matchmakePoolAdd(ws, userId)
                     mylog.debug("startMatchmaking")
                     opponentId = await findOpponent(userId)
                     mylog.debug(f"found opponent? {opponentId}")
                     if opponentId:
-                        await startOnlineMatch(userId, username, opponentId)
+                        await GameMan.startOnlineMatch(userId, username, opponentId)
                 case "endMatchmaking":
                     await matchmakePoolRemove(userId)
                     mylog.debug("endMatchmaking")
@@ -245,14 +95,14 @@ async def websocketEndpoint(ws: WebSocket):
                     if gameId:
                         game = await GameMan.getGame(gameId, "online", username, userId)
                         if game:
-                            await updateGameOne(ws, userId, "online", game, game.id)
+                            await GameMan.updateGameOne(ws, userId, "online", game, game.id)
                 # WATCH
                 case "getActiveGames":
                     mylog.debug("getActiveGames")
                     games: list[GameWatch] = await GameMan.getActiveOnlineGames(username)
                     await ws.send_json({"type": "activeOnlineGames", "games": games})
-    except WebSocketDisconnect:
-        mylog.debug(f"websocket disconnected normally")
+    except WebSocketDisconnect as e:
+        mylog.debug(f"websocket disconnected: {e}")
     except Exception as e:
         mylog.debug(f"websocket connection failed: {e}")
     finally:
