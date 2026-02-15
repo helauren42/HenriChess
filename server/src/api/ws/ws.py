@@ -65,7 +65,7 @@ async def websocketEndpoint(ws: WebSocket):
                     mylog.debug(f"getGameUpdate username: {username}")
                     game = await GameMan.getGame(msg["gameId"], msg["mode"], username, userId)
                     if game:
-                        await GameMan.updateGameAll(ws, userId, msg["mode"], game, game.id)
+                        await GameMan.updateGameOne(ws, userId, msg["mode"], game, game.id)
                     else:
                         await GameMan.sendGameExpired(ws, msg["gameId"])
                 case "addViewer":

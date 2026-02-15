@@ -44,7 +44,6 @@ class AGameMan():
 
 
 class GameMan(AGameMan):
-
     @staticmethod
     async def opponentName(game: Game, username: str)-> str:
         return game.blackUsername if username == game.blackUsername else game.whiteUsername
