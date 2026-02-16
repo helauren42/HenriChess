@@ -116,7 +116,7 @@ export const Navbar = () => {
   return (
     <div className="relative">
       <nav id="nav">
-        <div onClick={() => nav("/")} className="cursor-pointer">
+        <div onClick={() => nav("/home")} className="cursor-pointer">
           {
             width > 1300 ?
               <>

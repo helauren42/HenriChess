@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { ToastContainer } from "react-toastify"
 import './App.css'
-import { HomePage } from './Pages/HomePage'
+import { RootPage } from './Pages/RootPage'
 import { useContext, useEffect } from 'react'
 import { readFetch, type MyResp } from './utils/requests'
 import { UserContext, type UserContextFace } from './Contexts/User'
@@ -14,6 +14,7 @@ import { MatchmakeOnline } from './Pages/Play/MatchmakeOnline'
 import { WatchPage } from './Pages/Watch/Watch'
 import { GameExpired } from './componants/GameExpired'
 import { SocialPage } from './Pages/SocialPage'
+import { HomePage } from './Pages/HomePage'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
@@ -55,7 +56,8 @@ function App() {
     <>
       <ToastContainer />
       <Routes>
-        <Route path='/' element={<HomePage />}>
+        <Route path='/' element={<RootPage />}>
+          <Route path='/home/' element={<HomePage />} />
           <Route path='/game/' element={<PlayPage />} />
           <Route path='/game/hotseat/*' element={<HotseatGame />} />
           <Route path='/game/online/*' element={<OnlineGame />} />

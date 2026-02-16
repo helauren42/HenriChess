@@ -1,6 +1,16 @@
-#home-page {
-  position: relative;
-  width: 100vw;
-  min-height: 100vh;
-  display: flex;
+#features-list {
+  width: 95%;
+  max-width: 900px;
+}
+
+@media (max-width: 1200px) {
+  #features-list {
+    max-width: 750px;
+  }
+}
+
+@media (max-width: 900px) {
+  #features-list {
+    max-width: 600px;
+  }
 }

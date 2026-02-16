@@ -3,11 +3,14 @@ import { GameContext } from "../../Contexts/Game"
 
 import "../../cssElem/loadingSpinner.css"
 import { WsContext } from "../../Contexts/Ws"
+import { useNavigate } from "react-router-dom"
+import { ToastCustomError } from "../../utils/toastify"
 
 // mention if no one there after 15secs
 export const MatchmakeOnline = () => {
   const { startMatchmaking, endMatchmaking } = useContext(GameContext)
   const { ws } = useContext(WsContext)
+  const nav = useNavigate()
   const sendStartMessage = async () => {
     const intervalId = setInterval(() => {
       if (ws && ws.readyState == ws.OPEN) {
@@ -17,6 +20,16 @@ export const MatchmakeOnline = () => {
     }, 500)
     return null
   }
+  useEffect(() => {
+    const id = setTimeout(() => {
+      ToastCustomError("No opponents found, you will be redirected")
+      const redirId = setTimeout(() => {
+        nav("/game")
+        clearInterval(redirId)
+      }, 2500)
+      clearInterval(id)
+    }, 3000)
+  }, [])
   useEffect(() => {
     if (ws) {
       sendStartMessage()
