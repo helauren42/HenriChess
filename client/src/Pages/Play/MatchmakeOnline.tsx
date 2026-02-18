@@ -3,13 +3,14 @@ import { GameContext } from "../../Contexts/Game"
 
 import "../../cssElem/loadingSpinner.css"
 import { WsContext } from "../../Contexts/Ws"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { ToastCustomError } from "../../utils/toastify"
 
 // mention if no one there after 15secs
 export const MatchmakeOnline = () => {
   const { startMatchmaking, endMatchmaking } = useContext(GameContext)
   const { ws } = useContext(WsContext)
+  const loc = useLocation()
   const nav = useNavigate()
   const sendStartMessage = async () => {
     const intervalId = setInterval(() => {
@@ -21,15 +22,24 @@ export const MatchmakeOnline = () => {
     return null
   }
   useEffect(() => {
+    const changedPath = loc.pathname
+    const matchMakePath = "/game/matchmake-online"
+    console.log("changedPath: ", changedPath)
     const id = setTimeout(() => {
-      ToastCustomError("No opponents found, you will be redirected")
-      const redirId = setTimeout(() => {
-        nav("/game")
-        clearInterval(redirId)
-      }, 2500)
-      clearInterval(id)
+      // const path = window.location.pathname
+      const path = loc.pathname
+      if (path == matchMakePath) {
+        ToastCustomError("No opponents found, you will be redirected")
+        endMatchmaking()
+        const redirId = setTimeout(() => {
+          if (location.pathname == matchMakePath)
+            nav("/game")
+        }, 2500)
+        return () => clearTimeout(redirId)
+      }
     }, 3000)
-  }, [])
+    return () => clearInterval(id)
+  }, [loc.pathname])
   useEffect(() => {
     if (ws) {
       sendStartMessage()
