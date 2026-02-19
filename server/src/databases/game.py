@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-import string
-from typing import Literal, Optional, TypedDict
+from typing import TypedDict
 
 from utils.logger import mylog
 
@@ -68,3 +67,4 @@ class GameWatch(TypedDict):
     whiteId: int
     blackId: int
     fen: str
+

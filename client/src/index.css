@@ -6,6 +6,7 @@
   --bg-color-light: rgb(230, 190, 170);
   --nav-color: rgb(170, 120, 100);
   --border-color: rgb(120, 60, 50);
+  --border-outline: rgb(180, 100, 80);
   --text-color-dark: rgb(90, 50, 40);
   --disabled: rgb(120, 90, 80);
   --text-color-light: rgb(230, 215, 200);
@@ -126,12 +127,12 @@ input {
   border-radius: 0.4rem;
   background-color: var(--bg-color-light);
   padding: 0.5rem;
-  box-shadow: inset 0 0 1px 1px rgba(150, 105, 90, 0.5);
+  border: 1px solid var(--border-color);
 }
 
 input:focus {
-  outline: 2px solid var(--text-color-dark);
-  box-shadow: none;
+  border: 1px solid var(--border-outline);
+  outline: 1px solid var(--border-outline);
 }
 
 .base-border {
