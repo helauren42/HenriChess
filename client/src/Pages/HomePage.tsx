@@ -22,7 +22,6 @@ export const HomePage = () => {
           <FeatureList title="Social page" text="The social page will have a chat where all users may post messages, there will also be a list of online players and their current activity level (in game, not in game, idle), it will be possible to send an invitation to a game to players who are not currently in a game" />
           <FeatureList title="Credentials Verification and Security" text="On Signup add security measures like min length and requiring different categories of characters, digits and non alphanumerical, only allow 1 account per email adddress, add password recovery" />
           <FeatureList title="Google Auth" text="Allow Users to authenticate via google accounts" />
-          <FeatureList title="Finalize Responsiveness" text="Pages are responsive but there are some details to fix" />
         </ul>
       </div>
     </div>

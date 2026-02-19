@@ -19,7 +19,6 @@ const GameMoveHistoryLine = memo(({ whiteUci, index, blackUci }: { whiteUci: str
 export const GameMovesHistory = () => {
   const { gameMoves } = useContext(GameContext)
   useEffect(() => {
-    console.log("change here")
     const elem = document.getElementById("game-moves-history")
     elem?.scrollBy({ top: elem.scrollHeight })
   }, [gameMoves])

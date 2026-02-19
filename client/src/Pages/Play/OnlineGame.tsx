@@ -24,8 +24,16 @@ const Buttons = () => {
   )
 }
 
+const Messages = () => {
+  const { messages } = useContext(GameContext)
+  return (
+    <div id="online-messages" className="bg-(--bg-color-light) h-full rounded-sm">
+    </div>
+  )
+}
+
 export const OnlineGame = () => {
-  const { playerColor } = useContext(GameContext)
+  const { playerColor, winner } = useContext(GameContext)
   const { ws } = useContext(WsContext)
   useEffect(() => {
     // set player as viewer
@@ -41,8 +49,11 @@ export const OnlineGame = () => {
       <GameAndPlayers />
       <Panel title="Online" game={true}>
         {
-          playerColor != "v" ?
-            <Buttons />
+          playerColor != "v" && !winner ?
+            <>
+              <Messages />
+              <Buttons />
+            </>
             : null
         }
       </Panel>

@@ -32,7 +32,13 @@ export interface GameUpdateFace {
   blackUsername: string
   whiteId: number
   blackId: number
+  messages: GameMessageFace[] | undefined
   // TODO add time
+}
+
+export interface GameMessageFace {
+  username: string
+  message: string
 }
 
 export interface GameFace {
@@ -66,6 +72,9 @@ export interface GameFace {
   gameMoves: GameMoveFace[]
   setGameMoves: Dispatch<SetStateAction<GameMoveFace[]>>
   getGameUpdate: (tempId: number | null) => void
+  // messages
+  messages: GameMessageFace[]
+  setMessages: Dispatch<SetStateAction<GameMessageFace[]>>
   // square selection
   selected: SelectedFace
   setSelected: Dispatch<SetStateAction<SelectedFace>>
@@ -115,6 +124,9 @@ export const GameContext = createContext<GameFace>({
   gameMoves: [],
   setGameMoves: () => console.error("used outside of context"),
   getGameUpdate: (tempId: number | null) => console.error("used outside of context"),
+  // messages
+  messages: [],
+  setMessages: () => console.error("used outside of context"),
   // square selection
   selected: { id: "", rank: 0, file: "" },
   setSelected: () => console.error("used outside of context"),

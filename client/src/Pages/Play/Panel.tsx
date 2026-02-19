@@ -54,10 +54,10 @@ export const Panel = ({ title, game, children }: { title: string, game: boolean,
           <>
             <GameMovesHistory />
             <FinishedSubpanel />
+            {children}
           </>
           : null
       }
-      {children}
     </div>
   )
 }
