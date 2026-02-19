@@ -43,7 +43,7 @@ export const WsProvider = ({ children }: { children: ReactNode }) => {
     if (user.username.length > 0 && (ws == null || ws?.readyState == ws?.CLOSED || ws?.readyState == ws.CLOSING)) {
       const id = setInterval(() => {
         makeSocket()
-      }, 1000)
+      }, 3500)
       return () => clearInterval(id)
     }
   }, [user, ws])
