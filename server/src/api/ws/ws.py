@@ -34,8 +34,11 @@ async def findOpponent(userId: int)-> int:
 @wsRouter.websocket("")
 async def websocketEndpoint(ws: WebSocket):
     try:
+        mylog.debug(f"1")
         userId = await getUserId(ws.cookies)
+        mylog.debug(f"userId: {userId}")
         username = await postgres.fetchUsername(userId)
+        mylog.debug(f"username: {username}")
         assert username is not None
     except Exception as e:
         await asyncio.sleep(3)
@@ -49,7 +52,17 @@ async def websocketEndpoint(ws: WebSocket):
         while True:
             msg:dict = await ws.receive_json()
             mylog.debug(f"ws msg: {msg}")
-            match msg["type"]:
+            messageType = msg.get("type")
+            assert isinstance(messageType, str)
+            match messageType:
+                case "gameMessage":
+                    gameId = msg["gameId"]
+                    await myred.addMessage(username, msg["message"], gameId)
+                    game = await GameMan.getGame(msg["gameId"], "online", username, userId)
+                    if game:
+                        await GameMan.updateGameOne(ws, userId, "online", game, gameId)
+                        opponentId = await GameMan.opponentId(game, userId)
+                        await GameMan.updateGameOne(onlinePlayers[opponentId], opponentId, "online", game, gameId)
                 case "clientMove":
                     gameId = msg["gameId"]
                     gameData = await GameMan.getActiveGame(ws, username, msg["mode"], gameId)
@@ -101,6 +114,8 @@ async def websocketEndpoint(ws: WebSocket):
                     mylog.debug("getActiveGames")
                     games: list[GameWatch] = await GameMan.getActiveOnlineGames(username)
                     await ws.send_json({"type": "activeOnlineGames", "games": games})
+                case _:
+                    mylog.debug(f"Message type not handled")
     except WebSocketDisconnect as e:
         mylog.debug(f"websocket disconnected: {e}")
     except Exception as e:

@@ -20,7 +20,12 @@ class PostgresGames(PostgresUser):
         (id, fens, moves, winnerName, whiteUsername, blackUsername, whiteId, blackId,) = row
         game_moves = await decodeGameMoves(moves)
 
-        return Game(id=id, gameFens=fens, gameMoves=game_moves, winner=winnerName,
+        return Game(
+            id=id,
+            gameFens=fens,
+            gameMoves=game_moves,
+            gameMessages=[],
+            winner=winnerName,
             winnerName=winnerName,
             whiteUsername=whiteUsername,
             blackUsername=blackUsername,

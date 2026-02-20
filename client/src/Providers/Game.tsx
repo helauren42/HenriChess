@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, type ReactNode } from "react";
-import { GameContext, type GameUpdateFace, type GameMoveFace, type SelectedFace } from "../Contexts/Game.tsx";
+import { GameContext, type GameUpdateFace, type GameMoveFace, type SelectedFace, type GameMessageFace } from "../Contexts/Game.tsx";
 import { isBlack, isWhite } from "../utils/Game";
 import { INITIAL_BOARD, SERVER_URL_WS } from "../utils/const.tsx";
 import { ToastCustomError } from "../utils/toastify.tsx";
@@ -24,6 +24,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [gameFens, setGameFens] = useState<string[]>([])
   const [fenIndex, setFenIndex] = useState<number>(0)
   const [gameMoves, setGameMoves] = useState<GameMoveFace[]>([])
+  const [messages, setMessages] = useState<GameMessageFace[]>([])
   const [playerColor, setPlayerColor] = useState<"w" | "b" | "v">("w")
   const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
   const [whiteUsername, setWhiteUsername] = useState<string>("")
@@ -113,6 +114,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const parseGame = (data: DataGame) => {
     const game: GameUpdateFace = data.game
     const lastIndex = game.gameFens.length - 1
+    console.log("!!!: ", data.game)
     setGameFens(game.gameFens)
     setFenIndex(game.gameFens.length - 1)
     setGameMoves(game.gameMoves)
@@ -124,6 +126,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setWhiteId(game.whiteId)
     setWhiteId(game.blackId)
     setMode(data.mode)
+    if (!data.game.winner && data.mode == "online") {
+      if (data.game.gameMessages === undefined)
+        throw new Error("game messages should be defined")
+      setMessages(data.game.gameMessages)
+    }
     const turnColor: "w" | "b" = game.gameFens[lastIndex].split(" ")[1] as "w" | "b"
     setPlayerTurn(turnColor)
     if (data.mode == "hotseat")
@@ -213,7 +220,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       }
   }, [lastMessage])
   return (
-    <GameContext.Provider value={{ gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, fenIndex, setFenIndex, gameMoves, setGameMoves, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, fenIndex, setFenIndex, gameMoves, setGameMoves, messages, setMessages, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )

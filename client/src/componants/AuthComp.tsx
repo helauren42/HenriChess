@@ -140,9 +140,7 @@ export const Unauthorized = () => {
   const { user } = useContext(UserContext)
   const nav = useNavigate()
   useEffect(() => {
-    console.log("!!!!! PRE TIMEOUT")
     const id = setTimeout(() => {
-      console.log("!!!!! IN TIMEOUT")
       nav("/")
       openAuth("login")
       removeWaitCursor()
