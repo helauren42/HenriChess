@@ -114,6 +114,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const parseGame = (data: DataGame) => {
     const game: GameUpdateFace = data.game
     const lastIndex = game.gameFens.length - 1
+    console.log("!!!: ", data.game)
     setGameFens(game.gameFens)
     setFenIndex(game.gameFens.length - 1)
     setGameMoves(game.gameMoves)
@@ -125,10 +126,10 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setWhiteId(game.whiteId)
     setWhiteId(game.blackId)
     setMode(data.mode)
-    if (data.game.winner && data.mode == "online") {
-      if (data.game.messages === undefined)
+    if (!data.game.winner && data.mode == "online") {
+      if (data.game.gameMessages === undefined)
         throw new Error("game messages should be defined")
-      setMessages(data.game.messages)
+      setMessages(data.game.gameMessages)
     }
     const turnColor: "w" | "b" = game.gameFens[lastIndex].split(" ")[1] as "w" | "b"
     setPlayerTurn(turnColor)

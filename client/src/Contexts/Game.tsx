@@ -32,7 +32,7 @@ export interface GameUpdateFace {
   blackUsername: string
   whiteId: number
   blackId: number
-  messages: GameMessageFace[] | undefined
+  gameMessages: GameMessageFace[] | undefined
   // TODO add time
 }
 
