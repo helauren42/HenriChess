@@ -17,7 +17,6 @@ export const HomePage = () => {
       <div id="features-list">
         <h4 className="underline decoration-3">The main upcoming features expected for the 01/03/2026:</h4>
         <ul className="pt-6">
-          <FeatureList title="Messages in online games" text="Implement a simple chat feature that will be inside the game panel for players to interact during online games just like in chess.com" />
           <FeatureList title="Timer in online games" text="Implement timer for online games, giving players 10 mins in total to make all of their moves" />
           <FeatureList title="Social page" text="The social page will have a chat where all users may post messages, there will also be a list of online players and their current activity level (in game, not in game, idle), it will be possible to send an invitation to a game to players who are not currently in a game" />
           <FeatureList title="Credentials Verification and Security" text="On Signup add security measures like min length and requiring different categories of characters, digits and non alphanumerical, only allow 1 account per email adddress, add password recovery" />
