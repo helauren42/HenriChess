@@ -114,7 +114,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const parseGame = (data: DataGame) => {
     const game: GameUpdateFace = data.game
     const lastIndex = game.gameFens.length - 1
-    console.log("!!!: ", data.game)
     setGameFens(game.gameFens)
     setFenIndex(game.gameFens.length - 1)
     setGameMoves(game.gameMoves)
@@ -149,6 +148,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     if (pathname != gamePath)
       nav(gamePath)
     if (data.subtype as string == "continue")
+      // TODO
       console.log("!!!prompt user whether he wants to continue or start new game") // TODO
   }
   const restartGame = () => {

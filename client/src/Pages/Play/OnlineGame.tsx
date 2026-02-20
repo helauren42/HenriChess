@@ -48,9 +48,6 @@ const MessageBlock = ({ username, playerName, message }: { username: string, pla
 const Messages = () => {
   const { messages } = useContext(GameContext)
   const { user } = useContext(UserContext)
-  useEffect(() => {
-    console.log("!!!! messages: ", messages)
-  }, [messages])
   return (
     <div id="messages" className="h-full overflow-scroll pb-5 pl-3 pr-3">
       {
@@ -78,7 +75,7 @@ const OnlineChat = () => {
     }
   }
   return (
-    <div id="online-messages" className="bg-(--bg-color-light) flex flex-col h-[50%] rounded-xl p-3">
+    <div id="online-messages" className="bg-(--bg-color-light) flex flex-col h-full rounded-xl p-3">
       <Messages />
       <input id="message-input" onKeyDown={(e) => handleKeyDown(e)} className="bg-red-700" />
     </div>
