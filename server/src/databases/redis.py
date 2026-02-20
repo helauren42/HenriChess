@@ -4,8 +4,9 @@ from random import randint
 from typing import Optional
 import redis.asyncio as redis
 import asyncio
+import json
 
-from databases.game import Game, GameMap, GameMove, GameWatch, decodeGameMoves, gameMoveStr
+from databases.game import Game, GameMap, GameMessage, GameMove, GameWatch, decodeGameMoves, gameMoveStr
 from utils import game
 from utils.const import MODES, Env, EXPIRY_TIME
 from utils.game import getWinnerName
@@ -28,6 +29,7 @@ class AMyRedis(ABC):
         await self.game.expire(self.gameMoveKey(gameId), EXPIRY_TIME)
         await self.game.expire(self.gamePositionKey(gameId), EXPIRY_TIME)
         await self.game.expire(self.gameViewersKeys(gameId), EXPIRY_TIME)
+        await self.game.expire(self.gameMessageKey(gameId), EXPIRY_TIME)
         time = int(datetime.datetime.now().timestamp()) + EXPIRY_TIME
         if mode == "online":
             await self.game.zadd("online_expiries", {str(gameId): str(time)})
@@ -58,6 +60,9 @@ class AMyRedis(ABC):
 
     def gamePositionKey(self, gameId: int):
         return f"game_position_{gameId}"
+
+    def gameMessageKey(self, gameId: int):
+        return f"game_message_{gameId}"
 
     def gameViewersKeys(self, gameId: int):
         return f"game_viewers_{gameId}"
@@ -142,7 +147,6 @@ class MyRedis(AMyRedis):
             raise ValueError("misuse of addGame function if mode is hotseat username must be defined")
         try:
             async with self.lockAddGame:
-                mylog.debug(f"!!! lockAddGame")
                 name = self.gameKey(gameId=game.id, mode=mode, username=username)
                 mylog.debug(f"got key: {name}")
                 await self.game.hset(name, mapping=await self.gameMapping(game, mode, username))
@@ -203,9 +207,14 @@ class MyRedis(AMyRedis):
             if winner == "-1":
                 winner = None
             mylog.debug(f"winner: {winner}")
+            # TODO add game messages fetching
+            messages = await self.getMessages(gameId)
+            mylog.debug(f"!!! MESSAGES: {messages}")
+            mylog.debug(f"!!! MESSAGES: {type(messages)}")
             return Game(gameId,
                 await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
                 await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
+                messages,
                 winner,
                 await getWinnerName(None, map),
                 map["whiteUsername"],
@@ -256,5 +265,20 @@ class MyRedis(AMyRedis):
             if userId == whiteId or userId == blackId:
                 return int(gameId)
         return None
+
+    async def getMessages(self, gameId: int)-> list[GameMessage]:
+        l = await myred.game.lrange(self.gameMessageKey(gameId), 0, -1)
+        messages: list[GameMessage] = []
+        for elem in l:
+            data: dict = json.loads(elem)
+            username = data.get("username")
+            message = data.get("message")
+            assert isinstance(username, str) and isinstance(message, str)
+            messages.append(GameMessage(username=username, message=message))
+        return messages
+
+    async def addMessage(self, username: str, message: str, gameId: int):
+        item = json.dumps({"username": username, "message": message})
+        await myred.game.rpush(self.gameMessageKey(gameId), item)
 
 myred = MyRedis()

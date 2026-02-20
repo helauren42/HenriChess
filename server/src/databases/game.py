@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TypedDict
+from typing import Type, TypedDict
 
 from utils.logger import mylog
 
@@ -29,11 +29,16 @@ async def encodeGameMoves(l: list[GameMove]):
         r.append(s)
     return r
 
+class GameMessage(TypedDict):
+    username: str
+    message: str
+
 @dataclass
 class Game():
     id: int
     gameFens: list[str]
     gameMoves: list[GameMove]
+    gameMessages: list[GameMessage]
     winner: int | None # none is stored as -1 inside redis
     winnerName: str | None
     whiteUsername: str

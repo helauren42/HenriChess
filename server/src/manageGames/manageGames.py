@@ -11,10 +11,6 @@ from utils.logger import mylog
 
 class AGameMan():
     @staticmethod
-    def newGame(gameId: int, whiteId: int, blackId: int)-> Game:
-        return Game(id=gameId, gameFens=[chess.STARTING_FEN], gameMoves=[], winner=None, winnerName=None, whiteUsername="white", blackUsername="black", whiteId=whiteId, blackId=blackId)
-
-    @staticmethod
     async def sendError(ws: WebSocket, msg: str):
         await ws.send_json({
             "type": "error",
@@ -23,13 +19,14 @@ class AGameMan():
 
     @staticmethod
     async def sendGame(ws: WebSocket, mode: MODES, subtype: Literal["new", "continue", "update"], id: int, game: Game):
+        gameDict = asdict(game)
         try:
             await ws.send_json({
                 "type": "game",
                 "mode": mode,
                 "subtype": subtype,
                 "id": id,
-                "game": asdict(game),
+                "game": gameDict,
             })
         except Exception as e:
             mylog.error(f"sendGame {subtype} failed for game: {id}")
@@ -41,7 +38,6 @@ class AGameMan():
             "type": "gameExpired",
             "id": gameId
         })
-
 
 class GameMan(AGameMan):
     @staticmethod
@@ -88,7 +84,7 @@ class GameMan(AGameMan):
         mylog.debug(f"new hotseat game: {username}, {userId}")
         id = await myred.newGameId("hotseat", username)
         mylog.debug(f"new game id: {id}")
-        game = Game(id, [chess.STARTING_FEN], [], None, None, "white", "black", userId, userId)
+        game = Game(id, [chess.STARTING_FEN], [], [], None, None, "white", "black", userId, userId)
         await myred.addGame(game, "hotseat", username)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "hotseat", username)
         return game
@@ -98,9 +94,9 @@ class GameMan(AGameMan):
         color: bool = random.choice([True, False])
         id = await myred.newGameId("online", None)
         if color:
-            game = Game(id, [chess.STARTING_FEN], [], None, None, username1, username2, id1, id2)
+            game = Game(id, [chess.STARTING_FEN], [], [], None, None, username1, username2, id1, id2)
         else:
-            game = Game(id, [chess.STARTING_FEN], [], None, None, username2, username1, id2, id1)
+            game = Game(id, [chess.STARTING_FEN], [], [], None, None, username2, username1, id2, id1)
         await myred.addGame(game, "online", None)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "online", None)
         return id
