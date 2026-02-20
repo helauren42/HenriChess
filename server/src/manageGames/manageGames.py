@@ -41,8 +41,16 @@ class AGameMan():
 
 class GameMan(AGameMan):
     @staticmethod
-    async def opponentName(game: Game, username: str)-> str:
-        return game.blackUsername if username == game.blackUsername else game.whiteUsername
+    async def opponentName(game: Game, userId: int)-> str:
+        return game.whiteUsername if userId == game.blackId else game.blackUsername
+
+    @staticmethod
+    async def opponentId(game: Game, userId: int)-> int:
+        mylog.debug(f"whiteId: {game.whiteId}")
+        mylog.debug(f"blackId: {game.blackId}")
+        mylog.debug(f"userId: {userId}")
+        mylog.debug(f"opponentId: {game.whiteId if userId == game.blackId else game.blackId}")
+        return game.whiteId if userId == game.blackId else game.blackId
 
     @staticmethod
     async def startGameHotseat(ws: WebSocket, userId: int, username: str, re: bool = False):
@@ -184,8 +192,7 @@ class GameMan(AGameMan):
             await GameMan.sendGame(ws, mode, "update", gameId, game)
             mylog.debug(f"sent update for game {gameId}")
             if mode == "online":
-                opponentId = game.whiteId if userId == game.blackId else game.blackId
-                assert opponentId is not None
+                opponentId = await GameMan.opponentId(game, userId)
                 await GameMan.sendGame(onlinePlayers[opponentId], mode, "update", gameId, game)
                 mylog.debug(f"sent update for game {gameId} to opponent")
             viewers = await myred.getGameViewers(gameId)

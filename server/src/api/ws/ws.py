@@ -55,9 +55,14 @@ async def websocketEndpoint(ws: WebSocket):
             messageType = msg.get("type")
             assert isinstance(messageType, str)
             match messageType:
-                # case "gameMessage":
-                    # gameId = msg["gameId"]
-                    # await myred.addMessage(username, msg["message"], gameId)
+                case "gameMessage":
+                    gameId = msg["gameId"]
+                    await myred.addMessage(username, msg["message"], gameId)
+                    game = await GameMan.getGame(msg["gameId"], "online", username, userId)
+                    if game:
+                        await GameMan.updateGameOne(ws, userId, "online", game, gameId)
+                        opponentId = await GameMan.opponentId(game, userId)
+                        await GameMan.updateGameOne(onlinePlayers[opponentId], opponentId, "online", game, gameId)
                 case "clientMove":
                     gameId = msg["gameId"]
                     gameData = await GameMan.getActiveGame(ws, username, msg["mode"], gameId)

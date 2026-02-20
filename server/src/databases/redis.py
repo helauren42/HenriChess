@@ -278,6 +278,7 @@ class MyRedis(AMyRedis):
         return messages
 
     async def addMessage(self, username: str, message: str, gameId: int):
+        mylog.debug(f"!!!!!!! addMessage: {username} -> {message}")
         item = json.dumps({"username": username, "message": message})
         await myred.game.rpush(self.gameMessageKey(gameId), item)
 
