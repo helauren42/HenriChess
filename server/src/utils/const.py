@@ -12,7 +12,7 @@ EXPIRY_TIME = 1200
 matchmakePool: list[int] = []
 onlinePlayers: dict[int, WebSocket] = {} # userId, WebSocket
 
-if dotenv.load_dotenv() is False:
+if dotenv.load_dotenv() == False:
     mylog.critical("failed load env file")
     sys.exit(1)
 
@@ -24,7 +24,6 @@ def getEnv(key) -> str:
     return value
 
 MODES = Literal["hotseat", "online"]
-# MESSAGE_TYPES = Literal["clientMove", "gameMessage", "startGameHotseat"]
 
 class Env():
     CADDY_HOST=getEnv("CADDY_HOST")
@@ -44,7 +43,7 @@ class Env():
     DB_NAME=getEnv("DB_NAME")
     DB_USER=getEnv("DB_USER")
     DB_PWD=getEnv("DB_PWD")
+
     REDIS_PORT=getEnv("REDIS_PORT")
     REDIS_HOST=getEnv("REDIS_HOST")
     REDIS_EXT=getEnv("REDIS_EXT")
-

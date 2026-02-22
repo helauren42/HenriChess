@@ -4,6 +4,8 @@ import dotenv
 import os
 import sys
 
+from utils.logger import mylog
+
 dotenv.load_dotenv()
 
 def getEnv(key) -> str:
@@ -13,7 +15,7 @@ def getEnv(key) -> str:
         sys.exit(1)
     return value
 
-EMAIL = getEnv("EMAIL")
+SMTP_EMAIL = getEnv("SMTP_EMAIL")
 SMTP_KEY = getEnv("SMTP_KEY")
 SUBJECT = "HenriChess Email Confirmation"
 BASE_URL = getEnv("BASE_URL")
@@ -21,28 +23,23 @@ BASE_URL = getEnv("BASE_URL")
 class EmailManager():
     def sendVerificationEmail(self, username: str, clientEmail: str, uuidToken: str):
         try:
-            print(1)
             subject = SUBJECT
-            url = BASE_URL + "/auth/email-confirmation/" + uuidToken
+            # url = BASE_URL + "/auth/email-confirmation/" + uuidToken
+            url = BASE_URL + "/email-confirmation/" + uuidToken
             body = f"Hello {username},\n\n"
             body += f"Please click on the following link or copy paste it into the url bar of your browser: {url}\n\n"
             body += "Best Regards,"
             mimeText = MIMEText(body)
             mimeText['Subject'] = subject
-            mimeText["From"] = EMAIL
+            mimeText["From"] = SMTP_EMAIL
             mimeText["To"] = clientEmail
 
-            print(2)
             with smtplib.SMTP("smtp.gmail.com", 587) as server:
-                print(4)
                 server.starttls()
-                print(5)
-                server.login(EMAIL, SMTP_KEY)
-                print(6)
-                server.sendmail(EMAIL, clientEmail, mimeText.as_string())
-                print(7)
+                server.login(SMTP_EMAIL, SMTP_KEY)
+                server.sendmail(SMTP_EMAIL, clientEmail, mimeText.as_string())
         except Exception as e:
-            print(f"Error sending email: {e}")
+            mylog.critical(f"Error sending email: {e}")
 
 if __name__ == "__main__":
     obj = EmailManager()
