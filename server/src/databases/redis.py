@@ -1,6 +1,6 @@
 import redis.asyncio as redis
 
-from aredis.redisGame import RedisGame
+from databases.aredis.redisGame import RedisGame
 from utils.const import Env
 
 class RedisAuth(RedisGame):
