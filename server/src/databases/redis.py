@@ -1,13 +1,37 @@
+from abc import ABC
+from typing import TypedDict
+import uuid
 import redis.asyncio as redis
 
 from databases.aredis.redisGame import RedisGame
 from utils.const import Env
+from utils.logger import mylog
 
-class RedisAuth(RedisGame):
+class SignupMap(TypedDict):
+    username: str
+    email: str
+    password: str
+
+class ARedisAuth(RedisGame):
     def __init__(self):
         super().__init__()
-        self.usersPool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=0, max_connections=20)
-    def addSignUp(self, username: str, email: str, password: str):
-        pass
+        self.signupPool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=0, max_connections=20)
+        self.signup = redis.Redis(connection_pool=self.signupPool)
+        self.signupTime = 600
+
+    def signupKey(self):
+        return str(uuid.uuid4())
+
+    async def signupMap(self, username: str, email: str, password: str)-> SignupMap:
+        return SignupMap(username=username, email=email, password=password)
+
+
+class RedisAuth(ARedisAuth):
+    async def addSignUp(self, username: str, email: str, password: str)-> str:
+        key = self.signupKey()
+        fieldsAdded = await self.signup.hset(key, mapping=await self.signupMap(username, email, password))
+        await self.signup.expire(key, 600)
+        mylog.debug(f"fieldsAdded: {fieldsAdded}")
+        return key
 
 myred = RedisAuth()
