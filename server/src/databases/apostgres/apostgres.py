@@ -48,13 +48,10 @@ class APostgres(ABC):
                 yield cursor
 
     async def execFetchone(self, query: str, values: tuple) -> None | TupleRow:
-        try:
-            async with self.getConn() as conn:
-                async with conn.cursor() as cursor:
-                    await cursor.execute(query=query.encode(), params=values)
-                    return await cursor.fetchone()
-        except Exception as e:
-            raise await HttpCatch.postgres(e, "execFetchone() failed")
+        async with self.getConn() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.execute(query=query.encode(), params=values)
+                return await cursor.fetchone()
 
     async def execFetchall(self, query: str, values: tuple) -> None | list[TupleRow]:
         try:

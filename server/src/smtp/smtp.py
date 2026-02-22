@@ -25,7 +25,7 @@ class Smtp():
     def sendVerificationEmail(username: str, clientEmail: str, uuidToken: str):
         try:
             subject = SUBJECT
-            url = BASE_URL + "/email-confirmation/" + uuidToken
+            url = BASE_URL + "/verify-email/" + username + "/" + uuidToken
             body = f"Hello {username},\n\n"
             body += f"Please click on the following link or copy paste it into the url bar of your browser: {url}\n\n"
             body += "Best Regards,"

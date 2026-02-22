@@ -51,6 +51,6 @@ export const ToastCustomError = (msg: string) => {
   toast.error(msg, {
     toastId: "custom",
     position: "top-right",
-    autoClose: 2000
+    autoClose: 3000
   })
 }

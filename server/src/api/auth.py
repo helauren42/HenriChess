@@ -67,19 +67,25 @@ async def Login(clireq: Request, data: LoginSchema):
 # stores account info in redis prior to user validating ema
 @authRouter.post("/signup")
 async def signup(clireq: Request, data: SignupSchema):
-    # check for duplicates in postgres
+    # TODO check for duplicates in postgres
     key = await myred.addSignUp(data.username, data.email, data.password)
     Smtp.sendVerificationEmail(data.username, data.email, key)
     return resp204()
 
-# @authRouter.post("/email-confirmation/{token}")
-# async def createAccount(clireq: Request, token: str):
-#     # If you can't fetch the data from redis assume it expi ed, send expired response (410, gone)
-#     sessionToken = str(uuid.uuid4())
-#     deviceToken = str(uuid.uuid4())
-#     hasDeviceToken = clireq.cookies.get("deviceToken")
-#     await postgres.createUser(data.username, data.email, data.password, sessionToken, deviceToken)
-#     setSessionCookie(resp, sessionToken)
-#     if not hasDeviceToken:
-#         setSessionCookie(resp, deviceToken)
-#     return resp
+@authRouter.post("/verify/{token}")
+async def createAccount(clireq: Request, token: str):
+    # If you can't fetch the data from redis assume it expi ed, send expired response (410, gone)
+    sessionToken = str(uuid.uuid4())
+    deviceToken = clireq.cookies.get("deviceToken")
+    if deviceToken is None:
+        deviceToken = str(uuid.uuid4())
+    data = await myred.getSignUp(token)
+    mylog.debug(data)
+    userId = await postgres.createUser(data["username"], data["email"], data["password"])
+    resp = resp204()
+    mylog.debug(f"STORING: {sessionToken}")
+    mylog.debug(f"STORING: {deviceToken}")
+    await postgres.storeSession(sessionToken, deviceToken, userId)
+    setSessionCookie(resp, sessionToken)
+    setCookie(resp, "deviceToken", deviceToken)
+    return resp

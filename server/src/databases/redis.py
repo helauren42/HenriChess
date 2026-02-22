@@ -36,4 +36,14 @@ class RedisAuth(ARedisAuth):
         mylog.debug(f"Added Signup for: {email}")
         return key
 
+    async def getSignUp(self, token: str)-> SignupMap:
+        data = await self.signup.hgetall(token)
+        if len(data) == 0:
+            raise HTTPException(410, "Token Expired")
+        assert isinstance(data, dict) and len(data) == 3
+        username = data[b'username'].decode()
+        email = data[b'email'].decode()
+        password = data[b'password'].decode()
+        return SignupMap(username=username, email=email, password=password)
+
 myred = RedisAuth()
