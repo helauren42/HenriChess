@@ -3,6 +3,8 @@ from fastapi import HTTPException
 from pydantic import BaseModel, field_validator
 from email_validator import validate_email
 
+from smtp.smtp import mylog
+
 SPECIAL_CHARACTERS = string.punctuation
 
 class SignupSchema(BaseModel):
@@ -12,14 +14,15 @@ class SignupSchema(BaseModel):
 
     @field_validator("username")
     @classmethod
-    def usernameValidator(cls, username: str):
+    def usernameValidator(cls, username: str)-> str:
         for c in username:
             if not c.isdigit() and not c.islower() and not c.isupper():
                 raise HTTPException(422, "Invalid character in username, username may only have digits, lower case and upper case characters")
+        return username
 
     @field_validator("email")
     @classmethod
-    def emailValidator(cls, email: str):
+    def emailValidator(cls, email: str)-> str:
         try:
             validate_email(email)
         except Exception as e:
@@ -28,7 +31,7 @@ class SignupSchema(BaseModel):
 
     @field_validator("password")
     @classmethod
-    def passwordValidator(cls, pwd: str):
+    def passwordValidator(cls, pwd: str)-> str:
         lowerCase: bool = False
         upperCase: bool = False
         digit: bool = False

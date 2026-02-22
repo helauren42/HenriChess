@@ -11,20 +11,20 @@ dotenv.load_dotenv()
 def getEnv(key) -> str:
     value = os.getenv(key)
     if value is None:
-        # mylog.critical(f"Could not find key: {key} inside env")
+        mylog.critical(f"Could not find key: {key} inside env")
         sys.exit(1)
     return value
 
 SMTP_EMAIL = getEnv("SMTP_EMAIL")
 SMTP_KEY = getEnv("SMTP_KEY")
-SUBJECT = "HenriChess Email Confirmation"
 BASE_URL = getEnv("BASE_URL")
+SUBJECT = "HenriChess Email Confirmation"
 
-class EmailManager():
-    def sendVerificationEmail(self, username: str, clientEmail: str, uuidToken: str):
+class Smtp():
+    @staticmethod
+    def sendVerificationEmail(username: str, clientEmail: str, uuidToken: str):
         try:
             subject = SUBJECT
-            # url = BASE_URL + "/auth/email-confirmation/" + uuidToken
             url = BASE_URL + "/email-confirmation/" + uuidToken
             body = f"Hello {username},\n\n"
             body += f"Please click on the following link or copy paste it into the url bar of your browser: {url}\n\n"
@@ -42,5 +42,5 @@ class EmailManager():
             mylog.critical(f"Error sending email: {e}")
 
 if __name__ == "__main__":
-    obj = EmailManager()
+    obj = Smtp()
     obj.sendVerificationEmail("bob", "henrilrnc@gmail.com", "duife23731h9-24382-2121389hfeh")

@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import TypedDict
 import uuid
+from fastapi import HTTPException
 import redis.asyncio as redis
 
 from databases.aredis.redisGame import RedisGame
@@ -25,13 +26,14 @@ class ARedisAuth(RedisGame):
     async def signupMap(self, username: str, email: str, password: str)-> SignupMap:
         return SignupMap(username=username, email=email, password=password)
 
-
 class RedisAuth(ARedisAuth):
     async def addSignUp(self, username: str, email: str, password: str)-> str:
         key = self.signupKey()
-        fieldsAdded = await self.signup.hset(key, mapping=await self.signupMap(username, email, password))
+        fieldsAdded = await self.signup.hset(key.encode(), mapping=await self.signupMap(username, email, password))
         await self.signup.expire(key, 600)
-        mylog.debug(f"fieldsAdded: {fieldsAdded}")
+        if fieldsAdded == 0:
+            raise Exception("Failed to add signup account into redis")
+        mylog.debug(f"Added Signup for: {email}")
         return key
 
 myred = RedisAuth()

@@ -1,6 +1,6 @@
 from functools import wraps
 from typing import cast
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse, Response
 import uuid
@@ -9,6 +9,8 @@ from api.decorators import getUserIdReq
 from api.models.auth import LoginSchema, SignupSchema
 from databases.models.users import BasicUserModel
 from databases.postgres import postgres
+from databases.redis import myred
+from smtp.smtp import Smtp, mylog
 from utils.api import getUserId, mini401, miniResp, resp204, setCookie, setSessionCookie
 
 authRouter = APIRouter(prefix="/auth")
@@ -66,9 +68,8 @@ async def Login(clireq: Request, data: LoginSchema):
 @authRouter.post("/signup")
 async def signup(clireq: Request, data: SignupSchema):
     # check for duplicates in postgres
-    key = await myred.addSignUp(data.username, data.email, ata.password)
-    EmailManager.sendVerificationEmail(data.username, data. mail, key)
-    # store in redis with expiration in 10mins
+    key = await myred.addSignUp(data.username, data.email, data.password)
+    Smtp.sendVerificationEmail(data.username, data.email, key)
     return resp204()
 
 # @authRouter.post("/email-confirmation/{token}")

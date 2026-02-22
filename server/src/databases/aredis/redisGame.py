@@ -13,9 +13,6 @@ from utils.logger import mylog
 
 class ARedisGame(ABC):
     def __init__(self):
-        self.usersPool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=0, max_connections=20)
-        self.users = redis.Redis(connection_pool=self.usersPool)
-
         self.gamePool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=20)
         self.game = redis.Redis(connection_pool=self.gamePool)
 
