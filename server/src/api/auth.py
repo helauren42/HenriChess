@@ -103,7 +103,8 @@ async def getResetPassword(clireq: Request):
 @authRouter.patch("/reset-password/confirm")
 async def resetPassword(clireq: Request, data: ResetPasswordSchema):
     # TODO check that it matches the redis code and fetch email from redis
-    userId = await postgres.fetchUserId(None, data.email)
+    email = await myred.verifyResetPasswordToken(data.code)
+    userId = await postgres.fetchUserId(None, email)
     if userId is None:
         raise HTTPException(403, "You don't have an account")
     await postgres.updatePassword(userId, data.password)

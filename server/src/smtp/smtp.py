@@ -25,7 +25,7 @@ class Smtp():
         try:
             subject = "HenriChess Reset Password Request"
             body = f"Hello {username},\n\n"
-            body += f"Please enter the following code to reset your password: {code}.\n"
+            body += f"Please enter the following code in the next 10 minutes to reset your password: {code}.\n"
             body += f"If you did not make this request please contact use asap.\n\n"
             body += "Best Regards,"
             mimeText = MIMEText(body)

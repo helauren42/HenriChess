@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, type ReactNode } from "react"
-import { readFetch, writeFetch, type MyResp } from "../utils/requests"
+import { writeFetch, type MyResp } from "../utils/requests"
 import { Toast409, Toast422, ToastCustomError, ToastServerError } from "../utils/toastify"
 import { UserContext } from "../Contexts/User"
 import { AuthCompContext } from "../Contexts/AuthComp"
@@ -116,6 +116,7 @@ export const LoginPage = () => {
       return setLoading(false)
     if (!resp.ok) {
       switch (resp.status) {
+        case 400:
         case 401:
           ToastCustomError(resp.message)
           break
@@ -136,7 +137,7 @@ export const LoginPage = () => {
       <AuthTitle title="Login" />
       <FormWrapper onSubmit={(e) => handleSubmit(e)} submitText="Login" >
         <InputField title="Username or Email" type="text" value={values.usernameEmail} setter={(val) => setValues({ ...values, usernameEmail: val })} />
-        <InputField title="Password" type="text" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
+        <InputField title="Password" type="password" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
       </FormWrapper>
       <div className="mt-5">
         <p className="mt-2 cursor-pointer" onClick={() => openAuth("requestResetPassword")}>Forgot your password?</p>
@@ -178,7 +179,7 @@ export const RequestResetPassword = () => {
   return (
     <>
       <AuthTitle title="Reset Password" />
-      <FormWrapper onSubmit={(e) => handleSubmit(e)} submitText="Login" >
+      <FormWrapper onSubmit={(e) => handleSubmit(e)} submitText={loading ? "loading" : "Signup"} >
         <InputField title="Email" type="text" value={email} setter={(val) => setEmail(val)} />
       </FormWrapper>
       <div className="mt-5">
@@ -203,7 +204,7 @@ export const ResetPassword = () => {
     if (loading)
       return
     setLoading(true)
-    const resp: MyResp | null = await writeFetch("/auth/reset-password/confirm/request", "POST", { "code": parseInt(code), password, repassword })
+    const resp: MyResp | null = await writeFetch("/auth/reset-password/confirm", "PATCH", { "code": parseInt(code), password, repassword })
     if (!resp)
       return setLoading(false)
     console.log(resp)
@@ -211,11 +212,10 @@ export const ResetPassword = () => {
       if ((resp.message == null || resp.message.length == 0) && resp.status >= 400 && resp.status <= 499)
         ToastCustomError("Invalid Input")
       switch (resp.status) {
+        case 400:
+        case 409:
         case 401:
           ToastCustomError(resp.message)
-          break
-        case 409:
-          Toast409(resp.message)
           break
         case 422:
           Toast422(resp.message)

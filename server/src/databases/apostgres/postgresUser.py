@@ -59,14 +59,19 @@ class PostgresUser(APostgresUser):
         return int(fetched[0])
 
     async def usersUserId(self, data: LoginSchema) -> None | int:
-        fetched = await self.execFetchone("select id,password from users where username=%s", (data.usernameEmail,))
+        fetched = await self.execFetchone("select id, password from users where username=%s", (data.usernameEmail,))
         if fetched is None:
             fetched = await self.execFetchone("select id, password from users where email=%s", (data.usernameEmail,))
             if fetched is None:
                 return None
         passwordDb = fetched[1]
-        if bcrypt.checkpw(data.password.encode(), passwordDb):
-            return fetched[0]
+        try:
+            if bcrypt.checkpw(data.password.encode(), passwordDb):
+                return fetched[0]
+        except ValueError:
+            raise HTTPException(400, "Wrong Credentials")
+        except Exception as e:
+            raise e
         return None
 
     async def storeSession(self, sessionToken: str, deviceToken: str, userId):
@@ -116,4 +121,6 @@ class PostgresUser(APostgresUser):
         return data
 
     async def updatePassword(self, userId: int, password: str):
-        await self.execCommit("update users set password=%s where id=%s", (password, userId))
+        mylog.debug(f"userId: {userId}")
+        mylog.debug(f"password: {password}")
+        await self.execCommit("update users set password=%s where id=%s", (bcrypt.hashpw(password.encode(), bcrypt.gensalt()), userId))

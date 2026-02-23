@@ -60,6 +60,7 @@ class ResetPasswordSchema(BaseModel):
     @field_validator("password", "repassword")
     @classmethod
     def passwordValidator(cls, pwd: str)-> str:
+        mylog.debug(f"pwq: {pwd}")
         lowerCase: bool = False
         upperCase: bool = False
         digit: bool = False
@@ -81,7 +82,7 @@ class ResetPasswordSchema(BaseModel):
 
     @model_validator(mode="before")
     def identicalPasswords(self):
-        if self.password != self.repassword:
+        if self["password"] != self["repassword"]:
             raise HTTPException(422, f"Passwords do not match")
         return self
 

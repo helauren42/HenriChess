@@ -53,9 +53,17 @@ class RedisAuth(ARedisAuth):
 
     async def storeResetPasswordToken(self, email: str)-> int:
         code = random.randint(11111111, 99999999)
-        token = self.newResetPasswordKey(code)
-        await self.users.set(token, value=email)
-        await self.users.expire(token, 600)
+        key = self.newResetPasswordKey(code)
+        await self.users.set(key, value=email)
+        await self.users.expire(key, 600)
         return code
+
+    async def verifyResetPasswordToken(self, code: int) -> str:
+        key = self.newResetPasswordKey(code)
+        email = await self.users.get(key)
+        await self.users.delete(key)
+        if email is None:
+            raise HTTPException(400, "Invalid or expired reset password token")
+        return email.decode()
 
 myred = RedisAuth()
