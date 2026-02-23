@@ -20,7 +20,7 @@ class ARedisAuth(RedisGame):
         self.signup = redis.Redis(connection_pool=self.signupPool)
         self.signupTime = 600
 
-    def signupKey(self):
+    def newSignupKey(self):
         return str(uuid.uuid4())
 
     async def signupMap(self, username: str, email: str, password: str)-> SignupMap:
@@ -28,7 +28,7 @@ class ARedisAuth(RedisGame):
 
 class RedisAuth(ARedisAuth):
     async def addSignUp(self, username: str, email: str, password: str)-> str:
-        key = self.signupKey()
+        key = self.newSignupKey()
         fieldsAdded = await self.signup.hset(key.encode(), mapping=await self.signupMap(username, email, password))
         await self.signup.expire(key, 600)
         if fieldsAdded == 0:
@@ -38,6 +38,7 @@ class RedisAuth(ARedisAuth):
 
     async def getSignUp(self, token: str)-> SignupMap:
         data = await self.signup.hgetall(token)
+        await self.signup.delete(token)
         if len(data) == 0:
             raise HTTPException(410, "Token Expired")
         assert isinstance(data, dict) and len(data) == 3
