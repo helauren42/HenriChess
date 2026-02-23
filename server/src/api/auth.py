@@ -10,6 +10,7 @@ from api.models.auth import LoginSchema, ResetPasswordSchema, SignupSchema
 from databases.models.users import BasicUserModel
 from databases.postgres import postgres
 from databases.redis import myred
+import smtp
 from smtp.smtp import Smtp, mylog
 from utils.api import getUserId, mini401, miniResp, resp204, setCookie, setSessionCookie
 
@@ -87,9 +88,21 @@ async def createAccount(clireq: Request, token: str):
     setCookie(resp, "deviceToken", deviceToken)
     return resp
 
+@authRouter.post("/reset-password/request")
+async def getResetPassword(clireq: Request):
+    data: dict = await clireq.json()
+    email = data["email"]
+    username = await postgres.fetchUsername(None, email)
+    if username is None:
+        raise HTTPException(401, "No account linked to this email address was found")
+    mylog.debug(f"received getResetPassword for: {email}")
+    code = await myred.storeResetPasswordToken(email)
+    Smtp.sendResetPasswordEmail(username, email, code)
+    return JSONResponse({"message": "success"})
 
-@authRouter.patch("/reset-password")
+@authRouter.patch("/reset-password/confirm")
 async def resetPassword(clireq: Request, data: ResetPasswordSchema):
+    # TODO check that it matches the redis code and fetch email from redis
     userId = await postgres.fetchUserId(None, data.email)
     if userId is None:
         raise HTTPException(403, "You don't have an account")

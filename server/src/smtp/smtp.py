@@ -18,16 +18,36 @@ def getEnv(key) -> str:
 SMTP_EMAIL = getEnv("SMTP_EMAIL")
 SMTP_KEY = getEnv("SMTP_KEY")
 BASE_URL = getEnv("BASE_URL")
-SUBJECT = "HenriChess Email Confirmation"
 
 class Smtp():
     @staticmethod
+    def sendResetPasswordEmail(username: str, email: str, code: int):
+        try:
+            subject = "HenriChess Reset Password Request"
+            body = f"Hello {username},\n\n"
+            body += f"Please enter the following code to reset your password: {code}.\n"
+            body += f"If you did not make this request please contact use asap.\n\n"
+            body += "Best Regards,"
+            mimeText = MIMEText(body)
+            mimeText['Subject'] = subject
+            mimeText["From"] = SMTP_EMAIL
+            mimeText["To"] = email
+
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                server.starttls()
+                server.login(SMTP_EMAIL, SMTP_KEY)
+                server.sendmail(SMTP_EMAIL, email, mimeText.as_string())
+        except Exception as e:
+            mylog.critical(f"Error sending email: {e}")
+
+    @staticmethod
     def sendVerificationEmail(username: str, clientEmail: str, uuidToken: str):
         try:
-            subject = SUBJECT
+            subject = "HenriChess Email Confirmation"
             url = BASE_URL + "/verify-email/" + username + "/" + uuidToken
             body = f"Hello {username},\n\n"
-            body += f"Please click on the following link or copy paste it into the url bar of your browser: {url}\n\n"
+            body += f"Please click on the following link or copy paste it into the url bar of your browser: {url}\n"
+            body += f"If you did not attempt to create an account on this platform you may ignore this email.\n\n"
             body += "Best Regards,"
             mimeText = MIMEText(body)
             mimeText['Subject'] = subject

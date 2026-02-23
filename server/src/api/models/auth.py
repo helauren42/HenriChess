@@ -53,9 +53,9 @@ class SignupSchema(BaseModel):
 
 
 class ResetPasswordSchema(BaseModel):
+    code: int
     password: str
     repassword: str
-    email: str
 
     @field_validator("password", "repassword")
     @classmethod

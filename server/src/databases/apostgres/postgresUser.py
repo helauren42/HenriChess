@@ -12,8 +12,14 @@ class APostgresUser(APostgres):
     def __init__(self) -> None:
         super().__init__()
 
-    async def fetchUsername(self, user_id: int) -> None | str:
-        fetched = await self.execFetchone("select username from users where id=%s", (user_id, ))
+    async def fetchUsername(self, user_id: Optional[int], email: str | None = None) -> None | str:
+        assert isinstance(user_id, int) or isinstance(email, str)
+        if user_id:
+            fetched = await self.execFetchone("select username from users where id=%s", (user_id, ))
+            if fetched is None:
+                return None
+            return fetched[0]
+        fetched = await self.execFetchone("select username from users where email=%s", (email, ))
         if fetched is None:
             return None
         return fetched[0]
