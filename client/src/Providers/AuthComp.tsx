@@ -7,13 +7,14 @@ export const AuthCompProvider = ({ children }:
     section: "login",
     on: false
   })
-  const openAuth = (section: "login" | "signup" | "unauthorized") => {
+  const openAuth = (section: "login" | "signup" | "validate" | "unauthorized") => {
     setAuthComp({
       section: section,
       on: true
     })
   }
   const closeAuth = () => {
+    console.log("Called closeAuth")
     setAuthComp({
       section: authComp.section,
       on: false

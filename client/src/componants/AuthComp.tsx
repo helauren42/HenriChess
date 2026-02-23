@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, type ReactNode } from "react"
 import { writeFetch, type MyResp } from "../utils/requests"
-import { Toast409, ToastCustomError, ToastServerError } from "../utils/toastify"
-import { UserContext, type UserContextFace } from "../Contexts/User"
+import { Toast409, Toast422, ToastCustomError, ToastServerError } from "../utils/toastify"
+import { UserContext } from "../Contexts/User"
 import { AuthCompContext } from "../Contexts/AuthComp"
 import { useNavigate } from "react-router-dom"
 import { removeWaitCursor } from "../utils/utils"
@@ -16,7 +16,7 @@ const InputField = ({ title, type, value, setter }: { title: string, type: React
   return (
     <div className="flex flex-col items-start gap-2">
       <h4>{title}:</h4>
-      <input className="text-[1.4rem]" type={type} value={value} onChange={(e) => {
+      <input className="text-[1.4rem]" required={true} type={type} value={value} onChange={(e) => {
         setter(e.target.value)
       }} />
     </div>
@@ -59,9 +59,13 @@ export const SignupPage = () => {
       return
     setLoading(true)
     const resp: MyResp | null = await writeFetch("/auth/signup", "POST", values)
+    console.log("YOOOOOOOOOOOOO")
     if (!resp)
       return setLoading(false)
+    console.log(resp)
     if (!resp.ok) {
+      if ((resp.message == null || resp.message.length == 0) && resp.status >= 400 && resp.status <= 499)
+        ToastCustomError("Invalid Input")
       switch (resp.status) {
         case 401:
           ToastCustomError(resp.message)
@@ -69,14 +73,19 @@ export const SignupPage = () => {
         case 409:
           Toast409(resp.message)
           break
+        case 422:
+          Toast422(resp.message)
+          break
         case 500:
           ToastServerError(resp.message)
           break
       }
       return setLoading(false)
     }
+    else {
+      openAuth("validate")
+    }
     setLoading(false)
-    location.reload()
   }
   return (
     <>
@@ -135,6 +144,21 @@ export const LoginPage = () => {
   )
 }
 
+
+export const ValidatePage = () => {
+  return (
+    <>
+      <AuthTitle title="Validate Email" />
+      <div className="w-full h-50 flex justify-center items-center">
+        <div className="max-w-[350px] h-full flex flex-col text-center justify-center items-center">
+          <p>An email has been sent to you, click on the link to create your account</p>
+        </div>
+      </div>
+    </>
+  )
+}
+
+
 export const Unauthorized = () => {
   const { openAuth, closeAuth } = useContext(AuthCompContext)
   const { user } = useContext(UserContext)
@@ -177,14 +201,15 @@ export const AuthPage = () => {
       elem.style.display = "flex"
     else
       elem.style.display = "none"
-  }, [authComp.on])
+  }, [authComp])
   return (
     <div id="auth-page" className={`absolute w-full h-screen flex items-center justify-center z-10 pointer-events-none`}>
       < div className="h-fit w-fit min-h-80 min-w-50 bg-(--nav-color) rounded-3xl p-10 pt-2 shadow-(--auth-shadow) pointer-events-auto">
         {
           authComp.section == "login" ? <LoginPage />
             : authComp.section == "signup" ? <SignupPage />
-              : <Unauthorized />
+              : authComp.section == "validate" ? <ValidatePage />
+                : <Unauthorized />
         }
       </div >
     </div >

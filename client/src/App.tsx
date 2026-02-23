@@ -15,6 +15,7 @@ import { WatchPage } from './Pages/Watch/Watch'
 import { GameExpired } from './componants/GameExpired'
 import { SocialPage } from './Pages/SocialPage'
 import { HomePage } from './Pages/HomePage'
+import { VerifyEmail } from './Pages/EmailConfirmation'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
@@ -63,6 +64,7 @@ function App() {
           <Route path='/watch/*' element={<WatchPage />} />
           <Route path='/user/*' element={<UserPage />} />
           <Route path='/social' element={<SocialPage />} />
+          <Route path='/verify-email/*' element={<VerifyEmail />} />
         </Route>
       </Routes>
       <GameExpired />

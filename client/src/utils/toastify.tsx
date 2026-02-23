@@ -35,7 +35,7 @@ export const Toast422 = (msg: string) => {
   toast.error("Invalid Input: " + msg, {
     toastId: "error422",
     position: "top-right",
-    autoClose: 2000
+    autoClose: 5000
   })
 }
 
@@ -51,6 +51,6 @@ export const ToastCustomError = (msg: string) => {
   toast.error(msg, {
     toastId: "custom",
     position: "top-right",
-    autoClose: 2000
+    autoClose: 3000
   })
 }

@@ -1,6 +1,6 @@
 from functools import wraps
 from typing import cast
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse, Response
 import uuid
@@ -9,6 +9,8 @@ from api.decorators import getUserIdReq
 from api.models.auth import LoginSchema, SignupSchema
 from databases.models.users import BasicUserModel
 from databases.postgres import postgres
+from databases.redis import myred
+from smtp.smtp import Smtp, mylog
 from utils.api import getUserId, mini401, miniResp, resp204, setCookie, setSessionCookie
 
 authRouter = APIRouter(prefix="/auth")
@@ -62,13 +64,28 @@ async def Login(clireq: Request, data: LoginSchema):
     setSessionCookie(resp, sessionToken)
     return resp
 
+# stores account info in redis prior to user validating ema
 @authRouter.post("/signup")
 async def signup(clireq: Request, data: SignupSchema):
+    # TODO check for duplicates in postgres
+    key = await myred.addSignUp(data.username, data.email, data.password)
+    Smtp.sendVerificationEmail(data.username, data.email, key)
+    return resp204()
+
+@authRouter.post("/verify/{token}")
+async def createAccount(clireq: Request, token: str):
+    # If you can't fetch the data from redis assume it expi ed, send expired response (410, gone)
     sessionToken = str(uuid.uuid4())
     deviceToken = clireq.cookies.get("deviceToken")
     if deviceToken is None:
-        return mini401()
-    await postgres.createUser(data.username, data.email, data.password, sessionToken, deviceToken)
+        deviceToken = str(uuid.uuid4())
+    data = await myred.getSignUp(token)
+    mylog.debug(data)
+    userId = await postgres.createUser(data["username"], data["email"], data["password"])
     resp = resp204()
+    mylog.debug(f"STORING: {sessionToken}")
+    mylog.debug(f"STORING: {deviceToken}")
+    await postgres.storeSession(sessionToken, deviceToken, userId)
     setSessionCookie(resp, sessionToken)
+    setCookie(resp, "deviceToken", deviceToken)
     return resp

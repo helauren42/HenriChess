@@ -53,6 +53,7 @@ export const writeFetch = async (path: string, method: "POST" | "PUT" | "PATCH" 
       credentials: "same-origin",
       body: JSON.stringify(body)
     })
+    console.log("resp status: ", resp)
     if (resp.status == 204) {
       return {
         status: resp.status,

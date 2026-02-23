@@ -62,26 +62,29 @@ class PostgresUser(APostgresUser):
         else:
             await self.createSession(sessionToken, deviceToken, userId)
 
-    async def createUser(self, username: str, email: str, password: str, sessionToken: str, deviceToken: str):
+    async def createUser(self, username: str, email: str, password: str):
         try:
-            fetched = await self.execFetchone(query="INSERT INTO users (username, email, password) values(%s, %s, %s) returning id", values=(username, email, bcrypt.hashpw(password.encode(), bcrypt.gensalt())))
+            try:
+                fetched = await self.execFetchone(query="INSERT INTO users (username, email, password) values(%s, %s, %s) returning id", values=(username, email, bcrypt.hashpw(password.encode(), bcrypt.gensalt())))
+            except Exception as e:
+                raise e
             if fetched is None:
                 raise HTTPException(500, "failed to get returning id")
             userId = int(fetched[0])
-            await self.storeSession(sessionToken, deviceToken, userId)
+            return userId
         except UniqueViolation as e:
             if e.diag.constraint_name is None:
                 raise e
             columnName = e.diag.constraint_name.split("_")[1:-1]
             match columnName[0]:
                 case "username":
-                    return await HttpCatch.uniquenessViolation(e, "Username already exists")
+                    raise await HttpCatch.uniquenessViolation(e, "Username already exists")
                 case "email":
-                    return await HttpCatch.uniquenessViolation(e, "Email already exists")
+                    raise await HttpCatch.uniquenessViolation(e, "Email already exists")
                 case _:
-                    return await HttpCatch.uniquenessViolation(e, "Unexpected Unique Violation")
+                    raise await HttpCatch.uniquenessViolation(e, "Unexpected Unique Violation")
         except Exception as e:
-            return await HttpCatch.postgres(e, "Failed to create user")
+            raise await HttpCatch.postgres(e, "Failed to create user")
 
     async def publicUserData(self, userId: int)-> BasicUserModel:
         keys = [

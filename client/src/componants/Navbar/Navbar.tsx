@@ -67,7 +67,7 @@ const NavAuthBtn = () => {
           </>
         )
           :
-          <span className="cursor-pointer" onClick={user.username ? navAccount : () => openAuth("login")}>
+          <span className="cursor-pointer" onClick={handleClick}>
             <SvgAccount className="fill-(--text-color-dark) min-w-13" />
           </span>
       }
