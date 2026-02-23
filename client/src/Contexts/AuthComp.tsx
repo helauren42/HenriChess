@@ -1,14 +1,14 @@
 import { createContext, type Dispatch, type SetStateAction } from "react"
 
 export interface AuthCompFaceFace {
-  section: "login" | "signup" | "validate" | "unauthorized"
+  section: "login" | "signup" | "validate" | "requestResetPassword" | "resetPassword" | "unauthorized"
   on: boolean
 }
 
 export interface AuthCompFace {
   authComp: AuthCompFaceFace,
   setAuthComp: Dispatch<SetStateAction<AuthCompFaceFace>>
-  openAuth: (section: "login" | "signup" | "validate" | "unauthorized") => void
+  openAuth: (section: "login" | "signup" | "validate" | "requestResetPassword" | "resetPassword" | "unauthorized") => void
   closeAuth: () => void
 }
 

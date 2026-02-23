@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { AuthCompContext, type AuthCompFaceFace } from "../Contexts/AuthComp"
 
 export const AuthCompProvider = ({ children }:
@@ -7,7 +7,7 @@ export const AuthCompProvider = ({ children }:
     section: "login",
     on: false
   })
-  const openAuth = (section: "login" | "signup" | "validate" | "unauthorized") => {
+  const openAuth = (section: "login" | "signup" | "validate" | "requestResetPassword" | "resetPassword" | "unauthorized") => {
     setAuthComp({
       section: section,
       on: true
@@ -20,9 +20,6 @@ export const AuthCompProvider = ({ children }:
       on: false
     })
   }
-  useEffect(() => {
-    console.log("authComp: ", authComp)
-  }, [authComp])
   return (
     <AuthCompContext.Provider value={{ authComp, setAuthComp, openAuth, closeAuth }} >
       {children}

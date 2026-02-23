@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, type ReactNode } from "react"
-import { writeFetch, type MyResp } from "../utils/requests"
+import { readFetch, writeFetch, type MyResp } from "../utils/requests"
 import { Toast409, Toast422, ToastCustomError, ToastServerError } from "../utils/toastify"
 import { UserContext } from "../Contexts/User"
 import { AuthCompContext } from "../Contexts/AuthComp"
@@ -39,9 +39,7 @@ const FormWrapper = ({ onSubmit, submitText, children }:
 
 const AuthRedir = ({ onClick, text }: { onClick: () => void, text: string }) => {
   return (
-    <div className="mt-5">
-      <p className="cursor-pointer" onClick={() => onClick()}>{text}</p>
-    </div>
+    <p className="cursor-pointer" onClick={() => onClick()}>{text}</p>
   )
 }
 
@@ -59,7 +57,6 @@ export const SignupPage = () => {
       return
     setLoading(true)
     const resp: MyResp | null = await writeFetch("/auth/signup", "POST", values)
-    console.log("YOOOOOOOOOOOOO")
     if (!resp)
       return setLoading(false)
     console.log(resp)
@@ -95,7 +92,9 @@ export const SignupPage = () => {
         <InputField title="Email" type="text" value={values.email} setter={(val) => setValues({ ...values, email: val })} />
         <InputField title="Password" type="password" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
       </FormWrapper>
-      <AuthRedir onClick={() => openAuth("login")} text="Login instead?" />
+      <div className="mt-5">
+        <AuthRedir onClick={() => openAuth("login")} text="Login instead?" />
+      </div>
     </>
   )
 }
@@ -139,11 +138,111 @@ export const LoginPage = () => {
         <InputField title="Username or Email" type="text" value={values.usernameEmail} setter={(val) => setValues({ ...values, usernameEmail: val })} />
         <InputField title="Password" type="text" value={values.password} setter={(val) => setValues({ ...values, password: val })} />
       </FormWrapper>
-      <AuthRedir onClick={() => openAuth("signup")} text="Signup instead?" />
+      <div className="mt-5">
+        <p className="mt-2 cursor-pointer" onClick={() => openAuth("requestResetPassword")}>Forgot your password?</p>
+        <AuthRedir onClick={() => openAuth("signup")} text="Signup instead?" />
+      </div>
     </>
   )
 }
 
+export const RequestResetPassword = () => {
+  const [email, setEmail] = useState("")
+  const { openAuth } = useContext(AuthCompContext)
+  const [loading, setLoading] = useState<boolean>(false)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (loading)
+      return
+    setLoading(true)
+    const resp: MyResp | null = await writeFetch("/auth/reset-password/request", "POST", { email })
+    if (!resp)
+      return setLoading(false)
+    if (!resp.ok) {
+      switch (resp.status) {
+        case 401:
+        case 409:
+          ToastCustomError(resp.message)
+          break
+        case 500:
+          ToastServerError(resp.message)
+          break
+      }
+      return setLoading(false)
+    }
+    else {
+      setLoading(false)
+      openAuth("resetPassword")
+    }
+  }
+  return (
+    <>
+      <AuthTitle title="Reset Password" />
+      <FormWrapper onSubmit={(e) => handleSubmit(e)} submitText="Login" >
+        <InputField title="Email" type="text" value={email} setter={(val) => setEmail(val)} />
+      </FormWrapper>
+      <div className="mt-5">
+        <AuthRedir onClick={() => openAuth("signup")} text="Signup instead?" />
+      </div>
+    </>
+  )
+}
+
+export const ResetPassword = () => {
+  const [code, setCode] = useState("")
+  const [password, setPassword] = useState("")
+  const [repassword, setRepassword] = useState("")
+  const { openAuth } = useContext(AuthCompContext)
+  const [loading, setLoading] = useState<boolean>(false)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (password != repassword) {
+      ToastCustomError("Passwords do not match")
+      return
+    }
+    if (loading)
+      return
+    setLoading(true)
+    const resp: MyResp | null = await writeFetch("/auth/reset-password/confirm/request", "POST", { "code": parseInt(code), password, repassword })
+    if (!resp)
+      return setLoading(false)
+    console.log(resp)
+    if (!resp.ok) {
+      if ((resp.message == null || resp.message.length == 0) && resp.status >= 400 && resp.status <= 499)
+        ToastCustomError("Invalid Input")
+      switch (resp.status) {
+        case 401:
+          ToastCustomError(resp.message)
+          break
+        case 409:
+          Toast409(resp.message)
+          break
+        case 422:
+          Toast422(resp.message)
+          break
+        case 500:
+          ToastServerError(resp.message)
+          break
+      }
+      return setLoading(false)
+    }
+    setLoading(false)
+    location.reload()
+  }
+  return (
+    <>
+      <AuthTitle title="Reset Password" />
+      <FormWrapper onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleSubmit(e)} submitText={loading ? "loading" : "Signup"}>
+        <InputField title="Code" type="text" value={code} setter={(val) => setCode(val)} />
+        <InputField title="Password" type="password" value={password} setter={(val) => setPassword(val)} />
+        <InputField title="Retype Password" type="password" value={repassword} setter={(val) => setRepassword(val)} />
+      </FormWrapper>
+      <div className="mt-5">
+        <AuthRedir onClick={() => openAuth("signup")} text="Signup instead?" />
+      </div>
+    </>
+  )
+}
 
 export const ValidatePage = () => {
   return (
@@ -157,7 +256,6 @@ export const ValidatePage = () => {
     </>
   )
 }
-
 
 export const Unauthorized = () => {
   const { openAuth, closeAuth } = useContext(AuthCompContext)
@@ -209,7 +307,9 @@ export const AuthPage = () => {
           authComp.section == "login" ? <LoginPage />
             : authComp.section == "signup" ? <SignupPage />
               : authComp.section == "validate" ? <ValidatePage />
-                : <Unauthorized />
+                : authComp.section == "requestResetPassword" ? <RequestResetPassword />
+                  : authComp.section == "resetPassword" ? <ResetPassword />
+                    : <Unauthorized />
         }
       </div >
     </div >
