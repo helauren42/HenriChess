@@ -6,10 +6,11 @@ from fastapi.responses import JSONResponse, Response
 import uuid
 
 from api.decorators import getUserIdReq
-from api.models.auth import LoginSchema, SignupSchema
+from api.models.auth import LoginSchema, ResetPasswordSchema, SignupSchema
 from databases.models.users import BasicUserModel
 from databases.postgres import postgres
 from databases.redis import myred
+import smtp
 from smtp.smtp import Smtp, mylog
 from utils.api import getUserId, mini401, miniResp, resp204, setCookie, setSessionCookie
 
@@ -74,7 +75,6 @@ async def signup(clireq: Request, data: SignupSchema):
 
 @authRouter.post("/verify/{token}")
 async def createAccount(clireq: Request, token: str):
-    # If you can't fetch the data from redis assume it expi ed, send expired response (410, gone)
     sessionToken = str(uuid.uuid4())
     deviceToken = clireq.cookies.get("deviceToken")
     if deviceToken is None:
@@ -83,9 +83,38 @@ async def createAccount(clireq: Request, token: str):
     mylog.debug(data)
     userId = await postgres.createUser(data["username"], data["email"], data["password"])
     resp = resp204()
-    mylog.debug(f"STORING: {sessionToken}")
-    mylog.debug(f"STORING: {deviceToken}")
     await postgres.storeSession(sessionToken, deviceToken, userId)
     setSessionCookie(resp, sessionToken)
     setCookie(resp, "deviceToken", deviceToken)
     return resp
+
+@authRouter.post("/reset-password/request")
+async def getResetPassword(clireq: Request):
+    data: dict = await clireq.json()
+    email = data["email"]
+    username = await postgres.fetchUsername(None, email)
+    if username is None:
+        raise HTTPException(401, "No account linked to this email address was found")
+    mylog.debug(f"received getResetPassword for: {email}")
+    code = await myred.storeResetPasswordToken(email)
+    Smtp.sendResetPasswordEmail(username, email, code)
+    return JSONResponse({"message": "success"})
+
+@authRouter.patch("/reset-password/confirm")
+async def resetPassword(clireq: Request, data: ResetPasswordSchema):
+    # TODO check that it matches the redis code and fetch email from redis
+    email = await myred.verifyResetPasswordToken(data.code)
+    userId = await postgres.fetchUserId(None, email)
+    if userId is None:
+        raise HTTPException(403, "You don't have an account")
+    await postgres.updatePassword(userId, data.password)
+    deviceToken = clireq.cookies.get("deviceToken")
+    if deviceToken is None:
+        deviceToken = str(uuid.uuid4())
+    sessionToken = str(uuid.uuid4())
+    resp = resp204()
+    await postgres.storeSession(sessionToken, deviceToken, userId)
+    setSessionCookie(resp, sessionToken)
+    setCookie(resp, "deviceToken", deviceToken)
+    return resp
+

@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import HTTPException
 from psycopg.errors import UniqueViolation
 from api.models.auth import LoginSchema
@@ -11,14 +12,26 @@ class APostgresUser(APostgres):
     def __init__(self) -> None:
         super().__init__()
 
-    async def fetchUsername(self, user_id: int) -> None | str:
-        fetched = await self.execFetchone("select username from users where id=%s", (user_id, ))
+    async def fetchUsername(self, user_id: Optional[int], email: str | None = None) -> None | str:
+        assert isinstance(user_id, int) or isinstance(email, str)
+        if user_id:
+            fetched = await self.execFetchone("select username from users where id=%s", (user_id, ))
+            if fetched is None:
+                return None
+            return fetched[0]
+        fetched = await self.execFetchone("select username from users where email=%s", (email, ))
         if fetched is None:
             return None
         return fetched[0]
 
-    async def fetchUserId(self, username: str) -> int | None:
-        fetched = await self.execFetchone("select id from users where username=%s",(username, ))
+    async def fetchUserId(self, username: Optional[str], email: Optional[str] = None) -> int | None:
+        assert isinstance(username, str) or isinstance(email, str)
+        if username:
+            fetched = await self.execFetchone("select id from users where username=%s",(username, ))
+            if fetched is None:
+                return None
+            return fetched[0]
+        fetched = await self.execFetchone("select id from users where email=%s",(email, ))
         if fetched is None:
             return None
         return fetched[0]
@@ -46,14 +59,19 @@ class PostgresUser(APostgresUser):
         return int(fetched[0])
 
     async def usersUserId(self, data: LoginSchema) -> None | int:
-        fetched = await self.execFetchone("select id,password from users where username=%s", (data.usernameEmail,))
+        fetched = await self.execFetchone("select id, password from users where username=%s", (data.usernameEmail,))
         if fetched is None:
             fetched = await self.execFetchone("select id, password from users where email=%s", (data.usernameEmail,))
             if fetched is None:
                 return None
         passwordDb = fetched[1]
-        if bcrypt.checkpw(data.password.encode(), passwordDb):
-            return fetched[0]
+        try:
+            if bcrypt.checkpw(data.password.encode(), passwordDb):
+                return fetched[0]
+        except ValueError:
+            raise HTTPException(400, "Wrong Credentials")
+        except Exception as e:
+            raise e
         return None
 
     async def storeSession(self, sessionToken: str, deviceToken: str, userId):
@@ -102,4 +120,7 @@ class PostgresUser(APostgresUser):
         data: BasicUserModel = BasicUserModel(**obj)
         return data
 
-    # async def userClientData(userId: int)-> UserModel:
+    async def updatePassword(self, userId: int, password: str):
+        mylog.debug(f"userId: {userId}")
+        mylog.debug(f"password: {password}")
+        await self.execCommit("update users set password=%s where id=%s", (bcrypt.hashpw(password.encode(), bcrypt.gensalt()), userId))
