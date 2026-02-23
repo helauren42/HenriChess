@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import HTTPException
 from psycopg.errors import UniqueViolation
 from api.models.auth import LoginSchema
@@ -17,8 +18,14 @@ class APostgresUser(APostgres):
             return None
         return fetched[0]
 
-    async def fetchUserId(self, username: str) -> int | None:
-        fetched = await self.execFetchone("select id from users where username=%s",(username, ))
+    async def fetchUserId(self, username: Optional[str], email: Optional[str] = None) -> int | None:
+        assert isinstance(username, str) or isinstance(email, str)
+        if username:
+            fetched = await self.execFetchone("select id from users where username=%s",(username, ))
+            if fetched is None:
+                return None
+            return fetched[0]
+        fetched = await self.execFetchone("select id from users where email=%s",(email, ))
         if fetched is None:
             return None
         return fetched[0]
@@ -102,4 +109,5 @@ class PostgresUser(APostgresUser):
         data: BasicUserModel = BasicUserModel(**obj)
         return data
 
-    # async def userClientData(userId: int)-> UserModel:
+    async def updatePassword(self, userId: int, password: str):
+        await self.execCommit("update users set password=%s where id=%s", (password, userId))

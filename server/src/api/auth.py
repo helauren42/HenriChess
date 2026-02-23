@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse, Response
 import uuid
 
 from api.decorators import getUserIdReq
-from api.models.auth import LoginSchema, SignupSchema
+from api.models.auth import LoginSchema, ResetPasswordSchema, SignupSchema
 from databases.models.users import BasicUserModel
 from databases.postgres import postgres
 from databases.redis import myred
@@ -74,7 +74,6 @@ async def signup(clireq: Request, data: SignupSchema):
 
 @authRouter.post("/verify/{token}")
 async def createAccount(clireq: Request, token: str):
-    # If you can't fetch the data from redis assume it expi ed, send expired response (410, gone)
     sessionToken = str(uuid.uuid4())
     deviceToken = clireq.cookies.get("deviceToken")
     if deviceToken is None:
@@ -83,9 +82,25 @@ async def createAccount(clireq: Request, token: str):
     mylog.debug(data)
     userId = await postgres.createUser(data["username"], data["email"], data["password"])
     resp = resp204()
-    mylog.debug(f"STORING: {sessionToken}")
-    mylog.debug(f"STORING: {deviceToken}")
     await postgres.storeSession(sessionToken, deviceToken, userId)
     setSessionCookie(resp, sessionToken)
     setCookie(resp, "deviceToken", deviceToken)
     return resp
+
+
+@authRouter.patch("/reset-password")
+async def resetPassword(clireq: Request, data: ResetPasswordSchema):
+    userId = await postgres.fetchUserId(None, data.email)
+    if userId is None:
+        raise HTTPException(403, "You don't have an account")
+    await postgres.updatePassword(userId, data.password)
+    deviceToken = clireq.cookies.get("deviceToken")
+    if deviceToken is None:
+        deviceToken = str(uuid.uuid4())
+    sessionToken = str(uuid.uuid4())
+    resp = resp204()
+    await postgres.storeSession(sessionToken, deviceToken, userId)
+    setSessionCookie(resp, sessionToken)
+    setCookie(resp, "deviceToken", deviceToken)
+    return resp
+
