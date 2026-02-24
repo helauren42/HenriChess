@@ -116,57 +116,70 @@ export const Board = ({ playerColor }: { playerColor: "w" | "b" | "v" }) => {
 }
 
 export const PassiveSquare = memo(({ piece, rank, file }: { piece: string, rank: number, file: string }) => {
-  const { getFileNum } = useContext(GameContext)
+  const { getFileNum, playerColor } = useContext(GameContext)
   const squareColor: "white" | "black" = (rank + getFileNum(file)) % 2 == 0 ? "white" : "black"
   // console.log("square ", rank, "-", file, ": ", piece)
+  let cursorPointer: boolean = false
   const fileName = () => {
     let path = "/images/"
     switch (piece) {
       case "P":
         path += "whites/pawn"
+        cursorPointer = playerColor == "w"
         break
       case "p":
         path += "blacks/pawn"
+        cursorPointer = playerColor == "b"
         break
       case "N":
         path += "whites/knight"
+        cursorPointer = playerColor == "w"
         break
       case "n":
         path += "blacks/knight"
+        cursorPointer = playerColor == "b"
         break
       case "B":
         path += "whites/bishop"
+        cursorPointer = playerColor == "w"
         break
       case "b":
         path += "blacks/bishop"
+        cursorPointer = playerColor == "b"
         break
       case "R":
         path += "whites/rook"
+        cursorPointer = playerColor == "w"
         break
       case "r":
         path += "blacks/rook"
+        cursorPointer = playerColor == "b"
         break
       case "Q":
         path += "whites/queen"
+        cursorPointer = playerColor == "w"
         break
       case "q":
         path += "blacks/queen"
+        cursorPointer = playerColor == "b"
         break
       case "K":
         path += "whites/king"
+        cursorPointer = playerColor == "w"
         break
       case "k":
         path += "blacks/king"
+        cursorPointer = playerColor == "b"
         break
       default:
         return undefined
     }
     path += "_wood_outline.svg"
-    // console.log(path)
+    console.log("!!! path: ", path)
     return path
   }
   return (
-    <span id={`${rank}-${file}`} className={`square ${squareColor == "white" ? "square-white" : "square-black"}`}>
+    <span id={`${rank}-${file}`} className={`square ${squareColor == "white" ? "square-white" : "square-black"} ${cursorPointer ? "cursor-pointer" : ""}`}>
       <img src={piece == "" ? undefined : fileName()} />
     </span>)
 })

@@ -97,7 +97,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       unselect()
     }
   }
-  const getGameUpdate = (tempId: number | null = null) => {
+  const getGameUpdate = (tempMode: "online" | "hotseat", tempId: number | null = null) => {
     if (!ws || ws.readyState != ws.OPEN) {
       const id = setInterval(() => {
         if (ws && ws.readyState === ws.OPEN) {
