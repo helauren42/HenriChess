@@ -37,7 +37,6 @@ const GameExpiredButton = () => {
 export const GameExpired = () => {
   const { gameExpired } = useContext(GameContext)
   useEffect(() => {
-    console.log("GAMEEXPIRED: ", gameExpired)
     const elem: HTMLDialogElement | null = document.getElementById("base-modal") as HTMLDialogElement | null
     if (elem == null)
       return

@@ -125,6 +125,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setWhiteId(game.whiteId)
     setWhiteId(game.blackId)
     setMode(data.mode)
+    setGameExpired(false)
     if (!data.game.winner && data.mode == "online") {
       if (data.game.gameMessages === undefined)
         throw new Error("game messages should be defined")

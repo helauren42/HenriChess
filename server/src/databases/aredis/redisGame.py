@@ -202,8 +202,6 @@ class RedisGame(ARedisGame):
             mylog.debug(f"winner: {winner}")
             # TODO add game messages fetching
             messages = await self.getMessages(gameId)
-            mylog.debug(f"!!! MESSAGES: {messages}")
-            mylog.debug(f"!!! MESSAGES: {type(messages)}")
             return Game(gameId,
                 await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
                 await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
@@ -271,6 +269,5 @@ class RedisGame(ARedisGame):
         return messages
 
     async def addMessage(self, username: str, message: str, gameId: int):
-        mylog.debug(f"!!!!!!! addMessage: {username} -> {message}")
         item = json.dumps({"username": username, "message": message})
         await self.game.rpush(self.gameMessageKey(gameId), item)

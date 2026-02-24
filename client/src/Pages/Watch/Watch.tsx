@@ -29,7 +29,7 @@ export const WatchBoard = ({ fen, index }: { fen: string, index: number }) => {
   }
   const navToGame = () => {
     nav(`/game/online/${index}`)
-    location.reload()
+    // location.reload()
   }
   return (
     <div className="mini-board" key={`mini-board-${index}`} onClick={() => navToGame()} >
@@ -62,7 +62,7 @@ export const GamesList = ({ games }: { games: GameWatchFace[] }) => {
     <div id="games-list">
       {
         games.map((game, index) => {
-          return <WatchGame blackUsername={game.blackUsername} whiteUsername={game.whiteUsername} fen={game.fen} id={game.id} />
+          return <WatchGame key={`game-${index}`} blackUsername={game.blackUsername} whiteUsername={game.whiteUsername} fen={game.fen} id={game.id} />
         })
       }
     </div>
