@@ -12,7 +12,7 @@ export const WsProvider = ({ children }: { children: ReactNode }) => {
     const timeout = setTimeout(() => {
       if (sock.readyState != sock.OPEN)
         sock.close()
-    }, 4000)
+    }, 10000)
 
     sock.onopen = (e) => {
       clearTimeout(timeout)
@@ -43,7 +43,7 @@ export const WsProvider = ({ children }: { children: ReactNode }) => {
     if (user.username.length > 0 && (ws == null || ws?.readyState == ws?.CLOSED || ws?.readyState == ws.CLOSING)) {
       const id = setInterval(() => {
         makeSocket()
-      }, 3500)
+      }, 10500)
       return () => clearInterval(id)
     }
   }, [user, ws])
