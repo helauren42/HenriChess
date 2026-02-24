@@ -34,10 +34,10 @@ export const MatchmakeOnline = () => {
         const redirId = setTimeout(() => {
           if (location.pathname == matchMakePath)
             nav("/game")
-        }, 2500)
+        }, 10500)
         return () => clearTimeout(redirId)
       }
-    }, 3000)
+    }, 11000)
     return () => clearInterval(id)
   }, [loc.pathname])
   useEffect(() => {
