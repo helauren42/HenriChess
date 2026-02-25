@@ -15,7 +15,6 @@ export const MatchmakeOnline = () => {
   const sendStartMessage = async () => {
     const intervalId = setInterval(() => {
       if (ws && ws.readyState == ws.OPEN) {
-        console.log("sent StartMessage!!!!!!!!!: ", ws)
         startMatchmaking()
         clearInterval(intervalId)
       }
@@ -33,21 +32,17 @@ export const MatchmakeOnline = () => {
         const redirId = setTimeout(() => {
           if (location.pathname == matchMakePath)
             nav("/game")
-        }, 2500)
+        }, 10500)
         return () => clearTimeout(redirId)
       }
-    }, 12000)
+    }, 11000)
     return id
   }
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (ws)
-        if (ws && ws.readyState == ws.OPEN) {
-          const id = timeOutMatchmake()
-          return () => clearTimeout(id)
-        }
-    }, 1000)
-    return () => clearInterval(interval)
+    if (ws && ws.readyState == ws.OPEN) {
+      const id = timeOutMatchmake()
+      return () => clearTimeout(id)
+    }
   }, [loc.pathname, ws])
   useEffect(() => {
     if (ws) {
