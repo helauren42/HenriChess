@@ -20,8 +20,6 @@ export const Game = () => {
   const { ws } = useContext(WsContext)
   const location = useLocation()
   useEffect(() => {
-    const currPath = location.pathname
-    console.log("!!!!!!!!!!!!!!!! heree naved to game: ", currPath)
     const pathSplit = location.pathname.split("/")
     if (pathSplit.length < 4)
       return
@@ -29,7 +27,6 @@ export const Game = () => {
     if (newMode != "hotseat" && newMode != "online")
       return
     const tempId = parseInt(pathSplit[3])
-    console.log("!!!!!!!!!!! tempId: ", tempId)
     addWaitCursor()
     if (newMode != mode)
       setMode(newMode)

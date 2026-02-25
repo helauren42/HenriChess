@@ -22,7 +22,6 @@ export const MatchmakeOnline = () => {
     return null
   }
   const timeOutMatchmake = () => {
-    console.log("timeOutMatchmake started 1111111")
     const matchMakePath = "/game/matchmake-online"
     const id = setTimeout(() => {
       const path = loc.pathname
