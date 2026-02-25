@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { UserContext, type UserData } from "../Contexts/User"
 
 
@@ -8,10 +8,6 @@ export const UserProvider = ({ children }:
     username: "",
     email: ""
   })
-  useEffect(() => {
-    console.log(user.username)
-    console.log(user.email)
-  }, [user])
   return (
     <UserContext.Provider value={{ user, setUser }}> {children}
     </UserContext.Provider>

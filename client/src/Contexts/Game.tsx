@@ -71,7 +71,7 @@ export interface GameFace {
   setFenIndex: Dispatch<SetStateAction<number>>
   gameMoves: GameMoveFace[]
   setGameMoves: Dispatch<SetStateAction<GameMoveFace[]>>
-  getGameUpdate: (tempId: number | null) => void
+  getGameUpdate: (tempMode: "online" | "hotseat", tempId: number | null) => void
   // messages
   messages: GameMessageFace[]
   setMessages: Dispatch<SetStateAction<GameMessageFace[]>>
@@ -123,7 +123,7 @@ export const GameContext = createContext<GameFace>({
   setFenIndex: () => console.error("used outside of context"),
   gameMoves: [],
   setGameMoves: () => console.error("used outside of context"),
-  getGameUpdate: (tempId: number | null) => console.error("used outside of context"),
+  getGameUpdate: (tempMode: "online" | "hotseat", tempId: number | null) => console.error("used outside of context"),
   // messages
   messages: [],
   setMessages: () => console.error("used outside of context"),

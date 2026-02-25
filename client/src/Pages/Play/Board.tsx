@@ -3,11 +3,12 @@ import { GameContext } from "../../Contexts/Game";
 import { INITIAL_BOARD } from "../../utils/const";
 
 export const Square = memo(({ piece, rank, file, viewer = false }: { piece: string, rank: number, file: string, viewer: boolean }) => {
-  const { squareClick, getFileNum } = useContext(GameContext)
+  const { squareClick, getFileNum, playerColor, playerTurn } = useContext(GameContext)
   const squareColor: "white" | "black" = (rank + getFileNum(file)) % 2 == 0 ? "white" : "black"
-  // console.log("square ", rank, "-", file, ": ", piece)
+  const cursorPointer = playerColor == playerTurn
   const fileName = () => {
     let path = "/images/"
+    console.log("playerColor: ", playerColor)
     switch (piece) {
       case "P":
         path += "whites/pawn"
@@ -57,7 +58,7 @@ export const Square = memo(({ piece, rank, file, viewer = false }: { piece: stri
     squareClick(id, piece)
   }
   return (
-    <span onClick={viewer ? undefined : (e) => handleClick(e.currentTarget.id)} id={`${rank}-${file}`} className={`square ${squareColor == "white" ? "square-white" : "square-black"}`}>
+    <span onClick={viewer ? undefined : (e) => handleClick(e.currentTarget.id)} id={`${rank}-${file}`} className={`square ${squareColor == "white" ? "square-white" : "square-black"} ${cursorPointer ? "cursor-pointer" : null}`}>
       {/* <svg><use ></use></svg> */}
       <img src={piece == "" ? undefined : fileName()} />
     </span>)
@@ -116,7 +117,7 @@ export const Board = ({ playerColor }: { playerColor: "w" | "b" | "v" }) => {
 }
 
 export const PassiveSquare = memo(({ piece, rank, file }: { piece: string, rank: number, file: string }) => {
-  const { getFileNum } = useContext(GameContext)
+  const { getFileNum, playerColor } = useContext(GameContext)
   const squareColor: "white" | "black" = (rank + getFileNum(file)) % 2 == 0 ? "white" : "black"
   // console.log("square ", rank, "-", file, ": ", piece)
   const fileName = () => {
@@ -162,7 +163,6 @@ export const PassiveSquare = memo(({ piece, rank, file }: { piece: string, rank:
         return undefined
     }
     path += "_wood_outline.svg"
-    // console.log(path)
     return path
   }
   return (

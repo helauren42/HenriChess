@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, type ReactNode } from "react";
+import { useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { GameContext, type GameUpdateFace, type GameMoveFace, type SelectedFace, type GameMessageFace } from "../Contexts/Game.tsx";
 import { isBlack, isWhite } from "../utils/Game";
 import { INITIAL_BOARD, SERVER_URL_WS } from "../utils/const.tsx";
@@ -6,7 +6,7 @@ import { ToastCustomError } from "../utils/toastify.tsx";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../Contexts/User.tsx";
 import { WsContext } from "../Contexts/Ws.tsx";
-import { removeWaitCursor } from "../utils/utils.tsx";
+import { addWaitCursor, removeWaitCursor } from "../utils/utils.tsx";
 
 export interface DataGame {
   "type": "game",
@@ -40,6 +40,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   })
   const [gameExpired, setGameExpired] = useState<boolean>(false)
   const { ws, lastMessage } = useContext(WsContext)
+  const wsRef = useRef(ws)
   const nav = useNavigate()
   const getFileNum = (file: string) => {
     return file.charCodeAt(0) - 'a'.charCodeAt(0) + 1
@@ -97,7 +98,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       unselect()
     }
   }
-  const getGameUpdate = (tempId: number | null = null) => {
+  const getGameUpdate = (tempMode: "online" | "hotseat", tempId: number | null = null) => {
     if (!ws || ws.readyState != ws.OPEN) {
       const id = setInterval(() => {
         if (ws && ws.readyState === ws.OPEN) {
@@ -123,8 +124,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setWhiteUsername(game.whiteUsername)
     setBlackUsername(game.blackUsername)
     setWhiteId(game.whiteId)
-    setWhiteId(game.blackId)
+    setBlackId(game.blackId)
     setMode(data.mode)
+    setGameExpired(false)
     if (!data.game.winner && data.mode == "online") {
       if (data.game.gameMessages === undefined)
         throw new Error("game messages should be defined")
@@ -159,9 +161,13 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     ws.send(JSON.stringify({ type: fullType }))
   }
   const startGameHotseat = () => {
-    if (!ws)
-      return wsErrorNotOpen("start game hotseat")
-    ws.send(JSON.stringify({ type: "startGameHotseat" }))
+    addWaitCursor()
+    const id = setInterval(() => {
+      if (wsRef.current && wsRef.current.readyState == wsRef.current.OPEN) {
+        wsRef.current.send(JSON.stringify({ type: "startGameHotseat" }))
+        clearInterval(id)
+      }
+    }, 1000)
   }
   const resignGame = () => {
     if (!ws)
@@ -219,6 +225,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
           break
       }
   }, [lastMessage])
+  useEffect(() => {
+    wsRef.current = ws
+  }, [ws])
   return (
     <GameContext.Provider value={{ gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, fenIndex, setFenIndex, gameMoves, setGameMoves, messages, setMessages, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
       {children}

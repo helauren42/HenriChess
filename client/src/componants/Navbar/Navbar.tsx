@@ -97,7 +97,6 @@ export const Navbar = () => {
   useEffect(() => {
     const barToggler = document.getElementById("bar-toggler")
     const navElem = document.getElementById("nav") as HTMLElement
-    console.log("barVisible: ", barVisible)
     if (barVisible) {
       if (barToggler)
         barToggler.style.marginLeft = "80px"

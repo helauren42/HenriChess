@@ -16,22 +16,27 @@ export const PlayerDisplay = ({ playerName }: { playerName: string }) => {
 }
 
 export const Game = () => {
-  const { playerColor, getGameUpdate, setGameId, setMode } = useContext(GameContext)
+  const { playerColor, getGameUpdate, setGameId, setMode, mode, gameId } = useContext(GameContext)
   const { ws } = useContext(WsContext)
   const location = useLocation()
   useEffect(() => {
     const pathSplit = location.pathname.split("/")
     if (pathSplit.length < 4)
       return
-    const mode: "hotseat" | "online" | string = pathSplit[2] as "hotseat" | "online" | string
-    if (mode != "hotseat" && mode != "online")
+    const newMode: "hotseat" | "online" | string = pathSplit[2] as "hotseat" | "online" | string
+    if (newMode != "hotseat" && newMode != "online")
       return
     const tempId = parseInt(pathSplit[3])
     addWaitCursor()
-    setMode(mode)
-    setGameId(tempId)
-    getGameUpdate(tempId)
+    if (newMode != mode)
+      setMode(newMode)
+    if (tempId != gameId)
+      setGameId(tempId)
+    getGameUpdate(newMode, gameId)
   }, [location, ws])
+  useEffect(() => {
+    getGameUpdate(mode, gameId)
+  }, [mode, gameId])
   useEffect(() => {
     console.log("player color is: ", playerColor)
   }, [playerColor])

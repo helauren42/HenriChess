@@ -21,12 +21,9 @@ export const MatchmakeOnline = () => {
     }, 500)
     return null
   }
-  useEffect(() => {
-    const changedPath = loc.pathname
+  const timeOutMatchmake = () => {
     const matchMakePath = "/game/matchmake-online"
-    console.log("changedPath: ", changedPath)
     const id = setTimeout(() => {
-      // const path = window.location.pathname
       const path = loc.pathname
       if (path == matchMakePath) {
         ToastCustomError("No opponents found, you will be redirected")
@@ -38,8 +35,14 @@ export const MatchmakeOnline = () => {
         return () => clearTimeout(redirId)
       }
     }, 11000)
-    return () => clearInterval(id)
-  }, [loc.pathname])
+    return id
+  }
+  useEffect(() => {
+    if (ws && ws.readyState == ws.OPEN) {
+      const id = timeOutMatchmake()
+      return () => clearTimeout(id)
+    }
+  }, [loc.pathname, ws])
   useEffect(() => {
     if (ws) {
       sendStartMessage()
