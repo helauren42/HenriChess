@@ -6,6 +6,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: "0.0.0.0",
-    allowedHosts: ["chess.henri10x.dev", "www.chess.henri10x.dev"]
+    allowedHosts: ["chess.henri10x.dev"]
   }
 })

@@ -49,6 +49,7 @@ function App() {
     }
   }
   useEffect(() => {
+    document.title = "Henri Chess"
     initUser()
   }, [])
   return (
