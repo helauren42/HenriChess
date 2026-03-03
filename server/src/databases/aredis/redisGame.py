@@ -6,7 +6,7 @@ import redis.asyncio as redis
 import asyncio
 import json
 
-from databases.game import Game, GameMap, GameMessage, GameMove, GameWatch, decodeGameMoves, gameMoveStr
+from databases.game import Game, GameMap, GameMessage, GameMove, GameWatch, decodeGameMoves, decodeGameTs, gameMoveStr
 from utils.const import MODES, Env, EXPIRY_TIME
 from utils.game import getWinnerName
 from utils.logger import mylog
@@ -53,6 +53,9 @@ class ARedisGame(ABC):
 
     def gamePositionKey(self, gameId: int):
         return f"game_position_{gameId}"
+
+    def gameTsKey(self, gameId: int):
+        return f"game_position_ts_{gameId}"
 
     def gameMessageKey(self, gameId: int):
         return f"game_message_{gameId}"
@@ -160,6 +163,8 @@ class RedisGame(ARedisGame):
         mylog.debug(f"addGamePosition fen: {fen}")
         try:
             await self.game.rpush(self.gamePositionKey(gameId), fen)
+            ts = datetime.datetime.now().timestamp()
+            await self.game.rpush(self.gamePositionTsKey(gameId), str(ts))
             await self.extendGameExpiry(gameId, mode, username)
         except Exception as e:
             mylog.error(f"error adding game position {e}")
@@ -206,6 +211,7 @@ class RedisGame(ARedisGame):
                 await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
                 await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
                 messages,
+                await decodeGameTs(await self.game.lrange(self.gameTsKey(gameId), 0, -1)),
                 winner,
                 await getWinnerName(None, map),
                 map["whiteUsername"],

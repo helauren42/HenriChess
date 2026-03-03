@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE INDEX idx_sessions_device_token ON sessions(device_token);
 
 CREATE TABLE IF NOT EXISTS games (
-  id INT NOT NULL,
+  id INT PRIMARY NOT NULL,
   creation TIMESTAMP DEFAULT NOW(),
   game_mode TEXT CHECK (game_mode IN ('hotseat', 'online')),
   white_id INTEGER REFERENCES users(id) NOT NULL,

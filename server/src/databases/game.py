@@ -29,6 +29,16 @@ async def encodeGameMoves(l: list[GameMove]):
         r.append(s)
     return r
 
+async def decodeGameTs(l: list[str | bytes]):
+    r: list[float] = []
+    for i in range(len(l)):
+        s = l[i]
+        if isinstance(s, bytes):
+            s = s.decode()
+        assert isinstance(s, str)
+        r.append(float(s))
+    return r
+
 class GameMessage(TypedDict):
     username: str
     message: str
@@ -39,6 +49,7 @@ class Game():
     gameFens: list[str]
     gameMoves: list[GameMove]
     gameMessages: list[GameMessage]
+    gameTs: list[float]
     winner: int | None # none is stored as -1 inside redis
     winnerName: str | None
     whiteUsername: str
