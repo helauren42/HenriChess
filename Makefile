@@ -42,6 +42,9 @@ server: $(PIP_LATEST)
 dev: up
 	docker compose up
 
+deploy: up
+	docker compose up
+
 ############### cleaning ###############
 
 rmpy:
