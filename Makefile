@@ -39,8 +39,11 @@ re: down up
 server: $(PIP_LATEST)
 	$(INTERPRETER) $(MAIN)
 
-dev: up
+dev:
 	docker compose up
+
+deploy:
+	docker compose up -d
 
 ############### cleaning ###############
 

@@ -1,0 +1,23 @@
+name: CI/CD pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: chess.env
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run make
+        run: |
+          echo "${{ secrets.ENV }}" >> .env
+          mkdir -p secrets
+          openssl req -new -newkey rsa:2048 -nodes -x509 \
+          -keyout secrets/key.pem -out secrets/cert.pem -days 365 \
+          -subj "/C=US/ST=CA/L=SF/O=MyOrg/OU=Dev/CN=example.com/emailAddress=admin@example.com"
+          make deploy
+          python3 ./tests/startup.py
