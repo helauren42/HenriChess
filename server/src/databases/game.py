@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import Type, TypedDict
-
-from utils.logger import mylog
+from typing import TypedDict
 
 @dataclass
 class GameMove():
@@ -30,13 +28,14 @@ async def encodeGameMoves(l: list[GameMove]):
     return r
 
 async def decodeGameTs(l: list[str | bytes]):
-    r: list[float] = []
+    r: list[list[float]] = []
     for i in range(len(l)):
         s = l[i]
         if isinstance(s, bytes):
             s = s.decode()
         assert isinstance(s, str)
-        r.append(float(s))
+        stamps = [float(x) for x in s.split("-")]
+        r.append(stamps)
     return r
 
 class GameMessage(TypedDict):
@@ -49,7 +48,7 @@ class Game():
     gameFens: list[str]
     gameMoves: list[GameMove]
     gameMessages: list[GameMessage]
-    gameTs: list[float]
+    gameTs: list[list[float]] # it's a list of nested list of size 3, 3 floats for whiteTime, blackTime and timestamp at start of position/fen
     winner: int | None # none is stored as -1 inside redis
     winnerName: str | None
     whiteUsername: str

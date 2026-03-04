@@ -23,6 +23,7 @@ class ARedisGame(ABC):
         await self.game.expire(self.gamePositionKey(gameId), EXPIRY_TIME)
         await self.game.expire(self.gameViewersKeys(gameId), EXPIRY_TIME)
         await self.game.expire(self.gameMessageKey(gameId), EXPIRY_TIME)
+        await self.game.expire(self.gameTsKey(gameId), EXPIRY_TIME)
         time = int(datetime.datetime.now().timestamp()) + EXPIRY_TIME
         if mode == "online":
             await self.game.zadd("online_expiries", {str(gameId): str(time)})
@@ -159,12 +160,27 @@ class RedisGame(ARedisGame):
         except Exception as e:
             mylog.error(f"error adding game move {e}")
 
-    async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username):
+    async def addGameTs(self, gameId: int):
+        now = datetime.datetime.now().timestamp()
+        pos = await self.game.lrange(self.gamePositionKey(gameId), 0, -1)
+        l = len(pos)
+        assert l >= 1
+        if l == 1:
+            await self.game.rpush(self.gameTsKey(gameId), "0-0-" + str(now))
+        else:
+            data = pos[l-1]
+            assert isinstance(data, str)
+            times = data.split("-")
+            i = 0 if l % 2 == 0 else 1
+            playerTime: float = float(times[i]) + (now - float(times[2]))
+            times[i] = str(playerTime)
+            await self.game.rpush(self.gameTsKey(gameId), times[0] + "-" + times[1] + "-" + str(now))
+
+    async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username: str):
         mylog.debug(f"addGamePosition fen: {fen}")
         try:
             await self.game.rpush(self.gamePositionKey(gameId), fen)
-            ts = datetime.datetime.now().timestamp()
-            await self.game.rpush(self.gamePositionTsKey(gameId), str(ts))
+            await self.addGameTs(gameId)
             await self.extendGameExpiry(gameId, mode, username)
         except Exception as e:
             mylog.error(f"error adding game position {e}")

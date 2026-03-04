@@ -25,6 +25,7 @@ class PostgresGames(PostgresUser):
             gameFens=fens,
             gameMoves=game_moves,
             gameMessages=[],
+            gameTs=[],
             winner=winnerName,
             winnerName=winnerName,
             whiteUsername=whiteUsername,
