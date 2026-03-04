@@ -75,7 +75,7 @@ const OnlineChat = () => {
     }
   }
   return (
-    <div id="online-messages" className="bg-(--bg-color-light) flex flex-col h-full rounded-xl p-3">
+    <div id="online-messages" className="bg-(--bg-color-light) max-h-[48%]  flex flex-col h-full rounded-xl p-3">
       <Messages />
       <input id="message-input" onKeyDown={(e) => handleKeyDown(e)} className="bg-red-700" />
     </div>
