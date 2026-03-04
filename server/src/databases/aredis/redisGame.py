@@ -161,20 +161,26 @@ class RedisGame(ARedisGame):
             mylog.error(f"error adding game move {e}")
 
     async def addGameTs(self, gameId: int):
-        now = datetime.datetime.now().timestamp()
-        pos = await self.game.lrange(self.gamePositionKey(gameId), 0, -1)
-        l = len(pos)
-        assert l >= 1
-        if l == 1:
-            await self.game.rpush(self.gameTsKey(gameId), "0-0-" + str(now))
-        else:
-            data = pos[l-1]
-            assert isinstance(data, str)
-            times = data.split("-")
-            i = 0 if l % 2 == 0 else 1
-            playerTime: float = float(times[i]) + (now - float(times[2]))
-            times[i] = str(playerTime)
-            await self.game.rpush(self.gameTsKey(gameId), times[0] + "-" + times[1] + "-" + str(now))
+        try:
+            mylog.debug(f"add Game Ts")
+            now = datetime.datetime.now().timestamp()
+            pos = await self.game.lrange(self.gameTsKey(gameId), 0, -1)
+            l = len(pos)
+            mylog.debug(f"length of pos: {l}")
+            mylog.debug(f"pos: {pos}")
+            assert l >= 1
+            if l == 1:
+                await self.game.rpush(self.gameTsKey(gameId), "0-0-" + str(now))
+            else:
+                data = pos[l-1]
+                assert isinstance(data, bytes)
+                times = data.decode().split("-")
+                i = 0 if l % 2 == 0 else 1
+                playerTime: float = float(times[i]) + (now - float(times[2]))
+                times[i] = str(playerTime)
+                await self.game.rpush(self.gameTsKey(gameId), times[0] + "-" + times[1] + "-" + str(now))
+        except Exception as e:
+            mylog.error(f"error adding game timestamp: {e}")
 
     async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username: str):
         mylog.debug(f"addGamePosition fen: {fen}")
