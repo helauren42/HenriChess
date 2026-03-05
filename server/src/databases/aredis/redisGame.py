@@ -168,8 +168,7 @@ class RedisGame(ARedisGame):
             l = len(pos)
             mylog.debug(f"length of pos: {l}")
             mylog.debug(f"pos: {pos}")
-            assert l >= 1
-            if l == 1:
+            if l == 0:
                 await self.game.rpush(self.gameTsKey(gameId), "0-0-" + str(now))
             else:
                 data = pos[l-1]
@@ -245,13 +244,6 @@ class RedisGame(ARedisGame):
             )
         except Exception as e:
             mylog.error(f"failed to retrieve curr game state {e}")
-
-    async def updateTime(self, gameId: int, mode: MODES, username: Optional[str], time: int):
-        try:
-            playerTurn = await self.getPlayerTurn(gameId, True)
-            await self.game.hset(self.gameKey(gameId, mode, username), playerTurn+"Time", str(time))
-        except Exception as e:
-            mylog.debug(f"Redis failed to update time: {e}")
 
     async def getGameWatch(self, gameId: int):
         try:

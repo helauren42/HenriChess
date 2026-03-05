@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react"
+import { useContext, useEffect, useState } from "react"
 import { GameContext } from "../../Contexts/Game.tsx"
 
 import "./Game.css"
@@ -7,11 +7,17 @@ import { useLocation } from "react-router-dom"
 import { WsContext } from "../../Contexts/Ws.tsx"
 import { addWaitCursor } from "../../utils/utils.tsx"
 
-export const PlayerDisplay = ({ playerName }: { playerName: string }) => {
+export const PlayerDisplay = ({ playerName, winner, time }: { playerName: string, winner: number | null, time: number }) => {
+  const minutes = Math.floor(time / 60)
+  const seconds = Math.ceil(time % 60)
   return (
-    <div className="ml-3">
+    <div className="ml-3 flex gap-5 items-center text-center">
       <h4>{playerName}</h4>
-    </div>
+      {
+        winner ? null :
+          < p > {minutes}:{seconds}</p>
+      }
+    </div >
   )
 }
 
@@ -46,17 +52,29 @@ export const Game = () => {
 }
 
 export const GameAndPlayers = () => {
-  const { whiteUsername, blackUsername, playerColor } = useContext(GameContext)
+  const { whiteUsername, blackUsername, playerColor, gameTs, winner } = useContext(GameContext)
   const topName = playerColor == "b" ? whiteUsername : blackUsername
   const botName = topName == whiteUsername ? blackUsername : whiteUsername
+  const [whiteTime, setWhiteTime] = useState<number>(600)
+  const [blackTime, setBlackTime] = useState<number>(600)
+  useEffect(() => {
+    if (gameTs != undefined && gameTs != null && gameTs.length > 0) {
+      const lastTs = gameTs[gameTs.length - 1]
+      setWhiteTime(600 - lastTs[0])
+      setBlackTime(600 - lastTs[1])
+    }
+  }, [gameTs])
+  useEffect(() => {
+    console.log("!!!!!!!!!! GAME TS: ", gameTs)
+  }, [gameTs])
   return (
     <div className="game-players-wrapper">
       <div id="game-players">
-        <PlayerDisplay playerName={topName} />
+        <PlayerDisplay playerName={topName} winner={winner} time={topName == whiteUsername ? whiteTime : blackTime} />
         <div id="play-board">
           <Game />
         </div>
-        <PlayerDisplay playerName={botName} />
+        <PlayerDisplay playerName={botName} winner={winner} time={botName == whiteUsername ? whiteTime : blackTime} />
       </div>
     </div>
   )

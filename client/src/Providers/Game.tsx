@@ -24,6 +24,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [gameFens, setGameFens] = useState<string[]>([])
   const [fenIndex, setFenIndex] = useState<number>(0)
   const [gameMoves, setGameMoves] = useState<GameMoveFace[]>([])
+  const [gameTs, setGameTs] = useState<number[][]>([])
   const [messages, setMessages] = useState<GameMessageFace[]>([])
   const [playerColor, setPlayerColor] = useState<"w" | "b" | "v">("w")
   const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
@@ -118,6 +119,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setGameFens(game.gameFens)
     setFenIndex(game.gameFens.length - 1)
     setGameMoves(game.gameMoves)
+    setGameTs(game.gameTs)
     setWinner(game.winner)
     setWinnerName(game.winnerName)
     setGameId(game.id)
@@ -229,7 +231,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     wsRef.current = ws
   }, [ws])
   return (
-    <GameContext.Provider value={{ gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, fenIndex, setFenIndex, gameMoves, setGameMoves, messages, setMessages, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, fenIndex, setFenIndex, gameMoves, setGameMoves, gameTs, setGameTs, messages, setMessages, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )
