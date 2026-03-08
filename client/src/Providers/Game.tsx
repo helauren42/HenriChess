@@ -119,7 +119,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setGameFens(game.gameFens)
     setFenIndex(game.gameFens.length - 1)
     setGameMoves(game.gameMoves)
-    setGameTs(game.gameTs)
+    // setGameTs(game.gameTs)
     setWinner(game.winner)
     setWinnerName(game.winnerName)
     setGameId(game.id)

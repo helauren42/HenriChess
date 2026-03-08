@@ -2,6 +2,7 @@ from abc import ABC
 import datetime
 from random import randint
 from typing import Optional
+from click import Option
 import redis.asyncio as redis
 import asyncio
 import json
@@ -139,17 +140,6 @@ class RedisGame(ARedisGame):
             gameKey = self.gameKey(gameId, mode, username)
             await self.game.delete(self.gameMoveKey(gameId), self.gamePositionKey(gameId), gameKey, self.gameViewersKeys(gameId), self.gameMessageKey(gameId), self.gameTsKey(gameId))
 
-
-        # await self.game.expire(self.gameKey(gameId, mode, username), EXPIRY_TIME)
-        # await self.game.expire(self.gameMoveKey(gameId), EXPIRY_TIME)
-        # await self.game.expire(self.gamePositionKey(gameId), EXPIRY_TIME)
-        # await self.game.expire(self.gameViewersKeys(gameId), EXPIRY_TIME)
-        # await self.game.expire(self.gameMessageKey(gameId), EXPIRY_TIME)
-        # await self.game.expire(self.gameTsKey(gameId), EXPIRY_TIME)
-        # time = int(datetime.datetime.now().timestamp()) + EXPIRY_TIME
-        # if mode == "online":
-        #     await self.game.zadd("online_expiries", {str(gameId): str(time)})
-
     async def addGame(self, game: Game, mode: MODES, username: Optional[str]):
         if mode == "hotseat" and username is None:
             raise ValueError("misuse of addGame function if mode is hotseat username must be defined")
@@ -192,7 +182,7 @@ class RedisGame(ARedisGame):
         except Exception as e:
             mylog.error(f"error adding game timestamp: {e}")
 
-    async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username: str):
+    async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username: Optional[str]):
         mylog.debug(f"addGamePosition fen: {fen}")
         try:
             await self.game.rpush(self.gamePositionKey(gameId), fen)
@@ -243,7 +233,6 @@ class RedisGame(ARedisGame):
                 await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
                 await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
                 messages,
-                await decodeGameTs(await self.game.lrange(self.gameTsKey(gameId), 0, -1)),
                 winner,
                 await getWinnerName(None, map),
                 map["whiteUsername"],

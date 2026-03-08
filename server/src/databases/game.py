@@ -48,7 +48,6 @@ class Game():
     gameFens: list[str]
     gameMoves: list[GameMove]
     gameMessages: list[GameMessage]
-    gameTs: list[list[float]] # it's a list of nested list of size 3, 3 floats for whiteTime, blackTime and timestamp at start of position/fen
     winner: int | None # none is stored as -1 inside redis
     winnerName: str | None
     whiteUsername: str
