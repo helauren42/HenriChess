@@ -121,6 +121,4 @@ class PostgresUser(APostgresUser):
         return data
 
     async def updatePassword(self, userId: int, password: str):
-        mylog.debug(f"userId: {userId}")
-        mylog.debug(f"password: {password}")
         await self.execCommit("update users set password=%s where id=%s", (bcrypt.hashpw(password.encode(), bcrypt.gensalt()), userId))

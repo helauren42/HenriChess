@@ -1,22 +1,28 @@
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from api.auth import authRouter
 from api.users import accountRouter
 from api.ws.ws import wsRouter
+from games.gameTs import taskGamesTs
 from utils.logger import mylog
 from databases.postgres import postgres
 
 @asynccontextmanager
 async def lifeIsTooShort(app: FastAPI):
     await postgres.init_pool()
+    task = asyncio.create_task(taskGamesTs())
     yield
+    task.cancel()
     await postgres.close_pool()
 
 app = FastAPI(lifespan=lifeIsTooShort)
 app.include_router(authRouter, prefix="/api")
 app.include_router(accountRouter, prefix="/api")
 app.include_router(wsRouter, prefix="/api")
+
+app.on_event("startup")
 
 @app.exception_handler(ValueError)
 async def valueExcept(req: Request, e: ValueError):

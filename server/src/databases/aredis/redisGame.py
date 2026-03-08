@@ -13,7 +13,7 @@ from utils.logger import mylog
 
 class ARedisGame(ABC):
     def __init__(self):
-        self.gamePool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=20)
+        self.gamePool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=100)
         self.game = redis.Redis(connection_pool=self.gamePool)
 
     async def extendGameExpiry(self, gameId: int, mode: MODES, username: Optional[str]):
@@ -35,18 +35,12 @@ class ARedisGame(ABC):
         for tup in z:
             k = tup[0]
             gameId = k.decode()
-            time = tup[1]
-            now = int(datetime.datetime.now().timestamp())
-            if now >= time:
-                self.game.zrem("online_expiries", str(gameId))
-                continue
+            if len(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)) == 0:
+                await self.game.zrem("online_expiries", str(gameId))
             whiteUsername = await self.game.hget(self.gameKey(gameId, "online"), "whiteUsername")
             blackUsername = await self.game.hget(self.gameKey(gameId, "online"), "blackUsername")
-            mylog.debug(f"whiteUsername: {whiteUsername}")
-            mylog.debug(f"blackUsername: {blackUsername}")
             if username == None or (username != whiteUsername and username != blackUsername):
                 ret.append(gameId)
-        mylog.debug(ret)
         return ret
 
     def gameKey(self, gameId: int, mode: MODES, username: Optional[str] = None):
@@ -143,7 +137,18 @@ class RedisGame(ARedisGame):
     async def removeGame(self, gameId: int, mode: MODES, username: Optional[str]):
         async with self.lockAddGame:
             gameKey = self.gameKey(gameId, mode, username)
-            await self.game.delete(self.gameMoveKey(gameId), self.gamePositionKey(gameId), gameKey)
+            await self.game.delete(self.gameMoveKey(gameId), self.gamePositionKey(gameId), gameKey, self.gameViewersKeys(gameId), self.gameMessageKey(gameId), self.gameTsKey(gameId))
+
+
+        # await self.game.expire(self.gameKey(gameId, mode, username), EXPIRY_TIME)
+        # await self.game.expire(self.gameMoveKey(gameId), EXPIRY_TIME)
+        # await self.game.expire(self.gamePositionKey(gameId), EXPIRY_TIME)
+        # await self.game.expire(self.gameViewersKeys(gameId), EXPIRY_TIME)
+        # await self.game.expire(self.gameMessageKey(gameId), EXPIRY_TIME)
+        # await self.game.expire(self.gameTsKey(gameId), EXPIRY_TIME)
+        # time = int(datetime.datetime.now().timestamp()) + EXPIRY_TIME
+        # if mode == "online":
+        #     await self.game.zadd("online_expiries", {str(gameId): str(time)})
 
     async def addGame(self, game: Game, mode: MODES, username: Optional[str]):
         if mode == "hotseat" and username is None:

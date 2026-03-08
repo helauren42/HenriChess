@@ -222,3 +222,21 @@ class GameMan(AGameMan):
             await GameMan.sendError(ws, "a servor error occured: failed to find game data")
             return None
         return game
+
+    @staticmethod
+    async def sendTime(ws: WebSocket, gameId: int, whiteTime: int, blackTime: int):
+        await ws.send_json({
+            "type": "game",
+            "gameId": id,
+            "whiteTime": whiteTime,
+            "blackTime": blackTime
+        })
+
+    @staticmethod
+    async def updateTime(gameId: int):
+        whiteId = await myred.game.hget(myred.gameKey(gameId, "online"), "whiteId")
+        assert whiteId is not None
+        whiteId = int(whiteId)
+        viewers = await myred.getGameViewers(gameId)
+        for viewer in viewers:
+            GameMan.updateGameAll()

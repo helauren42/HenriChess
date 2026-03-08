@@ -8,7 +8,7 @@ from databases.redis import myred
 from utils.api import getUserId
 from utils.const import matchmakePool, onlinePlayers
 from utils.logger import mylog
-from manageGames.manageGames import GameMan
+from games.manageGames import GameMan
 
 wsRouter = APIRouter(prefix="/ws")
 
