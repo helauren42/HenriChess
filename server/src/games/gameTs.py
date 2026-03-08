@@ -62,4 +62,4 @@ async def taskGamesTs():
         for gameId in games: # for every active online game we calculate the time left and send it to the active players and their viewers
             tasks.append(processGameTs(int(gameId)))
         await asyncio.gather(*tasks)
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)

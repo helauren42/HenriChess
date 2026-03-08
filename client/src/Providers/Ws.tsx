@@ -34,8 +34,10 @@ export const WsProvider = ({ children }: { children: ReactNode }) => {
 
     sock.onmessage = (event) => {
       const data: Record<string, any> = JSON.parse(event.data)
-      console.log('Message type from server: ', data.type)
-      console.log('Message from server: ', data)
+      if (data.type != "gameTs") {
+        console.log('Message type from server: ', data.type)
+        console.log('Message from server: ', data)
+      }
       setLastMessage(data)
     }
   };

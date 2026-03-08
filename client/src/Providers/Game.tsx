@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { GameContext, type GameUpdateFace, type GameMoveFace, type SelectedFace, type GameMessageFace } from "../Contexts/Game.tsx";
 import { isBlack, isWhite } from "../utils/Game";
-import { INITIAL_BOARD, SERVER_URL_WS } from "../utils/const.tsx";
+import { INITIAL_BOARD } from "../utils/const.tsx";
 import { ToastCustomError } from "../utils/toastify.tsx";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../Contexts/User.tsx";
@@ -24,7 +24,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [gameFens, setGameFens] = useState<string[]>([])
   const [fenIndex, setFenIndex] = useState<number>(0)
   const [gameMoves, setGameMoves] = useState<GameMoveFace[]>([])
-  const [gameTs, setGameTs] = useState<number[][]>([])
+  const [whiteTime, setWhiteTime] = useState<number>(600)
+  const [blackTime, setBlackTime] = useState<number>(600)
   const [messages, setMessages] = useState<GameMessageFace[]>([])
   const [playerColor, setPlayerColor] = useState<"w" | "b" | "v">("w")
   const [playerTurn, setPlayerTurn] = useState<"w" | "b">("w")
@@ -217,6 +218,13 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (lastMessage && lastMessage.type)
       switch (lastMessage.type) {
+        case "gameTs":
+          console.log("!!!!!!!: ", lastMessage.whiteTime)
+          console.log("!!!!!!!: ", lastMessage.blackTime)
+          setWhiteTime(lastMessage.whiteTime)
+          setBlackTime(lastMessage.blackTime)
+          break
+        // setGameTs()
         case "game":
           parseGame(lastMessage as DataGame)
           removeWaitCursor()
@@ -231,7 +239,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     wsRef.current = ws
   }, [ws])
   return (
-    <GameContext.Provider value={{ gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, fenIndex, setFenIndex, gameMoves, setGameMoves, gameTs, setGameTs, messages, setMessages, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
+    <GameContext.Provider value={{ gameId, setGameId, board, setBoard, mode, setMode, gameFens, setGameFens, fenIndex, setFenIndex, gameMoves, setGameMoves, whiteTime, setWhiteTime, blackTime, setBlackTime, messages, setMessages, getGameUpdate, playerColor, setPlayerColor, playerTurn, setPlayerTurn, whiteUsername, setWhiteUsername, blackUsername, setBlackUsername, whiteId, setWhiteId, blackId, setBlackId, winner, setWinner, winnerName, setWinnerName, selected, setSelected, unselect, squareClick, getFileNum, clientMove, restartGame, startGameHotseat, resignGame, gameExpired, setGameExpired, startMatchmaking, endMatchmaking }} >
       {children}
     </GameContext.Provider>
   )
