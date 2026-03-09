@@ -37,8 +37,8 @@ class ARedisGame(ABC):
         for tup in z:
             k = tup[0]
             gameId = k.decode()
-            if len(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)) == 0:
-                await self.game.zrem("online_expiries", str(gameId))
+            # if len(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)) == 0:
+            #     await self.game.zrem("online_expiries", str(gameId))
             whiteUsername = await self.game.hget(self.gameKey(gameId, "online"), "whiteUsername")
             blackUsername = await self.game.hget(self.gameKey(gameId, "online"), "blackUsername")
             if username == None or (username != whiteUsername and username != blackUsername):
@@ -134,6 +134,7 @@ class RedisGame(ARedisGame):
 
     async def removeGame(self, gameId: int, mode: MODES, username: Optional[str]):
         async with self.lockAddGame:
+            mylog.debug(f"!!!!!!!!REMOVE GAME CALLED")
             gameKey = self.gameKey(gameId, mode, username)
             await self.game.delete(self.gameMoveKey(gameId), self.gamePositionKey(gameId), gameKey, self.gameViewersKeys(gameId), self.gameMessageKey(gameId), self.gameTsKey(gameId))
 

@@ -45,14 +45,20 @@ async def updateGameTs(gameId: int, times: list[str], playerTurn: Literal["black
 
 async def processGameTs(gameId: int):
     mylog.debug("!!! inner loop")
+    mylog.debug(f"!!! temp1:")
+    await myred.getActiveOnlineGamesKeys(None)
     gameKey = myred.gameTsKey(gameId)
     gameTs = await myred.game.lrange(gameKey, 0, -1)
     gameMoves = await myred.game.lrange(myred.gameMoveKey(gameId), 0, -1)
+    mylog.debug(f"!!! temp2:")
+    await myred.getActiveOnlineGamesKeys(None)
     playerTurn = "white" if len(gameMoves) % 2 == 0 else "black"
     mylog.debug(f"!!!!!!! player Turn: {playerTurn}")
     mylog.debug(f"!!!!!!! gameTs: {gameTs}")
     if len(gameTs) == 0:
         return
+    mylog.debug(f"!!! temp3:")
+    await myred.getActiveOnlineGamesKeys(None)
     b = gameTs[-1]
     mylog.debug(f"!!!!!!! gameTs: {b}")
     times = b.decode().split("|")
@@ -63,12 +69,13 @@ async def processGameTs(gameId: int):
     except Exception as e:
         mylog.error(f"updateGameTs raised error: {e}")
     mylog.debug(f"!!! Game TS: {times}")
+    mylog.debug(f"!!! templast:")
+    await myred.getActiveOnlineGamesKeys(None)
 
 async def taskGamesTs():
     while True:
         mylog.debug("!!! outer loop")
         games = await myred.getActiveOnlineGamesKeys(None)
-        mylog.debug("got active online games keys")
         # TODO store every updateGameTs as a task and run it here before the fetching from redis loop
         # or maybe I should send the data inside the for loop and have every step inside the for loop be run inside and async task
         tasks = []
