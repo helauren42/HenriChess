@@ -27,17 +27,6 @@ async def encodeGameMoves(l: list[GameMove]):
         r.append(s)
     return r
 
-async def decodeGameTs(l: list[str | bytes]):
-    r: list[list[float]] = []
-    for i in range(len(l)):
-        s = l[i]
-        if isinstance(s, bytes):
-            s = s.decode()
-        assert isinstance(s, str)
-        stamps = [float(x) for x in s.split("-")]
-        r.append(stamps)
-    return r
-
 class GameMessage(TypedDict):
     username: str
     message: str

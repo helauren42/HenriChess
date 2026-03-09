@@ -1,20 +1,21 @@
 from abc import ABC
 import datetime
 from random import randint
-from typing import Optional
+import random
+from typing import Literal, Optional
 from click import Option
 import redis.asyncio as redis
 import asyncio
 import json
 
-from databases.game import Game, GameMap, GameMessage, GameMove, GameWatch, decodeGameMoves, decodeGameTs, gameMoveStr
+from databases.game import Game, GameMap, GameMessage, GameMove, GameWatch, decodeGameMoves, gameMoveStr
 from utils.const import MODES, Env, EXPIRY_TIME
 from utils.game import getWinnerName
 from utils.logger import mylog
 
 class ARedisGame(ABC):
     def __init__(self):
-        self.gamePool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=100)
+        self.gamePool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=100, socket_timeout=1)
         self.game = redis.Redis(connection_pool=self.gamePool)
 
     async def extendGameExpiry(self, gameId: int, mode: MODES, username: Optional[str]):
@@ -27,6 +28,7 @@ class ARedisGame(ABC):
         await self.game.expire(self.gameTsKey(gameId), EXPIRY_TIME)
         time = int(datetime.datetime.now().timestamp()) + EXPIRY_TIME
         if mode == "online":
+            mylog.debug(f"!!!!!! ADDING ZADD: {gameId}")
             await self.game.zadd("online_expiries", {str(gameId): str(time)})
 
     async def getActiveOnlineGamesKeys(self, username: bytes | None)->list[str]:
@@ -80,13 +82,9 @@ class ARedisGame(ABC):
         return r
 
     async def newGameId(self, mode: MODES, username: Optional[str])-> int:
-        mylog.debug("1")
         cursor, keys = await self.game.scan()
-        mylog.debug("2")
         newId = randint(21489392, 82489392)
-        mylog.debug("3")
         while self.gameKey(newId, mode, username) in keys:
-            mylog.debug("4")
             # TODO also check that it is not inside postgres as finished games get stored in there
             newId = randint(123774, 823678)
         return newId
@@ -170,17 +168,23 @@ class RedisGame(ARedisGame):
             mylog.debug(f"length of pos: {l}")
             mylog.debug(f"pos: {pos}")
             if l == 0:
-                await self.game.rpush(self.gameTsKey(gameId), "0-0-" + str(now))
+                await self.game.rpush(self.gameTsKey(gameId), "600|600|" + str(now))
             else:
-                data = pos[l-1]
-                assert isinstance(data, bytes)
-                times = data.decode().split("-")
-                i = 0 if l % 2 == 0 else 1
-                playerTime: float = float(times[i]) + (now - float(times[2]))
-                times[i] = str(playerTime)
-                await self.game.rpush(self.gameTsKey(gameId), times[0] + "-" + times[1] + "-" + str(now))
+                data: bytes = pos[l-1]
+                times = data.decode().split("|")
+                await self.game.rpush(self.gameTsKey(gameId), times[0] + "|" + times[1] + "|" + str(now))
         except Exception as e:
             mylog.error(f"error adding game timestamp: {e}")
+
+    async def updateLastTs(self, gameId: int, i: int, newTime: float):
+        """ Use i = 0 if ts to update is for white player else i = 1 for black player"""
+        assert i == 0 or i == 1
+        lastTs = await self.game.lrange(self.gameTsKey(gameId), 0, -1)
+        lastIndex = len(lastTs) -1
+        times: list[str] = lastTs[lastIndex].decode().split("|")
+        assert len(times) == 3
+        times[i] = str(newTime)
+        await self.game.lset(self.gameTsKey(gameId), lastIndex, f"{times[0]}|{times[1]}|{times[2]}")
 
     async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username: Optional[str]):
         mylog.debug(f"addGamePosition fen: {fen}")

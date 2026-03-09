@@ -1,4 +1,5 @@
 from dataclasses import asdict
+import datetime
 import random
 from typing import Literal
 import chess
@@ -86,27 +87,28 @@ class GameMan(AGameMan):
         assert game is not None
         await GameMan.sendGame(onlinePlayers[userId], "online", "new", gameId, game)
         await GameMan.sendGame(onlinePlayers[opponentId], "online", "new", gameId, game)
+        await myred.game.zadd("online_expiries", {str(gameId): str(datetime.datetime.now().timestamp())})
 
     @staticmethod
     async def newHotseatGame(username: str, userId: int)-> Game:
-        mylog.debug(f"new hotseat game: {username}, {userId}")
         id = await myred.newGameId("hotseat", username)
-        mylog.debug(f"new game id: {id}")
         game = Game(id, [chess.STARTING_FEN], [], [], None, None, "white", "black", userId, userId)
         await myred.addGame(game, "hotseat", username)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "hotseat", username)
+        await myred.extendGameExpiry(id, "hotseat", None)
         return game
 
     @staticmethod
     async def newOnlineGame(username1: str, username2: str, id1: int, id2: int)-> int:
-        color: bool = random.choice([True, False])
+        color: int = random.randint(1, 2)
         id = await myred.newGameId("online", None)
-        if color:
+        if color == 1:
             game = Game(id, [chess.STARTING_FEN], [], [], None, None, username1, username2, id1, id2)
         else:
             game = Game(id, [chess.STARTING_FEN], [], [], None, None, username2, username1, id2, id1)
         await myred.addGame(game, "online", None)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "online", None)
+        await myred.extendGameExpiry(id, "online", None)
         return id
 
     @staticmethod
@@ -225,7 +227,6 @@ class GameMan(AGameMan):
 
     @staticmethod
     async def sendTime(ws: WebSocket, gameId: int, whiteTime: float, blackTime: float):
-        mylog.debug(f"sending time")
         await ws.send_json({
             "type": "gameTs",
             "gameId": gameId,

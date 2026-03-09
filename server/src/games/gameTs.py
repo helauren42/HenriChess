@@ -7,18 +7,20 @@ from utils.const import onlinePlayers
 from games.manageGames import GameMan
 from databases.redis import myred
 
-async def updateGameTs(gameId: int, times: list[float], playerTurn: Literal["black", "white"]):
+async def updateGameTs(gameId: int, times: list[str], playerTurn: Literal["black", "white"]):
+    mylog.debug(f"!!!!!!!!!! 1: {times}")
     whiteTime = 600 - float(times[0])
     blackTime = 600 - float(times[1])
     now = datetime.datetime.now().timestamp()
-    mylog.debug("!!!!!!!!!! 1")
     mylog.debug(times)
     mylog.debug(now)
     timeSinceLastMove = now - float(times[2])
     if playerTurn == "white":
         whiteTime -= timeSinceLastMove
+        await myred.updateLastTs(gameId, 0, whiteTime)
     else:
         blackTime -= timeSinceLastMove
+        await myred.updateLastTs(gameId, 0, blackTime)
     mylog.debug(f"2")
     whiteId = await myred.game.hget(myred.gameKey(gameId, "online"), "whiteId")
     blackId = await myred.game.hget(myred.gameKey(gameId, "online"), "blackId")
@@ -29,7 +31,7 @@ async def updateGameTs(gameId: int, times: list[float], playerTurn: Literal["bla
     blackId = blackId.decode()
     mylog.debug(f"4: {onlinePlayers}")
     await GameMan.sendTime(onlinePlayers[int(whiteId)], gameId, whiteTime, blackTime)
-    await GameMan.sendTime(onlinePlayers[int(whiteId)], gameId, whiteTime, blackTime)
+    await GameMan.sendTime(onlinePlayers[int(blackId)], gameId, whiteTime, blackTime)
     mylog.debug(f"5")
     for viewerId in viewersIds:
         mylog.debug(f"6")
@@ -42,9 +44,14 @@ async def processGameTs(gameId: int):
     mylog.debug("!!! inner loop")
     gameKey = myred.gameTsKey(gameId)
     gameTs = await myred.game.lrange(gameKey, 0, -1)
-    playerTurn = "black" if len(gameTs) else "white"
-    times = gameTs[-1].decode().split("-")
-    mylog.debug("PRE")
+    playerTurn = "black" if len(gameTs) % 2 == 0 else "white"
+    mylog.debug(f"!!!!!!! player Turn: {playerTurn}")
+    mylog.debug(f"!!!!!!! gameTs: {gameTs}")
+    b = gameTs[-1]
+    mylog.debug(f"!!!!!!! gameTs: {b}")
+    times = b.decode().split("|")
+    mylog.debug(f"!!!!!!! gameTs: {times}")
+    mylog.debug(f"PRE: {times}")
     try:
         await updateGameTs(gameId, times, playerTurn)
     except Exception as e:
@@ -62,4 +69,4 @@ async def taskGamesTs():
         for gameId in games: # for every active online game we calculate the time left and send it to the active players and their viewers
             tasks.append(processGameTs(int(gameId)))
         await asyncio.gather(*tasks)
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(1)

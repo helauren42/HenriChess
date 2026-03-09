@@ -8,14 +8,24 @@ import { WsContext } from "../../Contexts/Ws.tsx"
 import { addWaitCursor } from "../../utils/utils.tsx"
 
 export const PlayerDisplay = ({ playerName, winner, time }: { playerName: string, winner: number | null, time: number }) => {
-  const minutes = Math.floor(time / 60)
-  const seconds = Math.ceil(time % 60)
+  let minutes = Math.floor(time / 60)
+  let seconds = Math.floor(time % 60)
+  const peanutsLeft = time - (minutes * 60 + seconds)
+  let deciseconds = Math.ceil(peanutsLeft * 10)
+  if (seconds == 10) {
+    minutes += 1
+    deciseconds = 0
+  }
+  if (deciseconds == 10) {
+    seconds += 1
+    deciseconds = 0
+  }
   return (
     <div className="ml-3 flex gap-5 items-center text-center">
       <h4>{playerName}</h4>
       {
         winner ? null :
-          < p > {minutes}:{seconds}</p>
+          < p > {minutes}:{seconds}:{deciseconds}</p>
       }
     </div >
   )
@@ -52,21 +62,9 @@ export const Game = () => {
 }
 
 export const GameAndPlayers = () => {
-  const { whiteUsername, blackUsername, playerColor, gameTs, winner } = useContext(GameContext)
+  const { whiteUsername, blackUsername, playerColor, whiteTime, blackTime, winner } = useContext(GameContext)
   const topName = playerColor == "b" ? whiteUsername : blackUsername
   const botName = topName == whiteUsername ? blackUsername : whiteUsername
-  const [whiteTime, setWhiteTime] = useState<number>(600)
-  const [blackTime, setBlackTime] = useState<number>(600)
-  useEffect(() => {
-    if (gameTs != undefined && gameTs != null && gameTs.length > 0) {
-      const lastTs = gameTs[gameTs.length - 1]
-      setWhiteTime(600 - lastTs[0])
-      setBlackTime(600 - lastTs[1])
-    }
-  }, [gameTs])
-  useEffect(() => {
-    console.log("!!!!!!!!!! GAME TS: ", gameTs)
-  }, [gameTs])
   return (
     <div className="game-players-wrapper">
       <div id="game-players">

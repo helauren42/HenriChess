@@ -219,8 +219,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     if (lastMessage && lastMessage.type)
       switch (lastMessage.type) {
         case "gameTs":
-          console.log("!!!!!!!: ", lastMessage.whiteTime)
-          console.log("!!!!!!!: ", lastMessage.blackTime)
           setWhiteTime(lastMessage.whiteTime)
           setBlackTime(lastMessage.blackTime)
           break
