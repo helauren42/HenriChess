@@ -171,14 +171,13 @@ class RedisGame(ARedisGame):
 
     async def updateLastTs(self, gameId: int, i: int, newTime: float, now: float):
         """ Use i = 0 if ts to update is for white player else i = 1 for black player"""
+        mylog.debug(f"!!!!! new time: {newTime}")
         assert i == 0 or i == 1
         lastTs = await self.game.lrange(self.gameTsKey(gameId), 0, -1)
         lastIndex = len(lastTs) -1
         times: list[str] = lastTs[lastIndex].decode().split("|")
-        mylog.debug(f"PREVIOUS TIMES: {times}")
         assert len(times) == 3
         times[i] = str(newTime)
-        mylog.debug(f"NEW TIMES: {times}")
         await self.game.lset(self.gameTsKey(gameId), lastIndex, f"{times[0]}|{times[1]}|{now}")
 
     async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username: Optional[str]):

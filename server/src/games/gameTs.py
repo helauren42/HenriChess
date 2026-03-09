@@ -15,12 +15,15 @@ async def updateGameTs(gameId: int, times: list[str], playerTurn: Literal["black
     mylog.debug(times)
     mylog.debug(now)
     timeSinceLastMove = now - float(times[2])
+    mylog.debug(f"timeSinceLastMove: {timeSinceLastMove}")
     if playerTurn == "white":
         whiteTime -= timeSinceLastMove
+        mylog.debug(f"!!!!! whiteTime: {whiteTime}")
         await myred.updateLastTs(gameId, 0, whiteTime, now)
     else:
         blackTime -= timeSinceLastMove
-        await myred.updateLastTs(gameId, 0, blackTime, now)
+        mylog.debug(f"!!!!! blackTime: {blackTime}")
+        await myred.updateLastTs(gameId, 1, blackTime, now)
     mylog.debug(f"2")
     whiteId = await myred.game.hget(myred.gameKey(gameId, "online"), "whiteId")
     blackId = await myred.game.hget(myred.gameKey(gameId, "online"), "blackId")
@@ -44,7 +47,8 @@ async def processGameTs(gameId: int):
     mylog.debug("!!! inner loop")
     gameKey = myred.gameTsKey(gameId)
     gameTs = await myred.game.lrange(gameKey, 0, -1)
-    playerTurn = "black" if len(gameTs) % 2 == 0 else "white"
+    gameMoves = await myred.game.lrange(myred.gameMoveKey(gameId), 0, -1)
+    playerTurn = "white" if len(gameMoves) % 2 == 0 else "black"
     mylog.debug(f"!!!!!!! player Turn: {playerTurn}")
     mylog.debug(f"!!!!!!! gameTs: {gameTs}")
     if len(gameTs) == 0:
