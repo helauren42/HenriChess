@@ -28,7 +28,6 @@ class ARedisGame(ABC):
         await self.game.expire(self.gameTsKey(gameId), EXPIRY_TIME)
         time = int(datetime.datetime.now().timestamp()) + EXPIRY_TIME
         if mode == "online":
-            mylog.debug(f"!!!!!! ADDING ZADD: {gameId}")
             await self.game.zadd("online_expiries", {str(gameId): str(time)})
 
     async def getActiveOnlineGamesKeys(self, username: bytes | None)->list[str]:
@@ -161,36 +160,31 @@ class RedisGame(ARedisGame):
 
     async def addGameTs(self, gameId: int):
         try:
-            mylog.debug(f"add Game Ts")
             now = datetime.datetime.now().timestamp()
             pos = await self.game.lrange(self.gameTsKey(gameId), 0, -1)
             l = len(pos)
-            mylog.debug(f"length of pos: {l}")
-            mylog.debug(f"pos: {pos}")
             if l == 0:
+                print("!!!!!!! new game ts")
                 await self.game.rpush(self.gameTsKey(gameId), "600|600|" + str(now))
-            else:
-                data: bytes = pos[l-1]
-                times = data.decode().split("|")
-                await self.game.rpush(self.gameTsKey(gameId), times[0] + "|" + times[1] + "|" + str(now))
         except Exception as e:
             mylog.error(f"error adding game timestamp: {e}")
 
-    async def updateLastTs(self, gameId: int, i: int, newTime: float):
+    async def updateLastTs(self, gameId: int, i: int, newTime: float, now: float):
         """ Use i = 0 if ts to update is for white player else i = 1 for black player"""
         assert i == 0 or i == 1
         lastTs = await self.game.lrange(self.gameTsKey(gameId), 0, -1)
         lastIndex = len(lastTs) -1
         times: list[str] = lastTs[lastIndex].decode().split("|")
+        mylog.debug(f"PREVIOUS TIMES: {times}")
         assert len(times) == 3
         times[i] = str(newTime)
-        await self.game.lset(self.gameTsKey(gameId), lastIndex, f"{times[0]}|{times[1]}|{times[2]}")
+        mylog.debug(f"NEW TIMES: {times}")
+        await self.game.lset(self.gameTsKey(gameId), lastIndex, f"{times[0]}|{times[1]}|{now}")
 
     async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username: Optional[str]):
         mylog.debug(f"addGamePosition fen: {fen}")
         try:
             await self.game.rpush(self.gamePositionKey(gameId), fen)
-            await self.addGameTs(gameId)
             await self.extendGameExpiry(gameId, mode, username)
         except Exception as e:
             mylog.error(f"error adding game position {e}")

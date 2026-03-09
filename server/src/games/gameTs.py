@@ -9,18 +9,18 @@ from databases.redis import myred
 
 async def updateGameTs(gameId: int, times: list[str], playerTurn: Literal["black", "white"]):
     mylog.debug(f"!!!!!!!!!! 1: {times}")
-    whiteTime = 600 - float(times[0])
-    blackTime = 600 - float(times[1])
+    whiteTime = float(times[0])
+    blackTime = float(times[1])
     now = datetime.datetime.now().timestamp()
     mylog.debug(times)
     mylog.debug(now)
     timeSinceLastMove = now - float(times[2])
     if playerTurn == "white":
         whiteTime -= timeSinceLastMove
-        await myred.updateLastTs(gameId, 0, whiteTime)
+        await myred.updateLastTs(gameId, 0, whiteTime, now)
     else:
         blackTime -= timeSinceLastMove
-        await myred.updateLastTs(gameId, 0, blackTime)
+        await myred.updateLastTs(gameId, 0, blackTime, now)
     mylog.debug(f"2")
     whiteId = await myred.game.hget(myred.gameKey(gameId, "online"), "whiteId")
     blackId = await myred.game.hget(myred.gameKey(gameId, "online"), "blackId")
@@ -47,6 +47,8 @@ async def processGameTs(gameId: int):
     playerTurn = "black" if len(gameTs) % 2 == 0 else "white"
     mylog.debug(f"!!!!!!! player Turn: {playerTurn}")
     mylog.debug(f"!!!!!!! gameTs: {gameTs}")
+    if len(gameTs) == 0:
+        return
     b = gameTs[-1]
     mylog.debug(f"!!!!!!! gameTs: {b}")
     times = b.decode().split("|")

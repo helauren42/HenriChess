@@ -108,7 +108,7 @@ class GameMan(AGameMan):
             game = Game(id, [chess.STARTING_FEN], [], [], None, None, username2, username1, id2, id1)
         await myred.addGame(game, "online", None)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "online", None)
-        await myred.extendGameExpiry(id, "online", None)
+        await myred.addGameTs(id)
         return id
 
     @staticmethod
