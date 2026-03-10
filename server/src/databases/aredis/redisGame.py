@@ -34,8 +34,6 @@ class ARedisGame(ABC):
         ret: list[str] = []
         for b in z:
             gameId = int(b[7:])
-            mylog.debug(f"gameId: {gameId}")
-            # if len(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)) == 0:
             whiteUsername = await self.game.hget(self.gameKey(gameId, "online"), "whiteUsername")
             blackUsername = await self.game.hget(self.gameKey(gameId, "online"), "blackUsername")
             if username == None or (username != whiteUsername and username != blackUsername):
@@ -162,14 +160,12 @@ class RedisGame(ARedisGame):
             pos = await self.game.lrange(self.gameTsKey(gameId), 0, -1)
             l = len(pos)
             if l == 0:
-                print("!!!!!!! new game ts")
                 await self.game.rpush(self.gameTsKey(gameId), "600|600|" + str(now))
         except Exception as e:
             mylog.error(f"error adding game timestamp: {e}")
 
     async def updateLastTs(self, gameId: int, i: int, newTime: float, now: float):
         """ Use i = 0 if ts to update is for white player else i = 1 for black player"""
-        mylog.debug(f"!!!!! new time: {newTime}")
         assert i == 0 or i == 1
         lastTs = await self.game.lrange(self.gameTsKey(gameId), 0, -1)
         lastIndex = len(lastTs) -1

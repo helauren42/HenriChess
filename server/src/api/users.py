@@ -9,7 +9,6 @@ accountRouter = APIRouter(prefix="/user")
 
 @accountRouter.get("/{username}")
 async def getUserPageData(clireq: Request, username: str, userId: int = Depends(getUserIdReq)):
-    print("userId: ", userId)
     basicUser = await postgres.publicUserData(userId)
     return miniResp(200, "success", basicUser.myjson())
 

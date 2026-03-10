@@ -232,4 +232,3 @@ class GameMan(AGameMan):
             "whiteTime": whiteTime,
             "blackTime": blackTime
         })
-        mylog.debug(f"sent time")
