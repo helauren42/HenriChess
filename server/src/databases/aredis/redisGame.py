@@ -27,22 +27,19 @@ class ARedisGame(ABC):
         await self.game.expire(self.gameMessageKey(gameId), EXPIRY_TIME)
         await self.game.expire(self.gameTsKey(gameId), EXPIRY_TIME)
         time = int(datetime.datetime.now().timestamp()) + EXPIRY_TIME
-        if mode == "online":
-            await self.game.zadd("online_expiries", {str(gameId): str(time)})
 
     async def getActiveOnlineGamesKeys(self, username: bytes | None)->list[str]:
-        z = await self.game.zrevrange("online_expiries", 0, 15, withscores=True)
+        z = await self.game.keys("online:*")
         mylog.debug(f"getActiveOnlineGamesKeys KEYS: {z}")
         ret: list[str] = []
-        for tup in z:
-            k = tup[0]
-            gameId = k.decode()
+        for b in z:
+            gameId = int(b[7:])
+            mylog.debug(f"gameId: {gameId}")
             # if len(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)) == 0:
-            #     await self.game.zrem("online_expiries", str(gameId))
             whiteUsername = await self.game.hget(self.gameKey(gameId, "online"), "whiteUsername")
             blackUsername = await self.game.hget(self.gameKey(gameId, "online"), "blackUsername")
             if username == None or (username != whiteUsername and username != blackUsername):
-                ret.append(gameId)
+                ret.append(str(gameId))
         return ret
 
     def gameKey(self, gameId: int, mode: MODES, username: Optional[str] = None):

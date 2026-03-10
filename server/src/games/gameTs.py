@@ -45,20 +45,14 @@ async def updateGameTs(gameId: int, times: list[str], playerTurn: Literal["black
 
 async def processGameTs(gameId: int):
     mylog.debug("!!! inner loop")
-    mylog.debug(f"!!! temp1:")
-    await myred.getActiveOnlineGamesKeys(None)
     gameKey = myred.gameTsKey(gameId)
     gameTs = await myred.game.lrange(gameKey, 0, -1)
     gameMoves = await myred.game.lrange(myred.gameMoveKey(gameId), 0, -1)
-    mylog.debug(f"!!! temp2:")
-    await myred.getActiveOnlineGamesKeys(None)
     playerTurn = "white" if len(gameMoves) % 2 == 0 else "black"
     mylog.debug(f"!!!!!!! player Turn: {playerTurn}")
     mylog.debug(f"!!!!!!! gameTs: {gameTs}")
     if len(gameTs) == 0:
         return
-    mylog.debug(f"!!! temp3:")
-    await myred.getActiveOnlineGamesKeys(None)
     b = gameTs[-1]
     mylog.debug(f"!!!!!!! gameTs: {b}")
     times = b.decode().split("|")

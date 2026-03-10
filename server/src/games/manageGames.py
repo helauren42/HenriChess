@@ -87,7 +87,6 @@ class GameMan(AGameMan):
         assert game is not None
         await GameMan.sendGame(onlinePlayers[userId], "online", "new", gameId, game)
         await GameMan.sendGame(onlinePlayers[opponentId], "online", "new", gameId, game)
-        await myred.game.zadd("online_expiries", {str(gameId): str(datetime.datetime.now().timestamp())})
 
     @staticmethod
     async def newHotseatGame(username: str, userId: int)-> Game:
