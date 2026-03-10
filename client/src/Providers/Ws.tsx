@@ -6,6 +6,7 @@ import { UserContext } from "../Contexts/User";
 export const WsProvider = ({ children }: { children: ReactNode }) => {
   const [ws, setWs] = useState<WebSocket | null>(null)
   const [lastMessage, setLastMessage] = useState<Record<string, any> | null>(null)
+  const [timeMessage, setTimeMessage] = useState<Record<string, any> | null>(null)
   const { user } = useContext(UserContext)
   const makeSocket = () => {
     const sock = new WebSocket(SERVER_URL_WS)
@@ -37,8 +38,11 @@ export const WsProvider = ({ children }: { children: ReactNode }) => {
       if (data.type != "gameTs") {
         console.log('Message type from server: ', data.type)
         console.log('Message from server: ', data)
+        setLastMessage(data)
       }
-      setLastMessage(data)
+      else {
+        setTimeMessage(data)
+      }
     }
   };
   useEffect(() => {
@@ -50,7 +54,7 @@ export const WsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user, ws])
   return (
-    <WsContext.Provider value={{ ws, setWs, lastMessage, setLastMessage }}>
+    <WsContext.Provider value={{ ws, setWs, lastMessage, setLastMessage, timeMessage, setTimeMessage }}>
       {children}
     </WsContext.Provider>
   )

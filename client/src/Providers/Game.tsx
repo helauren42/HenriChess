@@ -41,7 +41,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     file: "",
   })
   const [gameExpired, setGameExpired] = useState<boolean>(false)
-  const { ws, lastMessage } = useContext(WsContext)
+  const { ws, lastMessage, timeMessage } = useContext(WsContext)
   const wsRef = useRef(ws)
   const nav = useNavigate()
   const getFileNum = (file: string) => {
@@ -216,14 +216,16 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     console.log("new gameId value: ", gameId)
   }, [gameId])
   useEffect(() => {
+    if (!timeMessage)
+      return
+    setWhiteTime(timeMessage.whiteTime)
+    setBlackTime(timeMessage.blackTime)
+  }, [timeMessage])
+  useEffect(() => {
     if (lastMessage && lastMessage.type)
       switch (lastMessage.type) {
-        case "gameTs":
-          setWhiteTime(lastMessage.whiteTime)
-          setBlackTime(lastMessage.blackTime)
-          break
-        // setGameTs()
         case "game":
+          console.log("received game lastMessage inside Game.tsx: ", lastMessage.type)
           parseGame(lastMessage as DataGame)
           removeWaitCursor()
           break

@@ -69,7 +69,6 @@ class ARedisGame(ABC):
         return None
 
     async def decodeBList(self, l: list[bytes]):
-        mylog.debug("decodeList")
         r: list[str] = []
         for i in range(len(l)):
             r.append(l[i].decode())
@@ -211,16 +210,13 @@ class RedisGame(ARedisGame):
             raise ValueError("misuse of getCurrGameState() if mode is hotseat, the username must be defined")
         try:
             map: GameMap | None = await self.getGameMap(gameId, mode, username)
-            mylog.debug(f"game map: {map}")
             if map is None:
                 return None
             winner = map["winner"]
             if winner == "-1":
                 winner = None
-            mylog.debug(f"winner: {winner}")
             # TODO add game messages fetching
             messages = await self.getMessages(gameId)
-            mylog.debug(f"Got curr game state")
             return Game(gameId,
                 await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
                 await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),

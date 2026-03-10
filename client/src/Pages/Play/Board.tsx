@@ -8,7 +8,6 @@ export const Square = memo(({ piece, rank, file, viewer = false }: { piece: stri
   const cursorPointer = playerColor == playerTurn
   const fileName = () => {
     let path = "/images/"
-    console.log("playerColor: ", playerColor)
     switch (piece) {
       case "P":
         path += "whites/pawn"

@@ -37,7 +37,6 @@ async def updateGameTs(gameId: int, times: list[str], playerTurn: Literal["black
         # mylog.debug(f"Resigning white")
         await GameMan.resignGame(onlinePlayers[whiteId], whiteId, "online", game, await postgres.fetchUsername(whiteId))
     if blackTime <= 0:
-        mylog.debug(f"Resigning black")
         await GameMan.resignGame(onlinePlayers[blackId], blackId, "online", game, await postgres.fetchUsername(blackId))
 
 async def processGameTs(gameId: int):
@@ -52,8 +51,8 @@ async def processGameTs(gameId: int):
     try:
         await updateGameTs(gameId, times, playerTurn)
     except Exception as e:
-        # pass
-        mylog.error(f"updateGameTs raised error: {e}")
+        # mylog.error(f"updateGameTs raised error: {e}")
+        pass
 
 async def taskGamesTs():
     while True:
