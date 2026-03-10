@@ -2,6 +2,7 @@ import asyncio
 import datetime
 from typing import Literal
 
+from databases.postgres import postgres
 from utils.logger import mylog
 from utils.const import onlinePlayers
 from games.manageGames import GameMan
@@ -11,8 +12,6 @@ async def updateGameTs(gameId: int, times: list[str], playerTurn: Literal["black
     whiteTime = float(times[0])
     blackTime = float(times[1])
     now = datetime.datetime.now().timestamp()
-    mylog.debug(times)
-    mylog.debug(now)
     timeSinceLastMove = now - float(times[2])
     if playerTurn == "white":
         whiteTime -= timeSinceLastMove
@@ -24,14 +23,22 @@ async def updateGameTs(gameId: int, times: list[str], playerTurn: Literal["black
     blackId = await myred.game.hget(myred.gameKey(gameId, "online"), "blackId")
     viewersIds = await myred.game.lrange(myred.gameViewersKeys(gameId), 0, -1)
     assert isinstance(whiteId, bytes) and isinstance(blackId, bytes) and isinstance(viewersIds, list)
-    whiteId = whiteId.decode()
-    blackId = blackId.decode()
-    await GameMan.sendTime(onlinePlayers[int(whiteId)], gameId, whiteTime, blackTime)
-    await GameMan.sendTime(onlinePlayers[int(blackId)], gameId, whiteTime, blackTime)
+    whiteId: int = int(whiteId.decode())
+    blackId: int = int(blackId.decode())
+    await GameMan.sendTime(onlinePlayers[whiteId], gameId, whiteTime, blackTime)
+    await GameMan.sendTime(onlinePlayers[blackId], gameId, whiteTime, blackTime)
     for viewerId in viewersIds:
         assert isinstance(viewerId, bytes)
         viewerId = viewerId.decode()
         await GameMan.sendTime(onlinePlayers[int(viewerId)], gameId, whiteTime, blackTime)
+    game = await myred.getCurrGameState(gameId, "online")
+    assert game is not None
+    if whiteTime <= 0:
+        # mylog.debug(f"Resigning white")
+        await GameMan.resignGame(onlinePlayers[whiteId], whiteId, "online", game, await postgres.fetchUsername(whiteId))
+    if blackTime <= 0:
+        mylog.debug(f"Resigning black")
+        await GameMan.resignGame(onlinePlayers[blackId], blackId, "online", game, await postgres.fetchUsername(blackId))
 
 async def processGameTs(gameId: int):
     gameKey = myred.gameTsKey(gameId)
@@ -45,8 +52,8 @@ async def processGameTs(gameId: int):
     try:
         await updateGameTs(gameId, times, playerTurn)
     except Exception as e:
+        # pass
         mylog.error(f"updateGameTs raised error: {e}")
-    mylog.debug(f"!!! Game TS: {times}")
 
 async def taskGamesTs():
     while True:

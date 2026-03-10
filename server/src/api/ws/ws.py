@@ -92,7 +92,7 @@ async def websocketEndpoint(ws: WebSocket):
                         continue
                     game = await GameMan.resignGame(ws, userId, msg["mode"], game, username)
                     mylog.debug(f"should be a resigned game: {game.winner}\n{game}")
-                    await GameMan.updateGameAll(ws, userId, msg["mode"], game, game.id)
+                    # await GameMan.updateGameAll(ws, userId, msg["mode"], game, game.id)
                 case "startMatchmaking":
                     await matchmakePoolAdd(ws, userId)
                     mylog.debug("startMatchmaking")

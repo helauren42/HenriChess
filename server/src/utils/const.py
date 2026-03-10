@@ -8,7 +8,7 @@ from fastapi import WebSocket
 from utils.logger import mylog
 
 EXPIRY_TIME = 1200
-GAME_TIME = 600
+GAME_TIME = "10"
 
 matchmakePool: list[int] = []
 onlinePlayers: dict[int, WebSocket] = {} # userId, WebSocket

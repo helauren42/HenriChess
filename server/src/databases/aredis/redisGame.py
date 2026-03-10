@@ -9,7 +9,7 @@ import asyncio
 import json
 
 from databases.game import Game, GameMap, GameMessage, GameMove, GameWatch, decodeGameMoves, gameMoveStr
-from utils.const import MODES, Env, EXPIRY_TIME
+from utils.const import GAME_TIME, MODES, Env, EXPIRY_TIME
 from utils.game import getWinnerName
 from utils.logger import mylog
 
@@ -30,7 +30,7 @@ class ARedisGame(ABC):
 
     async def getActiveOnlineGamesKeys(self, username: bytes | None)->list[str]:
         z = await self.game.keys("online:*")
-        mylog.debug(f"getActiveOnlineGamesKeys KEYS: {z}")
+        # mylog.debug(f"getActiveOnlineGamesKeys KEYS: {z}")
         ret: list[str] = []
         for b in z:
             gameId = int(b[7:])
@@ -129,7 +129,7 @@ class RedisGame(ARedisGame):
 
     async def removeGame(self, gameId: int, mode: MODES, username: Optional[str]):
         async with self.lockAddGame:
-            mylog.debug(f"!!!!!!!!REMOVE GAME CALLED")
+            mylog.debug(f"REMOVING GAME: {gameId}")
             gameKey = self.gameKey(gameId, mode, username)
             await self.game.delete(self.gameMoveKey(gameId), self.gamePositionKey(gameId), gameKey, self.gameViewersKeys(gameId), self.gameMessageKey(gameId), self.gameTsKey(gameId))
 
@@ -160,7 +160,7 @@ class RedisGame(ARedisGame):
             pos = await self.game.lrange(self.gameTsKey(gameId), 0, -1)
             l = len(pos)
             if l == 0:
-                await self.game.rpush(self.gameTsKey(gameId), "600|600|" + str(now))
+                await self.game.rpush(self.gameTsKey(gameId), f"{GAME_TIME}|{GAME_TIME}|" + str(now))
         except Exception as e:
             mylog.error(f"error adding game timestamp: {e}")
 
@@ -220,6 +220,7 @@ class RedisGame(ARedisGame):
             mylog.debug(f"winner: {winner}")
             # TODO add game messages fetching
             messages = await self.getMessages(gameId)
+            mylog.debug(f"Got curr game state")
             return Game(gameId,
                 await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
                 await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
