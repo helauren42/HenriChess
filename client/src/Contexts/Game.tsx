@@ -26,6 +26,7 @@ export interface GameUpdateFace {
   id: number
   gameFens: string[]
   gameMoves: GameMoveFace[]
+  gameTs: number[][]
   winner: number | null
   winnerName: string | null
   whiteUsername: string
@@ -71,6 +72,10 @@ export interface GameFace {
   setFenIndex: Dispatch<SetStateAction<number>>
   gameMoves: GameMoveFace[]
   setGameMoves: Dispatch<SetStateAction<GameMoveFace[]>>
+  whiteTime: number
+  setWhiteTime: Dispatch<SetStateAction<number>>
+  blackTime: number
+  setBlackTime: Dispatch<SetStateAction<number>>
   getGameUpdate: (tempMode: "online" | "hotseat", tempId: number | null) => void
   // messages
   messages: GameMessageFace[]
@@ -123,6 +128,10 @@ export const GameContext = createContext<GameFace>({
   setFenIndex: () => console.error("used outside of context"),
   gameMoves: [],
   setGameMoves: () => console.error("used outside of context"),
+  whiteTime: 600,
+  setWhiteTime: () => console.error("used outside of context"),
+  blackTime: 600,
+  setBlackTime: () => console.error("used outside of context"),
   getGameUpdate: (tempMode: "online" | "hotseat", tempId: number | null) => console.error("used outside of context"),
   // messages
   messages: [],

@@ -1,19 +1,21 @@
 from abc import ABC
 import datetime
 from random import randint
-from typing import Optional
+import random
+from typing import Literal, Optional
+from click import Option
 import redis.asyncio as redis
 import asyncio
 import json
 
-from databases.game import Game, GameMap, GameMessage, GameMove, GameWatch, decodeGameMoves, decodeGameTs, gameMoveStr
-from utils.const import MODES, Env, EXPIRY_TIME
+from databases.game import Game, GameMap, GameMessage, GameMove, GameWatch, decodeGameMoves, gameMoveStr
+from utils.const import GAME_TIME, MODES, Env, EXPIRY_TIME
 from utils.game import getWinnerName
 from utils.logger import mylog
 
 class ARedisGame(ABC):
     def __init__(self):
-        self.gamePool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=20)
+        self.gamePool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=100, socket_timeout=1)
         self.game = redis.Redis(connection_pool=self.gamePool)
 
     async def extendGameExpiry(self, gameId: int, mode: MODES, username: Optional[str]):
@@ -25,22 +27,17 @@ class ARedisGame(ABC):
         await self.game.expire(self.gameMessageKey(gameId), EXPIRY_TIME)
         await self.game.expire(self.gameTsKey(gameId), EXPIRY_TIME)
         time = int(datetime.datetime.now().timestamp()) + EXPIRY_TIME
-        if mode == "online":
-            await self.game.zadd("online_expiries", {str(gameId): str(time)})
 
-    async def getActiveOnlineGamesKeys(self, username: bytes)->list[str]:
-        keys = await self.game.zrevrange("online_expiries", 0, 15)
-        mylog.debug(f"getActiveOnlineGamesKeys KEYS: {keys}")
+    async def getActiveOnlineGamesKeys(self, username: bytes | None)->list[str]:
+        z = await self.game.keys("online:*")
+        # mylog.debug(f"getActiveOnlineGamesKeys KEYS: {z}")
         ret: list[str] = []
-        for k in keys:
-            key = k.decode()
-            whiteUsername = await self.game.hget(self.gameKey(key, "online"), "whiteUsername")
-            blackUsername = await self.game.hget(self.gameKey(key, "online"), "blackUsername")
-            mylog.debug(f"whiteUsername: {whiteUsername}")
-            mylog.debug(f"blackUsername: {blackUsername}")
-            if username != whiteUsername and username != blackUsername:
-                ret.append(key)
-        mylog.debug(ret)
+        for b in z:
+            gameId = int(b[7:])
+            whiteUsername = await self.game.hget(self.gameKey(gameId, "online"), "whiteUsername")
+            blackUsername = await self.game.hget(self.gameKey(gameId, "online"), "blackUsername")
+            if username == None or (username != whiteUsername and username != blackUsername):
+                ret.append(str(gameId))
         return ret
 
     def gameKey(self, gameId: int, mode: MODES, username: Optional[str] = None):
@@ -72,20 +69,15 @@ class ARedisGame(ABC):
         return None
 
     async def decodeBList(self, l: list[bytes]):
-        mylog.debug("decodeList")
         r: list[str] = []
         for i in range(len(l)):
             r.append(l[i].decode())
         return r
 
     async def newGameId(self, mode: MODES, username: Optional[str])-> int:
-        mylog.debug("1")
         cursor, keys = await self.game.scan()
-        mylog.debug("2")
         newId = randint(21489392, 82489392)
-        mylog.debug("3")
         while self.gameKey(newId, mode, username) in keys:
-            mylog.debug("4")
             # TODO also check that it is not inside postgres as finished games get stored in there
             newId = randint(123774, 823678)
         return newId
@@ -136,8 +128,9 @@ class RedisGame(ARedisGame):
 
     async def removeGame(self, gameId: int, mode: MODES, username: Optional[str]):
         async with self.lockAddGame:
+            mylog.debug(f"REMOVING GAME: {gameId}")
             gameKey = self.gameKey(gameId, mode, username)
-            await self.game.delete(self.gameMoveKey(gameId), self.gamePositionKey(gameId), gameKey)
+            await self.game.delete(self.gameMoveKey(gameId), self.gamePositionKey(gameId), gameKey, self.gameViewersKeys(gameId), self.gameMessageKey(gameId), self.gameTsKey(gameId))
 
     async def addGame(self, game: Game, mode: MODES, username: Optional[str]):
         if mode == "hotseat" and username is None:
@@ -161,26 +154,29 @@ class RedisGame(ARedisGame):
             mylog.error(f"error adding game move {e}")
 
     async def addGameTs(self, gameId: int):
-        now = datetime.datetime.now().timestamp()
-        pos = await self.game.lrange(self.gamePositionKey(gameId), 0, -1)
-        l = len(pos)
-        assert l >= 1
-        if l == 1:
-            await self.game.rpush(self.gameTsKey(gameId), "0-0-" + str(now))
-        else:
-            data = pos[l-1]
-            assert isinstance(data, str)
-            times = data.split("-")
-            i = 0 if l % 2 == 0 else 1
-            playerTime: float = float(times[i]) + (now - float(times[2]))
-            times[i] = str(playerTime)
-            await self.game.rpush(self.gameTsKey(gameId), times[0] + "-" + times[1] + "-" + str(now))
+        try:
+            now = datetime.datetime.now().timestamp()
+            pos = await self.game.lrange(self.gameTsKey(gameId), 0, -1)
+            l = len(pos)
+            if l == 0:
+                await self.game.rpush(self.gameTsKey(gameId), f"{GAME_TIME}|{GAME_TIME}|" + str(now))
+        except Exception as e:
+            mylog.error(f"error adding game timestamp: {e}")
 
-    async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username: str):
+    async def updateLastTs(self, gameId: int, i: int, newTime: float, now: float):
+        """ Use i = 0 if ts to update is for white player else i = 1 for black player"""
+        assert i == 0 or i == 1
+        lastTs = await self.game.lrange(self.gameTsKey(gameId), 0, -1)
+        lastIndex = len(lastTs) -1
+        times: list[str] = lastTs[lastIndex].decode().split("|")
+        assert len(times) == 3
+        times[i] = str(newTime)
+        await self.game.lset(self.gameTsKey(gameId), lastIndex, f"{times[0]}|{times[1]}|{now}")
+
+    async def addGamePosition(self, fen: str, gameId: int, mode: MODES, username: Optional[str]):
         mylog.debug(f"addGamePosition fen: {fen}")
         try:
             await self.game.rpush(self.gamePositionKey(gameId), fen)
-            await self.addGameTs(gameId)
             await self.extendGameExpiry(gameId, mode, username)
         except Exception as e:
             mylog.error(f"error adding game position {e}")
@@ -214,20 +210,17 @@ class RedisGame(ARedisGame):
             raise ValueError("misuse of getCurrGameState() if mode is hotseat, the username must be defined")
         try:
             map: GameMap | None = await self.getGameMap(gameId, mode, username)
-            mylog.debug(f"game map: {map}")
             if map is None:
                 return None
             winner = map["winner"]
             if winner == "-1":
                 winner = None
-            mylog.debug(f"winner: {winner}")
             # TODO add game messages fetching
             messages = await self.getMessages(gameId)
             return Game(gameId,
                 await self.decodeBList(await self.game.lrange(self.gamePositionKey(gameId), 0, -1)),
                 await decodeGameMoves(await self.game.lrange(self.gameMoveKey(gameId), 0, -1)),
                 messages,
-                await decodeGameTs(await self.game.lrange(self.gameTsKey(gameId), 0, -1)),
                 winner,
                 await getWinnerName(None, map),
                 map["whiteUsername"],
@@ -239,13 +232,6 @@ class RedisGame(ARedisGame):
             )
         except Exception as e:
             mylog.error(f"failed to retrieve curr game state {e}")
-
-    async def updateTime(self, gameId: int, mode: MODES, username: Optional[str], time: int):
-        try:
-            playerTurn = await self.getPlayerTurn(gameId, True)
-            await self.game.hset(self.gameKey(gameId, mode, username), playerTurn+"Time", str(time))
-        except Exception as e:
-            mylog.debug(f"Redis failed to update time: {e}")
 
     async def getGameWatch(self, gameId: int):
         try:

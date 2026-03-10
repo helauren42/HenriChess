@@ -1,4 +1,5 @@
 from dataclasses import asdict
+import datetime
 import random
 from typing import Literal
 import chess
@@ -89,37 +90,44 @@ class GameMan(AGameMan):
 
     @staticmethod
     async def newHotseatGame(username: str, userId: int)-> Game:
-        mylog.debug(f"new hotseat game: {username}, {userId}")
         id = await myred.newGameId("hotseat", username)
-        mylog.debug(f"new game id: {id}")
-        game = Game(id, [chess.STARTING_FEN], [], [], [], None, None, "white", "black", userId, userId)
+        game = Game(id, [chess.STARTING_FEN], [], [], None, None, "white", "black", userId, userId)
         await myred.addGame(game, "hotseat", username)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "hotseat", username)
+        await myred.extendGameExpiry(id, "hotseat", None)
         return game
 
     @staticmethod
     async def newOnlineGame(username1: str, username2: str, id1: int, id2: int)-> int:
-        color: bool = random.choice([True, False])
+        color: int = random.randint(1, 2)
         id = await myred.newGameId("online", None)
-        if color:
-            game = Game(id, [chess.STARTING_FEN], [], [], [], None, None, username1, username2, id1, id2)
+        if color == 1:
+            game = Game(id, [chess.STARTING_FEN], [], [], None, None, username1, username2, id1, id2)
         else:
-            game = Game(id, [chess.STARTING_FEN], [], [], [], None, None, username2, username1, id2, id1)
+            game = Game(id, [chess.STARTING_FEN], [], [], None, None, username2, username1, id2, id1)
         await myred.addGame(game, "online", None)
         await myred.addGamePosition(chess.STARTING_FEN, game.id, "online", None)
+        await myred.addGameTs(id)
         return id
 
     @staticmethod
     async def resignGame(ws: WebSocket, userId: int, mode: MODES, game: Game, username: str):
+        mylog.debug(f"here0")
         if mode == "hotseat":
             resignerColor = "w" if len(game.gameMoves) % 2 == 0 else "b"
         else:
             resignerColor = "b" if userId == game.blackId else "w"
+        mylog.debug(f"here0.5")
         winner: int = game.blackId if resignerColor == "w" else game.whiteId
         game.winner = winner
         game.winnerName = game.blackUsername if resignerColor == "w" else game.whiteUsername
+        mylog.debug(f"here1")
         await postgres.storeGameResult(mode, game)
+        mylog.debug(f"here2")
         await myred.removeGame(game.id, mode, username)
+        mylog.debug(f"here3")
+        await GameMan.updateGameAll(ws, userId, mode, game, game.id)
+        mylog.debug(f"here4")
         return game
 
     @staticmethod
@@ -222,3 +230,12 @@ class GameMan(AGameMan):
             await GameMan.sendError(ws, "a servor error occured: failed to find game data")
             return None
         return game
+
+    @staticmethod
+    async def sendTime(ws: WebSocket, gameId: int, whiteTime: float, blackTime: float):
+        await ws.send_json({
+            "type": "gameTs",
+            "gameId": gameId,
+            "whiteTime": whiteTime,
+            "blackTime": blackTime
+        })

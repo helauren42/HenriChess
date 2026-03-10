@@ -8,7 +8,7 @@ from databases.redis import myred
 from utils.api import getUserId
 from utils.const import matchmakePool, onlinePlayers
 from utils.logger import mylog
-from manageGames.manageGames import GameMan
+from games.manageGames import GameMan
 
 wsRouter = APIRouter(prefix="/ws")
 
@@ -92,7 +92,7 @@ async def websocketEndpoint(ws: WebSocket):
                         continue
                     game = await GameMan.resignGame(ws, userId, msg["mode"], game, username)
                     mylog.debug(f"should be a resigned game: {game.winner}\n{game}")
-                    await GameMan.updateGameAll(ws, userId, msg["mode"], game, game.id)
+                    # await GameMan.updateGameAll(ws, userId, msg["mode"], game, game.id)
                 case "startMatchmaking":
                     await matchmakePoolAdd(ws, userId)
                     mylog.debug("startMatchmaking")
