@@ -13,3 +13,4 @@ export const trimUsername = (username: string) => {
     return username
   return username.substring(0, 11) + "."
 }
+

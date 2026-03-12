@@ -3,7 +3,6 @@ import datetime
 from typing import Literal
 
 from databases.postgres import postgres
-from utils.logger import mylog
 from utils.const import onlinePlayers
 from games.manageGames import GameMan
 from databases.redis import myred

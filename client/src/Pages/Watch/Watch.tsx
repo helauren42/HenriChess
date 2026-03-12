@@ -29,7 +29,6 @@ export const WatchBoard = ({ fen, index }: { fen: string, index: number }) => {
   }
   const navToGame = () => {
     nav(`/game/online/${index}`)
-    // location.reload()
   }
   return (
     <div className="mini-board" key={`mini-board-${index}`} onClick={() => navToGame()} >
@@ -78,7 +77,6 @@ export const WatchPage = () => {
   useEffect(() => {
     ws?.send(JSON.stringify({ type: "getActiveGames" }))
     const id = setInterval(() => {
-      addWaitCursor()
       console.log("WatchPage loop")
       ws?.send(JSON.stringify({ type: "getActiveGames" }))
     }, 5000)
@@ -89,7 +87,6 @@ export const WatchPage = () => {
       switch (lastMessage.type) {
         case "activeOnlineGames":
           setGames(lastMessage.games)
-          removeWaitCursor()
           break
       }
     }
@@ -99,9 +96,6 @@ export const WatchPage = () => {
       openAuth("unauthorized")
     }
   }, [user.username])
-  useEffect(() => {
-    addWaitCursor()
-  }, [])
   useEffect(() => {
     if (games == null) {
       const interval = setInterval(() => {
