@@ -12,7 +12,7 @@ jobs:
     environment: chess.env
     steps:
       - uses: actions/checkout@v4
-      - name: Run make
+      - name: Run Make
         run: |
           echo "${{ secrets.ENV }}" >> .env
           mkdir -p secrets
@@ -21,3 +21,10 @@ jobs:
           -subj "/C=US/ST=CA/L=SF/O=MyOrg/OU=Dev/CN=example.com/emailAddress=admin@example.com"
           make deploy
           python3 ./tests/startup.py
+      - name: Update Server Code
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}"
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@188.68.57.140 "cd ~/Projects/HenriChess/ && git fetch && git reset --hard origin/main"
