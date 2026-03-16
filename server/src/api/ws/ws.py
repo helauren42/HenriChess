@@ -34,11 +34,8 @@ async def findOpponent(userId: int)-> int:
 @wsRouter.websocket("")
 async def websocketEndpoint(ws: WebSocket):
     try:
-        mylog.debug(f"1")
         userId = await getUserId(ws.cookies)
-        mylog.debug(f"userId: {userId}")
         username = await postgres.fetchUsername(userId)
-        mylog.debug(f"username: {username}")
         assert username is not None
     except Exception as e:
         await asyncio.sleep(3)
@@ -114,6 +111,11 @@ async def websocketEndpoint(ws: WebSocket):
                     mylog.debug("getActiveGames")
                     games: list[GameWatch] = await GameMan.getActiveOnlineGames(username)
                     await ws.send_json({"type": "activeOnlineGames", "games": games})
+                # SOCIAL
+                case "onSocialPage":
+                    mylog.debug("onSocialPage")
+                    await ws.send_json({"type": "socialMessages"})
+                    await ws.send_json({"type": "onlinePlayers"})
                 case _:
                     mylog.debug(f"Message type not handled")
     except WebSocketDisconnect as e:
@@ -122,6 +124,7 @@ async def websocketEndpoint(ws: WebSocket):
         mylog.debug(f"websocket connection failed: {e}")
     finally:
         await matchmakePoolRemove(userId)
+        await myred.offSocialPage(userId)
         if userId in onlinePlayers:
             onlinePlayers.pop(userId)
 
