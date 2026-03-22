@@ -27,11 +27,13 @@ export const GameChallengeBox = () => {
       <div className="w-full mt-5">
         <h2>Game Challenge</h2>
       </div>
-      <p>You have been challenged to a game by {`${challenger}`}</p>
+      <p className="font-semibold text-xl">You have been challenged to a game by {`${challenger}`}</p>
       <div className="flex justify-around">
         <div className="flex gap-5 mb-8">
-          <button>Accept</button>
-          <button>Decline</button>
+          <button className="bg-(--button-red)!" style={{ "--shadow-color": "var(--button-red)" }}>
+            Accept
+          </button>
+          <button className="bg-(--button-green)!" style={{ "--shadow-color": "var(--button-green)" }}>Decline</button>
         </div>
       </div>
     </div>
