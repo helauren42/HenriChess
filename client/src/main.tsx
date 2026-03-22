@@ -7,6 +7,7 @@ import { AuthCompProvider } from './Providers/AuthComp.tsx'
 import { GameProvider } from './Providers/Game.tsx'
 import { GameWatchProvider } from './Providers/ActiveOnlineGames.tsx'
 import { WsProvider } from './Providers/Ws.tsx'
+import { MscProvider } from './Providers/Msc.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
@@ -15,7 +16,9 @@ createRoot(document.getElementById('root')!).render(
         <AuthCompProvider>
           <GameProvider>
             <GameWatchProvider>
-              <App />
+              <MscProvider>
+                <App />
+              </MscProvider>
             </GameWatchProvider>
           </GameProvider>
         </AuthCompProvider>

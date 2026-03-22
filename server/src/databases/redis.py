@@ -41,13 +41,14 @@ class Redis(RedisAuth):
     def challengeKey(self, challengeId: int | ResponseT):
         return "challenge:" + str(challengeId)
 
-    async def addChallenge(self, challengerId: int, opponentId: int):
+    async def addChallenge(self, challengerId: int, opponentId: int)-> int:
         async with self.challengesLock:
-            challengeId = self.challenges.incr("challenge:id")
+            challengeId = await self.challenges.incr("challenge:id")
             challengeKey = self.challengeKey(challengeId)
-            self.challenges.hset(challengeKey, mapping={"challenger": challenger, "opponent": opponent})
+            await self.challenges.hset(challengeKey, mapping={"challengerId": challengerId, "opponentId": opponentId})
             # expires in 15 seconds
-            self.challenges.expire(challengeKey, 15)
+            await self.challenges.expire(challengeKey, 15)
+            return challengeId
 
     async def getChallenge(self, challengeId: int)-> None | tuple[str, str]:
         challengeKey = self.challengeKey(challengeId)

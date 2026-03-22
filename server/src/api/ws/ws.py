@@ -119,8 +119,8 @@ async def websocketEndpoint(ws: WebSocket):
                     await OnlinePlayers.sendMessage(userId, playersList)
                 case "sendChallenge":
                     opponentId = msg["opponentId"]
-                    await myred.addChallenge(userId, opponentId)
-                    await ws.send_json({"type":"gameChallenge", "challenger": username})
+                    challengeId = await myred.addChallenge(userId, opponentId)
+                    await onlinePlayers[opponentId].send_json({"type":"gameChallenge", "challenger": username, "id": challengeId})
                 case "acceptChallenge":
                     pass
                 case _:

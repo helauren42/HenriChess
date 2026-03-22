@@ -3,6 +3,7 @@ import { Navbar } from "../componants/Navbar/Navbar"
 import { AuthPage } from "../componants/AuthComp"
 import "./RootPage.css"
 import { useEffect } from "react"
+import { GameChallengeBox } from "../componants/GameChallenge"
 
 export const RootPage = () => {
   const location = useLocation()
@@ -15,6 +16,7 @@ export const RootPage = () => {
     <div id="root-page">
       <Navbar />
       {<Outlet />}
+      <GameChallengeBox />
       <AuthPage />
     </div>
   )

@@ -16,9 +16,11 @@ import { GameExpired } from './componants/GameExpired'
 import { SocialPage } from './Pages/SocialPage'
 import { HomePage } from './Pages/HomePage'
 import { VerifyEmail } from './Pages/EmailConfirmation'
+import { WsContext } from './Contexts/Ws'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
+  const { lastMessage } = useContext(WsContext)
   const initUser = async () => {
     const storeUsername = localStorage.getItem("username")
     const storeEmail = localStorage.getItem("email")
@@ -48,6 +50,11 @@ function App() {
       localStorage.removeItem("email")
     }
   }
+  useEffect(() => {
+    if (lastMessage && lastMessage.type == "gameChallenge") {
+      console.log("HTEIEWH")
+    }
+  }, [lastMessage])
   useEffect(() => {
     document.title = "Henri Chess"
     initUser()
