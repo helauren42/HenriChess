@@ -1,0 +1,19 @@
+#online-players-card {
+  height: 80%;
+  max-height: 80%;
+  overflow: scroll;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--nav-color);
+}
+
+#online-players-card::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Edge (Chromium), Safari */
+}
