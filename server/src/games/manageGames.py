@@ -1,7 +1,7 @@
 from dataclasses import asdict
 import datetime
 import random
-from typing import Literal
+from typing import Literal, Optional
 import chess
 from fastapi import WebSocket
 from databases.postgres import postgres
@@ -77,7 +77,9 @@ class GameMan(AGameMan):
             await GameMan.sendError(ws, "a servor error occured failed to start game")
 
     @staticmethod
-    async def startOnlineMatch(userId: int, username1: str, opponentId: int):
+    async def startOnlineMatch(userId: int, username1: Optional[str], opponentId: int):
+        if username1 is None:
+            username1 = await postgres.fetchUsername(userId)
         mylog.debug(f"starting game: {userId} vs {opponentId}")
         username2 = await postgres.fetchUsername(opponentId)
         assert username1 is not None

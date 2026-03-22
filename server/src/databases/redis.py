@@ -6,6 +6,7 @@ from redis.typing import ResponseT
 
 from databases.aredis.redisAuth import RedisAuth
 from utils.const import Env
+from utils.logger import mylog
 
 class Redis(RedisAuth):
     def __init__(self) -> None:
@@ -50,13 +51,14 @@ class Redis(RedisAuth):
             await self.challenges.expire(challengeKey, 15)
             return challengeId
 
-    async def getChallenge(self, challengeId: int)-> None | tuple[str, str]:
+    async def getChallenge(self, challengeId: int)-> None | tuple[int, int]:
         challengeKey = self.challengeKey(challengeId)
         map: dict = await self.challenges.hgetall(challengeKey)
+        mylog.debug(f"!!!!!!!!! map: {map}")
         if len(map) == 0:
             return None
-        challenger = map["challenger"]
-        opponent = map["opponent"]
-        return (challenger, opponent)
+        challengerId = map[b"challengerId"]
+        opponentId = map[b"opponentId"]
+        return (int(challengerId), int(opponentId))
 
 myred = Redis()

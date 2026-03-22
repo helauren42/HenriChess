@@ -120,9 +120,17 @@ async def websocketEndpoint(ws: WebSocket):
                 case "sendChallenge":
                     opponentId = msg["opponentId"]
                     challengeId = await myred.addChallenge(userId, opponentId)
-                    await onlinePlayers[opponentId].send_json({"type":"gameChallenge", "challenger": username, "id": challengeId})
+                    await onlinePlayers[opponentId].send_json({"type":"gameChallenge", "challenger": username, "challengeId": challengeId})
                 case "acceptChallenge":
-                    pass
+                    mylog.debug(f"received acceptChallenge: {msg}")
+                    players = await myred.getChallenge(msg["challengeId"])
+                    mylog.debug(f"!!!! PLAYERS: {players}")
+                    if players is None:
+                        continue
+                    assert len(players) == 2
+                    await GameMan.startOnlineMatch(players[0], None, players[1])
+                case "declineChallenge":
+                    mylog.debug(f"received acceptChallenge: {msg}")
                 case _:
                     mylog.debug(f"Message type not handled")
     except WebSocketDisconnect as e:

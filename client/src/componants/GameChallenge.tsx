@@ -5,23 +5,36 @@ import { WsContext } from "../Contexts/Ws"
 
 export const GameChallengeBox = () => {
   const { challenger, setChallenger } = useContext(MscContext)
-  const { lastMessage } = useContext(WsContext)
+  const { ws, lastMessage } = useContext(WsContext)
   const [challengeId, setChallengeId] = useState<number>(0)
   useEffect(() => {
     console.log("here!!!!!!!!!!!!: ", lastMessage?.type)
     if (lastMessage && lastMessage.type == "gameChallenge") {
       const elem = document.getElementById("game-challenge-box")
-      setChallengeId(lastMessage.id)
+      setChallengeId(lastMessage.challengeId)
       setChallenger(lastMessage.challenger)
       if (elem == null)
         return
       elem.style.display = "flex"
       const id = setTimeout(() => {
-        elem.style.display = "hidden"
+        elem.style.display = "none"
+        clearTimeout(id)
+        // TODO add timebar
       }, 10000)
-      clearTimeout(id)
     }
   }, [lastMessage])
+  const acceptChallenge = () => {
+    ws?.send(JSON.stringify({ "type": "acceptChallenge", challengeId }))
+    const elem = document.getElementById("game-challenge-box")
+    if (elem)
+      elem.style.display = "none"
+  }
+  const declineChallenge = () => {
+    ws?.send(JSON.stringify({ "type": "declineChallenge", challengeId }))
+    const elem = document.getElementById("game-challenge-box")
+    if (elem)
+      elem.style.display = "none"
+  }
   return (
     <div id="game-challenge-box">
       <div className="w-full mt-5">
@@ -30,10 +43,12 @@ export const GameChallengeBox = () => {
       <p className="font-semibold text-xl">You have been challenged to a game by {`${challenger}`}</p>
       <div className="flex justify-around">
         <div className="flex gap-5 mb-8">
-          <button className="bg-(--button-red)!" style={{ "--shadow-color": "var(--button-red)" }}>
+          <button onClick={() => acceptChallenge()}
+            className="bg-(--button-red)!" style={{ "--shadow-color": "var(--button-red)" }}>
             Accept
           </button>
-          <button className="bg-(--button-green)!" style={{ "--shadow-color": "var(--button-green)" }}>Decline</button>
+          <button onClick={() => declineChallenge()}
+            className="bg-(--button-green)!" style={{ "--shadow-color": "var(--button-green)" }}>Decline</button>
         </div>
       </div>
     </div>
