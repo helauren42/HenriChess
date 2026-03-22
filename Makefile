@@ -32,6 +32,9 @@ up:
 down:
 	docker compose down
 
+flogs:
+	docker compose logs -f
+
 re: down up
 
 ############### run ##################

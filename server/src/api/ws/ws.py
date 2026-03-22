@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from databases.game import GameWatch
 from databases.postgres import postgres
 from databases.redis import myred
+from tasks.onlinePlayers import OnlinePlayers
 from utils.api import getUserId
 from utils.const import matchmakePool, onlinePlayers
 from utils.logger import mylog
@@ -113,9 +114,15 @@ async def websocketEndpoint(ws: WebSocket):
                     await ws.send_json({"type": "activeOnlineGames", "games": games})
                 # SOCIAL
                 case "onSocialPage":
-                    mylog.debug("onSocialPage")
-                    await ws.send_json({"type": "socialMessages"})
-                    await ws.send_json({"type": "onlinePlayers"})
+                    await myred.onSocialPage(userId)
+                    playersList = await OnlinePlayers.getPlayersList()
+                    await OnlinePlayers.sendMessage(userId, playersList)
+                case "sendChallenge":
+                    opponentId = msg["opponentId"]
+                    await myred.addChallenge(userId, opponentId)
+                    await ws.send_json({"type":"gameChallenge", "challenger": username})
+                case "acceptChallenge":
+                    pass
                 case _:
                     mylog.debug(f"Message type not handled")
     except WebSocketDisconnect as e:

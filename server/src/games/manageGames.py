@@ -147,7 +147,6 @@ class GameMan(AGameMan):
                 games.append(game)
         return games
 
-
     @staticmethod
     async def handleGameMove(ws: WebSocket, mode: MODES, uciMove: str, gameData: Game, gameId: int, username: str)-> None | Game:
         try:
