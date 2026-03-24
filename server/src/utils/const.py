@@ -1,3 +1,4 @@
+from enum import Enum
 import sys
 from typing import Literal
 import dotenv
@@ -9,6 +10,11 @@ from utils.logger import mylog
 
 EXPIRY_TIME = 1200
 GAME_TIME = "600"
+
+class ActivityLevel(Enum):
+    active = 0
+    inGame = 1
+    # idle = 2
 
 matchmakePool: list[int] = []
 onlinePlayers: dict[int, WebSocket] = {} # userId, WebSocket

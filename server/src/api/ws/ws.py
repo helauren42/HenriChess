@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from databases.game import GameWatch
 from databases.postgres import postgres
 from databases.redis import myred
+from tasks.onlinePlayers import OnlinePlayers
 from utils.api import getUserId
 from utils.const import matchmakePool, onlinePlayers
 from utils.logger import mylog
@@ -34,11 +35,8 @@ async def findOpponent(userId: int)-> int:
 @wsRouter.websocket("")
 async def websocketEndpoint(ws: WebSocket):
     try:
-        mylog.debug(f"1")
         userId = await getUserId(ws.cookies)
-        mylog.debug(f"userId: {userId}")
         username = await postgres.fetchUsername(userId)
-        mylog.debug(f"username: {username}")
         assert username is not None
     except Exception as e:
         await asyncio.sleep(3)
@@ -114,6 +112,25 @@ async def websocketEndpoint(ws: WebSocket):
                     mylog.debug("getActiveGames")
                     games: list[GameWatch] = await GameMan.getActiveOnlineGames(username)
                     await ws.send_json({"type": "activeOnlineGames", "games": games})
+                # SOCIAL
+                case "onSocialPage":
+                    await myred.onSocialPage(userId)
+                    playersList = await OnlinePlayers.getPlayersList()
+                    await OnlinePlayers.sendMessage(userId, playersList)
+                case "sendChallenge":
+                    opponentId = msg["opponentId"]
+                    challengeId = await myred.addChallenge(userId, opponentId)
+                    await onlinePlayers[opponentId].send_json({"type":"gameChallenge", "challenger": username, "challengeId": challengeId})
+                case "acceptChallenge":
+                    mylog.debug(f"received acceptChallenge: {msg}")
+                    players = await myred.getChallenge(msg["challengeId"])
+                    mylog.debug(f"!!!! PLAYERS: {players}")
+                    if players is None:
+                        continue
+                    assert len(players) == 2
+                    await GameMan.startOnlineMatch(players[0], None, players[1])
+                case "declineChallenge":
+                    mylog.debug(f"received acceptChallenge: {msg}")
                 case _:
                     mylog.debug(f"Message type not handled")
     except WebSocketDisconnect as e:
@@ -122,6 +139,7 @@ async def websocketEndpoint(ws: WebSocket):
         mylog.debug(f"websocket connection failed: {e}")
     finally:
         await matchmakePoolRemove(userId)
+        await myred.offSocialPage(userId)
         if userId in onlinePlayers:
             onlinePlayers.pop(userId)
 

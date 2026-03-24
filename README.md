@@ -13,7 +13,7 @@ https://chess.henri10x.dev/
 - **Automated chess timer** automated designated winner when time runs out for opposition player
 - **In-game chat** — send messages to your opponent during the match(like trash talk :D)
 - **Game history** — review past games, browse through positions and learn from it
-- **Watch Games** — watch other active online games
+- **Spectator mode** — watch other active online games
 - **Responsive design** - works on desktop and mobile browsers
 
 ## Tech stack
@@ -34,7 +34,7 @@ https://chess.henri10x.dev/
 
 ## TODOs
 
-- add social page
+- handle in game player disconnections
+- move the timer to a separate service
 - add google auth
 - add profile pictures
-- move the timer to a separate service

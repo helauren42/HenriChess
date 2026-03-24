@@ -1,0 +1,23 @@
+#game-challenge-box {
+  position: absolute;
+  top: 5%;
+  left: 0;
+  width: 800px;
+  max-width: 90%;
+  height: 50vh;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--layover-color);
+  z-index: 100;
+  box-shadow: 0rem 0rem 1rem var(--layover-color);
+  color: var(--text-color-light);
+  text-align: center;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 1rem;
+}
+
+#cross {
+  color: rgb(220, 100, 50);
+}

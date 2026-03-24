@@ -6,15 +6,18 @@ from api.auth import authRouter
 from api.users import accountRouter
 from api.ws.ws import wsRouter
 from games.gameTs import taskGamesTs
+from tasks.onlinePlayers import OnlinePlayers
 from utils.logger import mylog
 from databases.postgres import postgres
 
 @asynccontextmanager
 async def lifeIsTooShort(app: FastAPI):
     await postgres.init_pool()
-    task = asyncio.create_task(taskGamesTs())
+    gameTsTask = asyncio.create_task(taskGamesTs())
+    onlinePlayersTask = asyncio.create_task(OnlinePlayers.updateOnlinePlayers())
     yield
-    task.cancel()
+    gameTsTask.cancel()
+    onlinePlayersTask.cancel()
     await postgres.close_pool()
 
 app = FastAPI(lifespan=lifeIsTooShort)

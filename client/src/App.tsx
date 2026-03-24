@@ -11,14 +11,15 @@ import { PlayPage } from './Pages/Play/PlayPage'
 import { HotseatGame } from './Pages/Play/HotseatGame'
 import { OnlineGame } from './Pages/Play/OnlineGame'
 import { MatchmakeOnline } from './Pages/Play/MatchmakeOnline'
-import { WatchPage } from './Pages/Watch/Watch'
 import { GameExpired } from './componants/GameExpired'
 import { SocialPage } from './Pages/SocialPage'
 import { HomePage } from './Pages/HomePage'
 import { VerifyEmail } from './Pages/EmailConfirmation'
+import { WsContext } from './Contexts/Ws'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
+  const { lastMessage } = useContext(WsContext)
   const initUser = async () => {
     const storeUsername = localStorage.getItem("username")
     const storeEmail = localStorage.getItem("email")
@@ -49,6 +50,11 @@ function App() {
     }
   }
   useEffect(() => {
+    if (lastMessage && lastMessage.type == "gameChallenge") {
+      console.log("HTEIEWH")
+    }
+  }, [lastMessage])
+  useEffect(() => {
     document.title = "Henri Chess"
     initUser()
   }, [])
@@ -62,7 +68,6 @@ function App() {
           <Route path='/game/hotseat/*' element={<HotseatGame />} />
           <Route path='/game/online/*' element={<OnlineGame />} />
           <Route path='/game/matchmake-online' element={<MatchmakeOnline />} />
-          <Route path='/watch/*' element={<WatchPage />} />
           <Route path='/user/*' element={<UserPage />} />
           <Route path='/social' element={<SocialPage />} />
           <Route path='/verify-email/*' element={<VerifyEmail />} />
