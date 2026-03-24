@@ -34,7 +34,7 @@ https://chess.henri10x.dev/
 
 ## TODOs
 
-- add social page
+- handle in game player disconnections
+- move the timer to a separate service
 - add google auth
 - add profile pictures
-- move the timer to a separate service
