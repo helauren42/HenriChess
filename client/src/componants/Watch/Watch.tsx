@@ -1,8 +1,7 @@
 import { useContext, useEffect, useState } from "react"
 import "./Watch.css"
 import { WsContext } from "../../Contexts/Ws"
-import { Rank } from "../Play/Board"
-import { addWaitCursor, removeWaitCursor } from "../../utils/utils"
+import { Rank } from "../../Pages/Play/Board.tsx"
 import { useNavigate } from "react-router-dom"
 import { UserContext } from "../../Contexts/User"
 import { AuthCompContext } from "../../Contexts/AuthComp"
@@ -106,12 +105,12 @@ export const WatchPage = () => {
   }, [games])
   return (
     <div className="w-full flex flex-col text-center gap-10 mt-10">
-      <h1>Watch Live Games</h1>
+      <h2 className="font-medium!">Watch Live Games</h2>
       <div className="w-full flex-row">
         {
           games ?
             games.length == 0 ?
-              <h4> There are no active games currently</h4>
+              <h4 className="font-medium!"> There are no active games currently</h4>
               : <GamesList games={games} />
             : <div className="flex text-left ml-[45%]">
               <h4>Loading{loadingDots}</h4>

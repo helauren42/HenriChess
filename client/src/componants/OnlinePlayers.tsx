@@ -29,9 +29,9 @@ const PlayerState = ({ playerState }: { playerState: [string, number, number] })
     console.log("sendChallenge")
   }
   return (
-    <div className="flex flex-row justify-between items-center">
+    <div className="flex flex-row justify-between items-center pl-4 pr-4">
       <PlayerStatus status={playerState[2]} />
-      <p className="text-2xl">{playerState[0]}</p>
+      <p title={playerState[0]} className="text-2xl">{playerState[0]}</p>
       {
         // active = 0, inGame = 1, TODO idle = 2
         playerState[2] != 1 ?
@@ -45,13 +45,24 @@ const PlayerState = ({ playerState }: { playerState: [string, number, number] })
 export const OnlinePlayers = ({ onlinePlayers }: OnlinePlayersFace) => {
   const { user } = useContext(UserContext)
   return (
-    <div id="online-players-card">
-      {
-        onlinePlayers.map((val, index) => {
-          if (val[0] != user.username)
-            return <PlayerState key={`${index}`} playerState={val} />
-        })
-      }
+    <div className="">
+      <div id="online-players-card">
+        <div className="w-full bg-[rgb(210,160,140)] pt-4 pb-4 border-b">
+          <h4 className="font-medium! text-center">Online players</h4>
+        </div>
+        {
+          onlinePlayers.length <= 1 ?
+            <NoOnlinePlayers /> :
+            <div className="h-full">
+              {
+                onlinePlayers.map((val, index) => {
+                  if (val[0] != user.username)
+                    return <PlayerState key={`${index}`} playerState={val} />
+                })
+              }
+            </div>
+        }
+      </div>
     </div>
   )
 }
@@ -59,7 +70,7 @@ export const OnlinePlayers = ({ onlinePlayers }: OnlinePlayersFace) => {
 export const NoOnlinePlayers = () => {
   return (
     <div className="pt-10 pb-10">
-      <h4>There are no online players atm</h4>
+      <p>There are no online players atm</p>
     </div>
   )
 }

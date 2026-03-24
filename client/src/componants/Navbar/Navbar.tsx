@@ -128,7 +128,6 @@ export const Navbar = () => {
         </div>
         <ul className="flex flex-col gap-5 mt-10 mb-13">
           <Navlink name="Play" to="/game" imgsrc="/images/nav/pawn.svg" />
-          <Navlink name="Watch" to="/watch" imgsrc="/images/nav/eyes.svg" />
           <Navlink name="Social" to="/social" imgsrc="/images/nav/people.svg" />
         </ul>
         {

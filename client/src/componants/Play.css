@@ -21,6 +21,14 @@
   padding: 0 1rem;
 }
 
+
+#game-moves-history::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Edge (Chromium), Safari */
+}
+
+
+
 @media (max-width: 1400px) {
   #board-panel {
     flex-direction: column;

@@ -1,6 +1,8 @@
 import { useContext, useEffect, useState } from "react"
 import { WsContext } from "../Contexts/Ws"
-import { NoOnlinePlayers, OnlinePlayers } from "../componants/OnlinePlayers"
+import { OnlinePlayers } from "../componants/OnlinePlayers"
+import { WatchPage } from "../componants/Watch/Watch"
+import "./SocialPage.css"
 
 export const SocialPage = () => {
   const { ws, lastMessage } = useContext(WsContext)
@@ -16,11 +18,12 @@ export const SocialPage = () => {
   }, [lastMessage])
   return (
     <div id="social-page" className="w-full h-full mt-10 flex flex-col justify-center items-center">
-      {
-        onlinePlayers.length <= 1 ?
-          <NoOnlinePlayers />
-          : <OnlinePlayers onlinePlayers={onlinePlayers} />
-      }
+      <h1>Community Hub</h1>
+      <div className="h-[8vh]"></div>
+      <div id="social-content">
+        <WatchPage />
+        <OnlinePlayers onlinePlayers={onlinePlayers} />
+      </div>
     </div>
   )
 }
