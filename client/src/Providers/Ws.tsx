@@ -7,30 +7,37 @@ export const WsProvider = ({ children }: { children: ReactNode }) => {
   const [ws, setWs] = useState<WebSocket | null>(null)
   const [lastMessage, setLastMessage] = useState<Record<string, any> | null>(null)
   const [timeMessage, setTimeMessage] = useState<Record<string, any> | null>(null)
+  const [connecting, setConnecting] = useState<boolean>(false)
   const { user } = useContext(UserContext)
   const makeSocket = () => {
+    setConnecting(true)
     const sock = new WebSocket(SERVER_URL_WS)
     const timeout = setTimeout(() => {
-      if (sock.readyState != sock.OPEN)
+      if (sock.readyState != sock.OPEN) {
         sock.close()
+        setConnecting(false)
+      }
     }, 10000)
 
     sock.onopen = (e) => {
       clearTimeout(timeout)
       console.log("websocket on open: ", e)
       setWs(sock)
+      setConnecting(false)
     }
 
     sock.onerror = (e) => {
       clearTimeout(timeout)
       console.error("websocket on error: ", e)
       setWs(null)
+      setConnecting(false)
     }
 
     sock.onclose = (e) => {
       clearTimeout(timeout)
       console.log("websocket on close: ", e)
       setWs(null)
+      setConnecting(false)
     };
 
     sock.onmessage = (event) => {
@@ -46,11 +53,9 @@ export const WsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   useEffect(() => {
-    if (user.username.length > 0 && (ws == null || ws?.readyState == ws?.CLOSED || ws?.readyState == ws.CLOSING)) {
-      const id = setInterval(() => {
-        makeSocket()
-      }, 10500)
-      return () => clearInterval(id)
+    if ((ws == null || ws?.readyState == ws?.CLOSED || ws?.readyState == ws.CLOSING)
+      && connecting == false) {
+      makeSocket()
     }
   }, [user, ws])
   return (
