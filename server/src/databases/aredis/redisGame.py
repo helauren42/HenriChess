@@ -18,7 +18,7 @@ class ARedisGame(ABC):
         self.gamePool = redis.ConnectionPool(host=Env.REDIS_HOST, port=Env.REDIS_PORT, db=1, max_connections=100, socket_timeout=1)
         self.game = redis.Redis(connection_pool=self.gamePool)
 
-    async def extendGameExpiry(self, gameId: int, mode: MODES, username: Optional[str]):
+    async def extendGameExpiry(self, gameId: int, mode: MODES, username: str):
         assert not (mode == "hotseat" and username is None)
         await self.game.expire(self.gameKey(gameId, mode, username), EXPIRY_TIME)
         await self.game.expire(self.gameMoveKey(gameId), EXPIRY_TIME)

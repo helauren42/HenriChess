@@ -35,6 +35,8 @@ async def findOpponent(userId: int)-> int:
 @wsRouter.websocket("")
 async def websocketEndpoint(ws: WebSocket):
     try:
+        print("START")
+        mylog.debug("!!!!! START")
         userId = await getUserId(ws.cookies)
         username = await postgres.fetchUsername(userId)
         assert username is not None
