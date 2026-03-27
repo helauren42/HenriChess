@@ -54,11 +54,8 @@ export const Game = () => {
       setMode(newMode)
     if (tempId != gameId)
       setGameId(tempId)
-    getGameUpdate(newMode, gameId)
+    getGameUpdate(newMode, tempId)
   }, [location, ws])
-  useEffect(() => {
-    getGameUpdate(mode, gameId)
-  }, [mode, gameId])
   useEffect(() => {
     console.log("player color is: ", playerColor)
   }, [playerColor])
