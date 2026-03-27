@@ -7,12 +7,12 @@ import { useLocation } from "react-router-dom"
 import { WsContext } from "../../Contexts/Ws.tsx"
 import { addWaitCursor } from "../../utils/utils.tsx"
 
-export const PlayerDisplay = ({ mode, playerName, winner, time }: { mode: "hotseat" | "online", playerName: string, winner: number | null, time: number }) => {
+export const TimeDisplay = ({ time }: { time: number }) => {
   let minutes = Math.floor(time / 60)
   let seconds = Math.floor(time % 60)
   const peanutsLeft = time - (minutes * 60 + seconds)
   let deciseconds = Math.ceil(peanutsLeft * 10)
-  if (seconds == 10) {
+  if (seconds == 60) {
     minutes += 1
     deciseconds = 0
   }
@@ -21,11 +21,17 @@ export const PlayerDisplay = ({ mode, playerName, winner, time }: { mode: "hotse
     deciseconds = 0
   }
   return (
+    <p>{minutes}:{seconds >= 10 ? seconds : "0" + seconds}:{deciseconds}</p>
+  )
+}
+
+export const PlayerDisplay = ({ mode, playerName, winner, time }: { mode: "hotseat" | "online", playerName: string, winner: number | null, time: number }) => {
+  return (
     <div className="ml-3 flex gap-5 items-center text-center">
       <h4>{playerName}</h4>
       {
         mode == "hotseat" || winner ? null :
-          <p> {minutes}:{seconds}:{deciseconds}</p>
+          <TimeDisplay time={time} />
       }
     </div >
   )
