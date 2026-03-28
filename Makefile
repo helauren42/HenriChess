@@ -33,7 +33,7 @@ flogs:
 	docker compose -f docker-compose.$(ENV).yaml logs -f
 
 up:
-	if [ "$(ENV)" == "prod" ]; then\
+	if [ "$(ENV)" = "prod" ]; then\
 		cd client && npm run build;\
 	fi
 	docker compose -f docker-compose.$(ENV).yaml up -d
