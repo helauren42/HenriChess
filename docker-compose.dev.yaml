@@ -8,7 +8,6 @@ services:
     networks:
       - chess-net
     volumes:
-      # - ./client/:/app/client/
       - ./server/:/app/server
       - ./Makefile/:/app/Makefile
       - ./server/logger/:/app/logger/
@@ -60,7 +59,7 @@ services:
   caddy:
     image: caddy:2.8.4
     volumes:
-      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./docker/caddy/CaddyfileDev:/etc/caddy/Caddyfile
       - ./secrets/cert.pem:/etc/caddy/cert.pem
       - ./secrets/key.pem:/etc/caddy/key.pem
     networks:

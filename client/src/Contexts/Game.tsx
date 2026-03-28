@@ -132,7 +132,7 @@ export const GameContext = createContext<GameFace>({
   setWhiteTime: () => console.error("used outside of context"),
   blackTime: 600,
   setBlackTime: () => console.error("used outside of context"),
-  getGameUpdate: (tempMode: "online" | "hotseat", tempId: number | null) => console.error("used outside of context"),
+  getGameUpdate: (tempMode: "online" | "hotseat", tempId: number | null) => console.error("used outside of context: ", tempMode, tempId),
   // messages
   messages: [],
   setMessages: () => console.error("used outside of context"),
@@ -140,14 +140,14 @@ export const GameContext = createContext<GameFace>({
   selected: { id: "", rank: 0, file: "" },
   setSelected: () => console.error("used outside of context"),
   unselect: () => console.error("used outside of context"),
-  squareClick: (id: string, piece: string) => console.error("used outside of context"),
+  squareClick: (id: string, piece: string) => console.error("used outside of context: ", id, piece),
   getFileNum: (file: string) => {
-    console.error("used outside of context")
+    console.error("used outside of context: ", file)
     return 0
   },
   // WS
   clientMove(uciMove: string) {
-    console.error("used outside of context")
+    console.error("used outside of context", uciMove)
   },
   restartGame() {
     console.error("used outside of context")

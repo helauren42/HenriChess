@@ -1,0 +1,21 @@
+{
+	# Enable caddy internal CA
+	pki {
+		ca internal {
+			name homelab_ca
+		}
+	}
+}
+:443 {
+	tls /etc/caddy/cert.pem /etc/caddy/key.pem
+
+	route /api/* {
+		reverse_proxy app:8080
+	}
+
+	route {
+		root * /etc/caddy/static
+		try_files {path} /index.html
+		file_server
+	}
+}

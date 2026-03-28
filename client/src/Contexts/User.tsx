@@ -10,6 +10,11 @@ export interface UserContextFace {
   setUser: Dispatch<SetStateAction<UserData>>
 }
 
+export interface UserResp {
+  username: string
+  email: string
+}
+
 export const UserContext = createContext<UserContextFace>({
   user: {
     username: "",

@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { writeFetch } from "../utils/requests"
 import { ToastCustomError } from "../utils/toastify"
 import { useEffect } from "react"

@@ -116,7 +116,7 @@ export const Board = ({ playerColor }: { playerColor: "w" | "b" | "v" }) => {
 }
 
 export const PassiveSquare = memo(({ piece, rank, file }: { piece: string, rank: number, file: string }) => {
-  const { getFileNum, playerColor } = useContext(GameContext)
+  const { getFileNum } = useContext(GameContext)
   const squareColor: "white" | "black" = (rank + getFileNum(file)) % 2 == 0 ? "white" : "black"
   // console.log("square ", rank, "-", file, ": ", piece)
   const fileName = () => {

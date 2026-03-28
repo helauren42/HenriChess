@@ -23,30 +23,33 @@ $(STATIC_FILES):
 
 ############### docker ###############
 
-up:
-	mkdir -p ./server/logger
-	touch ./server/logger/logs.log
-	docker compose build
-	docker compose up
-
 down:
-	docker compose down
+	docker compose -f docker-compose.$(ENV).yaml down
+
+logs:
+	docker compose -f docker-compose.$(ENV).yaml logs
 
 flogs:
-	docker compose logs -f
+	docker compose -f docker-compose.$(ENV).yaml logs -f
+
+up:
+	if [ "$(ENV)" == "prod" ]; then\
+		cd client && npm run build;\
+	fi
+	docker compose -f docker-compose.$(ENV).yaml up -d
 
 re: down up
+
+ps:
+	docker compose -f docker-compose.$(ENV).yaml ps
+
+restart:
+	docker compose -f docker-compose.$(ENV).yaml restart $(ARGS)
 
 ############### run ##################
 
 server: $(PIP_LATEST)
 	$(INTERPRETER) $(MAIN)
-
-dev:
-	docker compose up
-
-deploy:
-	docker compose up -d
 
 ############### cleaning ###############
 
