@@ -26,6 +26,9 @@ $(STATIC_FILES):
 down:
 	docker compose -f docker-compose.$(ENV).yaml down
 
+logs:
+	docker compose -f docker-compose.$(ENV).yaml logs
+
 flogs:
 	docker compose -f docker-compose.$(ENV).yaml logs -f
 

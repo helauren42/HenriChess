@@ -19,7 +19,7 @@ jobs:
           openssl req -new -newkey rsa:2048 -nodes -x509 \
           -keyout secrets/key.pem -out secrets/cert.pem -days 365 \
           -subj "/C=US/ST=CA/L=SF/O=MyOrg/OU=Dev/CN=example.com/emailAddress=admin@example.com"
-          make deploy
+          make up
           python3 ./tests/startup.py
       - name: Update Server Code
         run: |
