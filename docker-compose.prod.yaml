@@ -1,0 +1,70 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/server/Dockerfile
+    ports:
+      - ${SERVER_EXT}:${SERVER_PORT}
+    networks:
+      - chess-net
+    volumes:
+      - ./server/:/app/server
+      - ./Makefile/:/app/Makefile
+      - ./server/logger/:/app/logger/
+      - ./.env/:/app/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  db:
+    image: postgres:16-alpine3.22
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PWD}
+      PGPASSWORD: ${DB_PWD}
+    ports:
+      - "${DB_EXT}:5432"
+    volumes:
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - chess-net
+    restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      interval: 10s
+      timeout: 3s
+      retries: 3
+  redis:
+    image: redis:alpine3.22
+    ports:
+      - "${REDIS_EXT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - chess-net
+    restart: unless-stopped
+  caddy:
+    image: caddy:2.8.4
+    volumes:
+      - ./docker/caddy/CaddyfileProd:/etc/caddy/Caddyfile
+      - ./secrets/cert.pem:/etc/caddy/cert.pem
+      - ./secrets/key.pem:/etc/caddy/key.pem
+      - ./client/dist/:/etc/caddy/static/
+    networks:
+      - chess-net
+    ports:
+      - "${CADDY_EXT}:443"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  chess-net:
+    driver: bridge
+
+volumes:
+  redis_data:
+  db_data:
