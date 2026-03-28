@@ -7,7 +7,7 @@ export interface MscFace {
 
 export const MscContext = createContext({
   challenger: "",
-  setChallenger: (challenger) => {
-    console.error("MscContext used outside of context")
+  setChallenger: (challenger: string) => {
+    console.error("MscContext used outside of context: ", challenger)
   },
 })

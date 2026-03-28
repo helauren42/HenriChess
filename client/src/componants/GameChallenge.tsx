@@ -44,11 +44,11 @@ export const GameChallengeBox = () => {
       <div className="flex justify-around">
         <div className="flex gap-5 mb-8">
           <button onClick={() => acceptChallenge()}
-            className="bg-(--button-red)!" style={{ "--shadow-color": "var(--button-red)" }}>
+            className="bg-(--button-red)!">
             Accept
           </button>
           <button onClick={() => declineChallenge()}
-            className="bg-(--button-green)!" style={{ "--shadow-color": "var(--button-green)" }}>Decline</button>
+            className="bg-(--button-green)!">Decline</button>
         </div>
       </div>
     </div>

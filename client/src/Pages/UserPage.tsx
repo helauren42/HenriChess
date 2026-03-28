@@ -70,7 +70,7 @@ export const UserPage = () => {
   const fetchUser = async () => {
     const resp: MyResp = await readFetch(`/user/${username}`)
     if (resp.status == 200 && resp.data) {
-      resp.data["visibility"] = "Public"
+      (resp.data as { "visibility": string })["visibility"] = "Public"
       setUserData(resp.data as UserData)
     }
     if (resp.status == 401) {

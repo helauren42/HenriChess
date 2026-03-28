@@ -104,7 +104,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     if (!ws || ws.readyState != ws.OPEN) {
       const id = setInterval(() => {
         if (ws && ws.readyState === ws.OPEN) {
-          ws?.send(JSON.stringify({ type: "getGameUpdate", mode, "gameId": tempId ? tempId : gameId }))
+          ws?.send(JSON.stringify({ type: "getGameUpdate", "mode": tempMode, "gameId": tempId ? tempId : gameId }))
           clearInterval(id)
           return
         }

@@ -1,13 +1,16 @@
-import { useContext, type Dispatch, type SetStateAction } from "react"
 import { SERVER_URL } from "./const"
 import { ToastNetworkError } from "./toastify"
-import { AuthCompContext } from "../Contexts/AuthComp"
 
 export interface MyResp {
   status: number
   ok: boolean
   message: string | null
   data: object | null
+}
+
+export interface messageDataObj {
+  message: string
+  data: object
 }
 
 export const readFetch = async (path: string): Promise<MyResp> => {
@@ -25,7 +28,7 @@ export const readFetch = async (path: string): Promise<MyResp> => {
         data: null
       }
     }
-    const jsonResp: object = await resp.json()
+    const jsonResp: messageDataObj = await resp.json()
     return {
       status: resp.status,
       ok: resp.ok,
@@ -62,7 +65,7 @@ export const writeFetch = async (path: string, method: "POST" | "PUT" | "PATCH" 
         data: null
       }
     }
-    const jsonResp: object = await resp.json()
+    const jsonResp: messageDataObj = await resp.json()
     return {
       status: resp.status,
       ok: resp.ok,

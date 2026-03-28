@@ -65,16 +65,16 @@ export const SignupPage = () => {
         ToastCustomError("Invalid Input")
       switch (resp.status) {
         case 401:
-          ToastCustomError(resp.message)
+          ToastCustomError(resp.message as string)
           break
         case 409:
-          Toast409(resp.message)
+          Toast409(resp.message as string)
           break
         case 422:
-          Toast422(resp.message)
+          Toast422(resp.message as string)
           break
         case 500:
-          ToastServerError(resp.message)
+          ToastServerError(resp.message as string)
           break
       }
       return setLoading(false)
@@ -118,13 +118,13 @@ export const LoginPage = () => {
       switch (resp.status) {
         case 400:
         case 401:
-          ToastCustomError(resp.message)
+          ToastCustomError(resp.message as string)
           break
         case 409:
-          Toast409(resp.message)
+          Toast409(resp.message as string)
           break
         case 500:
-          ToastServerError(resp.message)
+          ToastServerError(resp.message as string)
           break
       }
       return setLoading(false)
@@ -163,10 +163,10 @@ export const RequestResetPassword = () => {
       switch (resp.status) {
         case 401:
         case 409:
-          ToastCustomError(resp.message)
+          ToastCustomError(resp.message as string)
           break
         case 500:
-          ToastServerError(resp.message)
+          ToastServerError(resp.message as string)
           break
       }
       return setLoading(false)
@@ -215,13 +215,13 @@ export const ResetPassword = () => {
         case 400:
         case 409:
         case 401:
-          ToastCustomError(resp.message)
+          ToastCustomError(resp.message as string)
           break
         case 422:
-          Toast422(resp.message)
+          Toast422(resp.message as string)
           break
         case 500:
-          ToastServerError(resp.message)
+          ToastServerError(resp.message as string)
           break
       }
       return setLoading(false)

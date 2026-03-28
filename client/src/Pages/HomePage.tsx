@@ -1,10 +1,10 @@
 import "./HomePage.css"
 
-const FeatureList = ({ title, text }: { title: string, text: string }) => {
-  return (
-    <li className="mb-3 list-disc list-inside pl-3 text-start"><span className="font-bold underline decoration-2">{title}</span>: {text}</li>
-  )
-}
+// const FeatureList = ({ title, text }: { title: string, text: string }) => {
+//   return (
+//     <li className="mb-3 list-disc list-inside pl-3 text-start"><span className="font-bold underline decoration-2">{title}</span>: {text}</li>
+//   )
+// }
 
 export const HomePage = () => {
   return (

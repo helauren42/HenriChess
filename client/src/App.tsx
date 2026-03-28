@@ -1,10 +1,9 @@
 import { Routes, Route } from 'react-router-dom'
 import { ToastContainer } from "react-toastify"
-import './App.css'
 import { RootPage } from './Pages/RootPage'
 import { useContext, useEffect } from 'react'
 import { readFetch, type MyResp } from './utils/requests'
-import { UserContext, type UserContextFace } from './Contexts/User'
+import { UserContext, type UserContextFace, type UserResp } from './Contexts/User'
 import { UserPage } from './Pages/UserPage'
 import { ToastSessionExpired } from './utils/toastify'
 import { PlayPage } from './Pages/Play/PlayPage'
@@ -16,6 +15,8 @@ import { SocialPage } from './Pages/SocialPage'
 import { HomePage } from './Pages/HomePage'
 import { VerifyEmail } from './Pages/EmailConfirmation'
 import { WsContext } from './Contexts/Ws'
+
+import './App.css'
 
 function App() {
   const { setUser } = useContext<UserContextFace>(UserContext)
@@ -31,12 +32,13 @@ function App() {
     }
     const resp: MyResp = await readFetch("/auth/login")
     if (resp.ok) {
+      const data = resp.data as UserResp
       setUser({
-        username: resp.data["username"],
-        email: resp.data["email"],
+        username: data["username"],
+        email: data["email"],
       })
-      localStorage.setItem("username", resp.data["username"])
-      localStorage.setItem("email", resp.data["email"])
+      localStorage.setItem("username", data["username"])
+      localStorage.setItem("email", data["email"])
     }
     else {
       if (localStorage.getItem("username"))
