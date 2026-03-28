@@ -7,8 +7,6 @@ PIP_LATEST=server/.pip_latest
 MAIN=server/src/main.py
 INTERPRETER=server/venv/bin/python3
 
-STATIC_FILES=client/build
-
 ############### env and builds ###############
 
 $(VENV):
@@ -18,19 +16,19 @@ $(PIP_LATEST): $(VENV) $(REQUIREMENTS)
 	$(PIP) install -r $(REQUIREMENTS)
 	touch $(PIP_LATEST)
 
-$(STATIC_FILES):
-	cd client && npm run build
-
 ############### docker ###############
 
 down:
 	docker compose -f docker-compose.$(ENV).yaml down
 
+logs:
+	docker compose -f docker-compose.$(ENV).yaml logs
+
 flogs:
 	docker compose -f docker-compose.$(ENV).yaml logs -f
 
 up:
-	if [ "$(ENV)" == "prod" ]; then\
+	if [ "$(ENV)" = "prod" ]; then\
 		cd client && npm run build;\
 	fi
 	docker compose -f docker-compose.$(ENV).yaml up -d
