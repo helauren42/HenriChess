@@ -22,13 +22,14 @@ class AGameMan():
     async def sendGame(ws: WebSocket, mode: MODES, subtype: Literal["new", "continue", "update"], id: int, game: Game):
         gameDict = asdict(game)
         try:
-            await ws.send_json({
+            data = {
                 "type": "game",
                 "mode": mode,
                 "subtype": subtype,
                 "id": id,
                 "game": gameDict,
-            })
+            }
+            await ws.send_json(data)
         except Exception as e:
             mylog.error(f"sendGame {subtype} failed for game: {id}")
 
@@ -114,22 +115,16 @@ class GameMan(AGameMan):
 
     @staticmethod
     async def resignGame(ws: WebSocket, userId: int, mode: MODES, game: Game, username: str):
-        mylog.debug(f"here0")
         if mode == "hotseat":
             resignerColor = "w" if len(game.gameMoves) % 2 == 0 else "b"
         else:
             resignerColor = "b" if userId == game.blackId else "w"
-        mylog.debug(f"here0.5")
         winner: int = game.blackId if resignerColor == "w" else game.whiteId
         game.winner = winner
         game.winnerName = game.blackUsername if resignerColor == "w" else game.whiteUsername
-        mylog.debug(f"here1")
         await postgres.storeGameResult(mode, game)
-        mylog.debug(f"here2")
         await myred.removeGame(game.id, mode, username)
-        mylog.debug(f"here3")
         await GameMan.updateGameAll(ws, userId, mode, game, game.id)
-        mylog.debug(f"here4")
         return game
 
     @staticmethod
@@ -171,18 +166,21 @@ class GameMan(AGameMan):
                 # await postgres.addNewPositionAndMove(gameId, mode, board.fen(), uciMove, san)
                 await myred.addGamePosition(board.fen(), gameId, mode, username)
                 await myred.addGameMove(GameMove(uciMove, san), gameId, mode, username)
-                mylog.debug("added")
                 gameData.gameFens.append(board.fen())
                 gameData.gameMoves.append(GameMove(uci=uciMove, san=san))
                 outcome = board.outcome()
+                mylog.debug(f"outcome: {outcome}")
                 if outcome:
                     match outcome.winner:
                         case False:
                             gameData.winner = gameData.blackId
+                            gameData.winnerName = gameData.blackUsername
                         case True:
                             gameData.winner = gameData.whiteId
+                            gameData.winnerName = gameData.whiteUsername
                         case None:
                             gameData.winner = 0
+                            gameData.winnerName = "no one"
                 return gameData
             else:
                 mylog.debug("move is illegal")

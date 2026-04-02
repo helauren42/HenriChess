@@ -35,7 +35,6 @@ async def findOpponent(userId: int)-> int:
 @wsRouter.websocket("")
 async def websocketEndpoint(ws: WebSocket):
     try:
-        print("START")
         mylog.debug("!!!!! START")
         userId = await getUserId(ws.cookies)
         username = await postgres.fetchUsername(userId)
@@ -69,6 +68,9 @@ async def websocketEndpoint(ws: WebSocket):
                     assert gameData is not None
                     updatedGame = await GameMan.handleGameMove(ws, msg["mode"], msg["uciMove"], gameData, gameId, username) # update game object is returned if move was valid otherwise it returns None
                     if updatedGame:
+                        if updatedGame.winner:
+                            await postgres.storeGameResult(msg["mode"], gameData)
+                            await myred.removeGame(gameData.id, msg["mode"], username)
                         await GameMan.updateGameAll(ws, userId, msg["mode"], updatedGame, gameId)
                 case "startGameHotseat":
                     await GameMan.startGameHotseat(ws, userId, username)
