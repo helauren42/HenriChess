@@ -4,6 +4,7 @@ import { WsContext } from "../Contexts/Ws"
 
 import "./OnlinePlayers.css"
 import { UserContext } from "../Contexts/User"
+import { ToastChallengeSent } from "../utils/toastify"
 
 interface OnlinePlayersFace {
   onlinePlayers: []
@@ -24,9 +25,10 @@ const PlayerStatus = ({ status }: { status: number }) => {
 // pos 0: player name, pos 1: player id, pos 2: player status
 const PlayerState = ({ playerState }: { playerState: [string, number, number] }) => {
   const { ws } = useContext(WsContext)
-  const sendChallenge = (opponentId: number) => {
+  const sendChallenge = (opponentId: number, opponentName: string) => {
     ws?.send(JSON.stringify({ "type": "sendChallenge", "opponentId": opponentId }))
-    console.log("sendChallenge")
+    console.log("sendChallenge omg")
+    ToastChallengeSent(opponentName)
   }
   return (
     <div className="flex flex-row justify-between items-center pl-4 pr-4">
@@ -35,7 +37,7 @@ const PlayerState = ({ playerState }: { playerState: [string, number, number] })
       {
         // active = 0, inGame = 1, TODO idle = 2
         playerState[2] != 1 ?
-          <img src={checkmateImg} title="send challenge" className="w-7 cursor-pointer" onClick={() => sendChallenge(playerState[1])} />
+          <img src={checkmateImg} title="send challenge" className="w-7 cursor-pointer" onClick={() => sendChallenge(playerState[1], playerState[0])} />
           : <div className="w-7"></div>
       }
     </div>

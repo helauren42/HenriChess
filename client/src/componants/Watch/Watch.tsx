@@ -28,6 +28,7 @@ export const WatchBoard = ({ fen, index }: { fen: string, index: number }) => {
   }
   const navToGame = () => {
     nav(`/game/online/${index}`)
+    location.reload()
   }
   return (
     <div className="mini-board" key={`mini-board-${index}`} onClick={() => navToGame()} >

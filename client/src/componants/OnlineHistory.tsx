@@ -42,6 +42,8 @@ export const OnlineHistory = ({ onlineHistory, dataFetched }: { onlineHistory: O
               <tbody>
                 {onlineHistory.map((game) => {
                   const isBlackWinner = game.winnerName === game.blackUsername;
+                  if (game.moveCount == null)
+                    game.moveCount = 0
                   return (
                     <tr key={game.id} id={`${game.id}`} className="game-history-row" onClick={() => viewGame(game.id)} >
                       <td>

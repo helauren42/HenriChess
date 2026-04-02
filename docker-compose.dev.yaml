@@ -65,7 +65,6 @@ services:
     networks:
       - chess-net
     ports:
-      # - "${CADDY_EXT}:80"
       - "${CADDY_EXT}:443"
     depends_on:
       db:

@@ -18,7 +18,7 @@ export const SocialPage = () => {
   }, [lastMessage])
   return (
     <div id="social-page" className="w-full h-full mt-10 flex flex-col justify-center items-center">
-      <h1>Community Hub</h1>
+      <h1 className="text-center">Community Hub</h1>
       <div className="h-[8vh]"></div>
       <div id="social-content">
         <WatchPage />

@@ -54,3 +54,11 @@ export const ToastCustomError = (msg: string) => {
     autoClose: 3000
   })
 }
+
+export const ToastChallengeSent = (playerChallenged: string) => {
+  toast.success("Sent challenge to " + playerChallenged, {
+    toastId: "challengeSent",
+    position: "top-right",
+    autoClose: 2000
+  })
+}

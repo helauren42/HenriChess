@@ -25,8 +25,6 @@ app.include_router(authRouter, prefix="/api")
 app.include_router(accountRouter, prefix="/api")
 app.include_router(wsRouter, prefix="/api")
 
-app.on_event("startup")
-
 @app.exception_handler(ValueError)
 async def valueExcept(req: Request, e: ValueError):
     mylog.error(f"value error for {req.method} {req.url.path}: {e.__str__()}")
