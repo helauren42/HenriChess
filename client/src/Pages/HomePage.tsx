@@ -10,9 +10,11 @@ export const HomePage = () => {
   return (
     <div id="home-page" className="flex flex-col items-center gap-[8%] relative pt-[5%] h-screen w-full text-center">
       <h1>Welcome to Henri Chess</h1>
-      <div className="max-w-[95%] flex flex-col gap-8">
-        <h3>This application is still in development</h3>
-        <h3>Video coming soon</h3>
+      <div className="max-w-[75%] flex flex-col gap-2">
+        <h3>Watch a quick demo</h3>
+        <video controls className="rounded-2xl">
+          <source src="/videos/demo.mp4" type="video/mp4" />
+        </video>
       </div>
       <div id="features-list">
         <ul className="pt-6">

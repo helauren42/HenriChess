@@ -8,7 +8,6 @@ export const GameChallengeBox = () => {
   const { ws, lastMessage } = useContext(WsContext)
   const [challengeId, setChallengeId] = useState<number>(0)
   useEffect(() => {
-    console.log("here!!!!!!!!!!!!: ", lastMessage?.type)
     if (lastMessage && lastMessage.type == "gameChallenge") {
       const elem = document.getElementById("game-challenge-box")
       setChallengeId(lastMessage.challengeId)

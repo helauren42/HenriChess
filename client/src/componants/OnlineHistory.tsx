@@ -17,7 +17,6 @@ export const OnlineHistory = ({ onlineHistory, dataFetched }: { onlineHistory: O
   const navigate = useNavigate();
 
   const viewGame = (gameId: number) => {
-    console.log("!!!!!!!!!!! VIEW GAME: ", gameId)
     navigate(`/game/online/${gameId}`);
   };
 
