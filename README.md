@@ -4,7 +4,7 @@ A modern **web-based chess platform** where you can play against friends, random
 
 I built it as a learning full-stack personal project with performant clean code and real-time gameplay.
 
-https://chess.henri10x.dev/
+**You can watch a video of me using the platform on the home page of the website** https://chess.henri10x.dev/
 
 ## Features
 
@@ -12,7 +12,7 @@ https://chess.henri10x.dev/
 - **Hotseat mode** — play on a single device
 - **Automated chess timer** automated designated winner when time runs out for opposition player
 - **In-game chat** — send messages to your opponent during the match(like trash talk :D)
-- **Game history** — review past games, browse through positions and learn from it
+- **Game history** — view player games history, rewatch past games, browse through positions and learn from your past games
 - **Spectator mode** — watch other active online games
 - **Responsive design** - works on desktop and mobile browsers
 
@@ -32,9 +32,3 @@ https://chess.henri10x.dev/
 - HTTP/HTTPS - REST API
 - WebSocket - matchmaking, game moves, timer updates and chat
 
-## TODOs
-
-- handle in game player disconnections
-- move the timer to a separate service
-- add google auth
-- add profile pictures
